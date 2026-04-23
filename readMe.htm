@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>readMe</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="htm">2htm</h1>
+<p><strong>Author:</strong> Jamal Mazrui <strong>License:</strong> MIT
+(see <code>License.htm</code>)</p>
+<p><code>2htm</code> is a single, independent Windows executable that
+converts popular document file types to accessible HTML (WCAG 2.2 AAA)
+or plain text. It runs on any modern Windows version with Microsoft
+Office installed. There is no installer, no .NET runtime to download, no
+sidecar DLLs — just one .exe file that works from any folder.</p>
+<p>The same executable runs in two modes with the same set of options: a
+command-line mode for scripting and batch processing, and a GUI dialog
+mode for interactive use. A single command-line flag (<code>-g</code>)
+switches between them.</p>
+<p>The tool converts each input into a single-file HTML equivalent that
+can be opened in any modern web browser — Chrome, Edge, Firefox, Safari
+— with no dependencies, no companion folders, and no special viewer
+required. The conversion aims for WCAG 2.2 AAA conformance to the extent
+the source document’s structure and content allow. Headings, landmarks,
+table markup, alt-text propagation, color contrast, and language
+declaration are all preserved or inferred where possible.</p>
+<p>2htm is free to use and free to modify under the permissive MIT
+license. The source is a single C# file (<code>2htm.cs</code>) — C# is
+Microsoft’s flagship application language, well-documented, with a
+mature free toolchain (Visual Studio Community or Visual Studio Build
+Tools, both free downloads from Microsoft). Developers can customize or
+extend the conversion logic without paying for commercial tooling.</p>
+<p>This project was developed in collaboration with Claude, Anthropic’s
+AI coding assistant.</p>
+<p>The whole 2htm project may be downloaded in a single zip archive
+from:</p>
+<p><a href="http://GitHub.com/JamalMazrui/2htm/archive/main.zip"
+class="uri">http://GitHub.com/JamalMazrui/2htm/archive/main.zip</a></p>
+<hr />
+<h2 id="what-you-need">What you need</h2>
+<ul>
+<li>Windows 10 or later</li>
+<li>Microsoft Office 2016 or later (Word, Excel, PowerPoint) for
+converting Office documents and PDFs</li>
+</ul>
+<p>Plain text, CSV, JSON, HTML, and Markdown files can be converted
+without Office installed.</p>
+<hr />
+<h2 id="why-2htm">Why 2htm</h2>
+<p><strong>Accessibility pipelines.</strong> Organizations publishing
+documents to the public often need to produce “alternate formats” —
+versions of content that are more accessible to users with disabilities.
+Running 2htm as a step in a content pipeline turns Word, Excel,
+PowerPoint, and PDF files into clean, landmark-rich HTML automatically.
+The HTML output reads well on screen readers, reflows on small screens,
+and opens on any device with a browser.</p>
+<p><strong>Single-file portability.</strong> Because 2htm is one
+executable, it can be dropped into a folder, attached to an email, or
+stored on a thumb drive. Administrators can deploy it across an
+organization without installer paperwork. Developers can call it from
+batch files, scheduled tasks, or CI jobs.</p>
+<p><strong>No vendor lock-in for the output.</strong> A
+<code>.htm</code> file produced by 2htm has no sidecar folder of images
+or styles. Images are embedded as base64 data URIs; CSS is inlined. The
+file can be stored, emailed, archived, or served from any web host
+without worrying about what gets left behind.</p>
+<p><strong>The same interface for GUI and CLI users.</strong> Every
+option available on the command line is also a field in the GUI dialog.
+Users who prefer a visual workflow get a keyboard-accessible form (every
+control has an Alt+Letter hotkey and a tab-order sequence); users who
+prefer scripting get a conventional POSIX-style command-line
+interface.</p>
+<hr />
+<h2 id="how-to-use-it">How to use it</h2>
+<p>Put <code>2htm.exe</code> in any folder. Open a Command Prompt in the
+folder containing the files you want to convert, and run:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>2htm report.docx</span></code></pre></div>
+<p>The command above creates <code>report.htm</code> in the current
+directory — a fully accessible, single-file HTML document you can open
+in any browser, share by email, or post to a website.</p>
+<h3 id="convert-one-file">Convert one file</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>2htm annual<span class="at">-report</span>.docx</span></code></pre></div>
+<h3 id="convert-many-files-at-once">Convert many files at once</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>2htm *.xlsx</span></code></pre></div>
+<h3 id="convert-every-supported-file-in-a-folder">Convert every
+supported file in a folder</h3>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>2htm C:\work\documents</span></code></pre></div>
+<p>A bare folder path processes every file type 2htm recognizes inside
+that folder. Files with unsupported extensions (images, archives, and so
+on) are silently skipped.</p>
+<h3 id="convert-to-plain-text-instead-of-html">Convert to plain text
+instead of HTML</h3>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>2htm <span class="at">-p</span> report.docx</span></code></pre></div>
+<h3 id="open-the-gui">Open the GUI</h3>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>2htm <span class="at">-g</span></span></code></pre></div>
+<p>A small dialog lets you pick source files, an output directory, and
+conversion options. The GUI is designed to work cleanly with screen
+readers; every field has a keyboard hotkey.</p>
+<h3 id="get-help">Get help</h3>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>2htm <span class="at">-h</span></span></code></pre></div>
+<hr />
+<h2 id="supported-input-formats">Supported input formats</h2>
+<table>
+<thead>
+<tr>
+<th>Format</th>
+<th>Extensions</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Microsoft Word</td>
+<td><code>.docx</code> <code>.doc</code> <code>.rtf</code>
+<code>.odt</code></td>
+<td>Word automation</td>
+</tr>
+<tr>
+<td>PDF</td>
+<td><code>.pdf</code></td>
+<td>Word 2013+ PDF Reflow</td>
+</tr>
+<tr>
+<td>Microsoft Excel</td>
+<td><code>.xlsx</code> <code>.xls</code></td>
+<td>Region-aware tables</td>
+</tr>
+<tr>
+<td>Microsoft PowerPoint</td>
+<td><code>.pptx</code> <code>.ppt</code></td>
+<td>One section per slide</td>
+</tr>
+<tr>
+<td>CSV</td>
+<td><code>.csv</code></td>
+<td>Native</td>
+</tr>
+<tr>
+<td>Web</td>
+<td><code>.html</code> <code>.htm</code></td>
+<td>Native (cleaned)</td>
+</tr>
+<tr>
+<td>Markdown</td>
+<td><code>.md</code></td>
+<td>Pandoc / CommonMark via Markdig</td>
+</tr>
+<tr>
+<td>JSON</td>
+<td><code>.json</code></td>
+<td>Pretty-printed</td>
+</tr>
+<tr>
+<td>Text</td>
+<td><code>.txt</code></td>
+<td>Native</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="command-line-options">Command-line options</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Option</th>
+<th>Long form</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-h</code></td>
+<td><code>--help</code></td>
+<td>Show usage and exit</td>
+</tr>
+<tr>
+<td><code>-v</code></td>
+<td><code>--version</code></td>
+<td>Show version and exit</td>
+</tr>
+<tr>
+<td><code>-s</code></td>
+<td><code>--strip-images</code></td>
+<td>Remove images from output (smaller, faster)</td>
+</tr>
+<tr>
+<td><code>-p</code></td>
+<td><code>--plain-text</code></td>
+<td>Produce .txt instead of .htm</td>
+</tr>
+<tr>
+<td><code>-f</code></td>
+<td><code>--force</code></td>
+<td>Overwrite existing output files</td>
+</tr>
+<tr>
+<td><code>-l</code></td>
+<td><code>--log</code></td>
+<td>Write detailed diagnostics to <code>2htm.log</code></td>
+</tr>
+<tr>
+<td><code>-g</code></td>
+<td><code>--gui-mode</code></td>
+<td>Launch the dialog</td>
+</tr>
+<tr>
+<td><code>-o &lt;dir&gt;</code></td>
+<td><code>--output-dir &lt;dir&gt;</code></td>
+<td>Write output to <code>&lt;dir&gt;</code> instead of the current
+directory</td>
+</tr>
+<tr>
+<td></td>
+<td><code>--view-output</code></td>
+<td>After conversion, open the output directory in File Explorer</td>
+</tr>
+<tr>
+<td><code>-u</code></td>
+<td><code>--use-configuration</code></td>
+<td>Read saved defaults from
+<code>%LOCALAPPDATA%\2htm\2htm.ini</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="examples">Examples</h3>
+<p>Convert every Word and Excel file in two folders, write the output to
+a third folder, and open that folder in File Explorer when done:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>2htm <span class="at">-o</span> C:\converted -<span class="at">-view-output</span> C:\reports\*.docx C:\finance\*.xlsx</span></code></pre></div>
+<p>Convert a PDF to plain text, overwriting any existing output
+file:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>2htm <span class="at">-p</span> <span class="at">-f</span> handbook.pdf</span></code></pre></div>
+<p>Run the GUI with options pre-populated:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>2htm <span class="at">-g</span> <span class="at">-p</span> <span class="at">-s</span> C:\docs\*.docx</span></code></pre></div>
+<hr />
+<h2 id="gui-mode">GUI mode</h2>
+<p>Running <code>2htm -g</code> opens a small dialog with these controls
+(keyboard hotkeys in parentheses):</p>
+<ul>
+<li><strong>Source files</strong> (Alt+S) — a file path, a folder path,
+or a wildcard pattern. A bare folder processes every supported file in
+it.</li>
+<li><strong>Browse source…</strong> (Alt+B) — pick a folder with the
+Windows folder-chooser dialog.</li>
+<li><strong>Output directory</strong> (Alt+O) — where converted files
+are written. Defaults to the source directory.</li>
+<li><strong>Choose output…</strong> (Alt+C) — pick the output
+folder.</li>
+<li><strong>Strip images</strong> (Alt+I) — remove images for smaller,
+faster output.</li>
+<li><strong>Plain text</strong> (Alt+P) — write .txt files instead of
+.htm.</li>
+<li><strong>Force replacements</strong> (Alt+F) — overwrite existing
+output.</li>
+<li><strong>View output</strong> (Alt+V) — open the output directory in
+File Explorer when done.</li>
+<li><strong>Use configuration</strong> (Alt+U) — save these settings as
+defaults for next run.</li>
+<li><strong>Default settings</strong> (Alt+D) — reset all fields to
+factory defaults.</li>
+<li><strong>Help</strong> (Alt+H) — show a quick help message.</li>
+<li><strong>OK</strong> / <strong>Cancel</strong> — Enter / Esc.</li>
+</ul>
+<p>Every option in the GUI corresponds one-to-one with a command-line
+flag, so a workflow prototyped in the dialog can be translated to a
+batch file without surprises.</p>
+<p>After conversion, a results dialog shows what was converted, skipped,
+or failed.</p>
+<hr />
+<h2 id="saved-configuration-opt-in">Saved configuration (opt-in)</h2>
+<p>Pass <code>-u</code> on the command line, or check <strong>Use
+configuration</strong> in the GUI, to have 2htm remember the last-used
+values between runs. Values live in
+<code>%LOCALAPPDATA%\2htm\2htm.ini</code> — a small text file in the
+standard per-user Windows location.</p>
+<p>Without <code>-u</code> and without the checkbox, 2htm creates no
+files of its own. Unchecking the box in the GUI suppresses the write for
+that run but does not delete any existing configuration file.</p>
+<p><strong>Precedence:</strong> command-line values override saved
+values, and GUI edits override both.</p>
+<hr />
+<h2 id="view-output">View output</h2>
+<p>Pass <code>--view-output</code> or check the box in the GUI to open
+the output directory in File Explorer after conversion. The open fires
+only if at least one file was actually converted. If an Explorer window
+is already displaying that directory, 2htm brings it to the foreground
+instead of spawning a duplicate.</p>
+<hr />
+<h2 id="output">Output</h2>
+<p>For each input file, a new file is written to the output
+directory:</p>
+<ul>
+<li><code>report.docx</code> → <code>report.htm</code> (or
+<code>report.txt</code> with <code>-p</code>)</li>
+<li>Original file is never modified.</li>
+<li>If an output file already exists, the input is skipped unless
+<code>-f</code> is given.</li>
+</ul>
+<p>The HTML output is a single standalone file. Images (when kept) are
+embedded as base64 data URIs, so the <code>.htm</code> file can be
+shared without a sidecar folder. The result passes automated WCAG 2.2
+AAA checks in axe-core for landmarks, headings, table structure,
+alt-text propagation, color contrast, and language declaration.</p>
+<h3 id="exit-codes">Exit codes</h3>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>All files converted (or help/version shown)</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Some files failed</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Fatal error (unknown option, unwritable output directory)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="notes">Notes</h2>
+<ul>
+<li>Office must be installed and licensed. 2htm drives Word, Excel, and
+PowerPoint via COM automation; it cannot read these formats without
+Office.</li>
+<li>2htm cleans up Office COM servers when it’s done, even if conversion
+fails mid-run. If a workbook or document ever appears hung in Task
+Manager after a 2htm run, it’s a bug — please report it.</li>
+<li>Excel workbooks with very large “used ranges” (hundreds of millions
+of cells) are handled on a special code path that uses
+<code>SpecialCells</code> instead of reading the full array. This is
+effective for workbooks that have auto-extended formulas down empty
+columns.</li>
+<li>PowerPoint automation requires a visible application window
+(PowerPoint does not support invisible automation). The window is
+minimized while 2htm works and closed at the end.</li>
+</ul>
+<hr />
+<h2 id="pipelines-and-integration">Pipelines and integration</h2>
+<p>Because 2htm is a portable single file with well-defined exit codes,
+it integrates naturally into automation:</p>
+<ul>
+<li><strong>Batch scripts</strong> can call <code>2htm</code>
+synchronously and inspect <code>%ERRORLEVEL%</code>.</li>
+<li><strong>Scheduled tasks</strong> can convert folders of documents on
+a nightly basis to keep an accessible-formats mirror up to date.</li>
+<li><strong>CI/CD jobs</strong> can turn design docs committed as
+<code>.docx</code> into <code>.htm</code> for web publication as part of
+a build.</li>
+<li><strong>Content management workflows</strong> can use 2htm as an
+“alternate format” step, producing accessible HTML versions of public
+documents alongside the original Office files.</li>
+</ul>
+<p>The output file is self-contained, so downstream steps can simply
+copy or serve the <code>.htm</code> file without worrying about
+dependencies.</p>
+<hr />
+<h2 id="development">Development</h2>
+<p>This section is for developers who want to build
+<code>2htm.exe</code> from source, or modify the conversion logic.</p>
+<p>Because 2htm is released under the MIT license, anyone may use,
+modify, or redistribute the code for any purpose, including commercial
+use, as long as the copyright notice is preserved. C# is Microsoft’s
+primary application language, backed by extensive documentation and a
+mature ecosystem of Office automation examples. The required toolchain
+(Roslyn, via Visual Studio Community or Visual Studio Build Tools) is
+free from Microsoft.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<ul>
+<li>Windows 10 or later</li>
+<li><strong>.NET Framework 4.x</strong> — ships with every supported
+Windows version (Windows 10 and Windows 11 include it out of the box).
+No .NET SDK or .NET Core install is needed; the legacy .NET Framework
+that’s already on your machine provides the runtime libraries 2htm links
+against.</li>
+<li><strong>A Roslyn C# compiler</strong> — this is the modern compiler
+that supports current language features. It ships with any of:
+<ul>
+<li>Visual Studio 2017 or later (any edition, including the free
+<strong>Community</strong> edition).</li>
+<li><strong>Visual Studio Build Tools 2019 or 2022</strong> — a free,
+smaller download that installs just the compiler (no IDE). During
+install, select the workload <strong>“.NET desktop build
+tools”</strong>. Download from <a
+href="https://visualstudio.microsoft.com/downloads/"
+class="uri">https://visualstudio.microsoft.com/downloads/</a>.</li>
+</ul>
+<strong>Important</strong>: the <code>csc.exe</code> bundled with .NET
+Framework at
+<code>%WINDIR%\Microsoft.NET\Framework64\v4.0.30319\csc.exe</code> is
+the older pre-Roslyn compiler and cannot build 2htm — it only supports
+C# 5 and earlier. The build script detects and rejects this compiler;
+install Roslyn via Visual Studio or the Build Tools.</li>
+</ul>
+<p>The build script searches several known Visual Studio install paths
+automatically.</p>
+<h3 id="build">Build</h3>
+<p>Open a Command Prompt in the project folder and run:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>build2htm.cmd</span></code></pre></div>
+<p>On the first build, the script downloads <code>Markdig.dll</code>
+from nuget.org (the CommonMark parser for Markdown input). Markdig is
+embedded into <code>2htm.exe</code> as a manifest resource, so the
+resulting executable is a true single file — no sidecar DLLs are needed
+at runtime.</p>
+<p>On subsequent builds, <code>Markdig.dll</code> sits next to
+<code>2htm.cs</code> and is reused.</p>
+<p>The build targets <code>x64</code> to match the 64-bit Office that
+Microsoft has installed by default since Office 2019. If your Office is
+32-bit, edit <code>build2htm.cmd</code> and change
+<code>/platform:x64</code> to <code>/platform:x86</code> before
+building. A 64-bit process cannot automate a 32-bit Office COM server
+and vice versa.</p>
+<h3 id="source-layout">Source layout</h3>
+<p>All source lives in a single file: <code>2htm.cs</code> (~4,800
+lines). The file is organized into several <code>static class</code>
+sections:</p>
+<ul>
+<li><code>program</code> — entry point, argument parsing, conversion
+dispatch, temp-folder management.</li>
+<li><code>logger</code> — diagnostic logging (opt-in via
+<code>-l</code>).</li>
+<li><code>fileIntegrity</code>, <code>tempManager</code> — pre-flight
+checks and temp file handling.</li>
+<li><code>htmlWriter</code> — WCAG-conformant HTML emitter shared by all
+converters.</li>
+<li><code>comHelper</code> — COM late-binding helpers for Office
+automation.</li>
+<li><code>wordConverter</code>, <code>excelConverter</code>,
+<code>csvConverter</code>, <code>pptConverter</code>,
+<code>htmlConverter</code>, <code>markdownConverter</code>,
+<code>jsonConverter</code>, <code>textConverter</code>,
+<code>textPassthrough</code> — per-format converters.</li>
+<li><code>guiDialog</code> — WinForms dialog (the <code>-g</code>
+mode).</li>
+<li><code>shellHelper</code> — smart Explorer-window detection for
+<code>--view-output</code>.</li>
+<li><code>configManager</code> — opt-in <code>.ini</code> read/write for
+<code>-u</code>.</li>
+</ul>
+<p>The code is written in <strong>Camel Type</strong>, a coding style
+the author developed to convey type information succinctly through
+variable names themselves, rather than through external type annotations
+or the reader’s memory. Each identifier carries a short prefix signaling
+its type: <code>s</code> for string, <code>b</code> for bool,
+<code>i</code> for integer, <code>n</code> for real number,
+<code>dt</code> for datetime, <code>ls</code> for list, <code>d</code>
+for dictionary, and so on. A reader glancing at <code>sSource</code>,
+<code>bForce</code>, or <code>lsFileArgs</code> knows the type without
+cross-referencing a declaration or hovering for IDE tooltips — useful
+when reading source in a plain text editor, when navigating by screen
+reader, or when reviewing code in a diff or a printout. Beyond type
+clarity, Camel Type standardizes capitalization (lower camel case
+throughout), prefers methods that return meaningful values over void
+subprocedures, alphabetizes variable declarations at the top of each
+scope, and requires named constants in place of all magic numbers. The
+consistency makes the source uniformly easy to scan, audit, and
+refactor.</p>
+<p>One related benefit is readability under a screen reader. Identifiers
+in lower camel case break naturally into syllables that the screen
+reader pronounces as distinct words — <code>sFileName</code> reads as
+“s, file, name,” not as a single unreadable run. For the same reason,
+this project uses <code>readMe.md</code> rather than the common
+<code>README.md</code> (the all-caps form either gets spelled out
+letter-by-letter or mis-pronounced as one run-on sound, and also carries
+an unintended shouting connotation in written English).</p>
+<p>Camel Type is language-agnostic; within <code>2htm.cs</code> it is
+applied to C# but the same conventions carry over to any procedural or
+object-oriented language. For the full C# guidelines see
+<code>CamelType_CSharp.md</code> in this repository; an equivalent
+document for JavaScript is available as
+<code>CamelType_JavaScript.md</code> in the author’s other projects.</p>
+<h3 id="running-from-source">Running from source</h3>
+<p>There is no “run from source” path — C# requires compilation. After
+<code>build2htm.cmd</code> finishes, run the resulting executable:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>2htm.exe -<span class="at">-help</span></span></code></pre></div>
+<h3 id="development-history">Development history</h3>
+<p>This project was developed in collaboration with Anthropic’s Claude
+AI assistant, over a sustained series of design and implementation
+sessions. The author drove the product decisions — naming, command-line
+conventions, accessibility priorities, configuration philosophy, GUI
+layout, and the Camel Type coding style described above — while the AI
+assisted with C# implementation details, COM automation quirks, Windows
+API research, and iterative debugging of edge cases (pathological Excel
+workbooks, PowerPoint shape enumeration, screen-reader keyboard
+conventions, and so on).</p>
+<hr />
+<h2 id="license">License</h2>
+<p>MIT License. See <code>License.htm</code>.</p>
+<hr />
+<h2 id="download">Download</h2>
+<p>The whole 2htm project may be downloaded in a single zip archive
+from:</p>
+<p><a href="http://GitHub.com/JamalMazrui/2htm/archive/main.zip"
+class="uri">http://GitHub.com/JamalMazrui/2htm/archive/main.zip</a></p>
+</body>
+</html>
