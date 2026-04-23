@@ -42,11 +42,11 @@ namespace twoHtm
     // -----------------------------------------------------------------
     public static class program
     {
-        public const int c_iExitOk = 0;
-        public const int c_iExitPartial = 1;
-        public const int c_iExitFatal = 2;
+        public const int iExitOk = 0;
+        public const int iExitPartial = 1;
+        public const int iExitFatal = 2;
 
-        public const string c_sVersion = "1.14.2";
+        public const string sVersion = "1.17.2";
 
         // Global flags set by command-line switches. All converters
         // read these directly rather than having them threaded
@@ -137,11 +137,111 @@ namespace twoHtm
             return run(asArgs);
         }
 
+        // Returns true when this process appears to have been
+        // launched by a GUI shell (File Explorer double-click,
+        // Start-menu shortcut, pinned taskbar button, zip-archive
+        // extraction-and-run) rather than from a command-line
+        // shell (cmd.exe, PowerShell, Windows Terminal).
+        //
+        // Technique: GetConsoleProcessList returns the process IDs
+        // attached to the current console. When a shell launches a
+        // console-subsystem executable, the new process inherits
+        // the shell's console, giving a count >= 2 (shell plus us,
+        // at minimum). When the shell creates a fresh console for
+        // a double-clicked executable, we're the only process on
+        // that console, so the count is 1.
+        //
+        // A count of 0 means no console is attached at all (service
+        // context, some scheduled-task configurations). In that
+        // case we fall through to command-line behavior, which
+        // simply prints usage and exits — the right outcome for a
+        // non-interactive invocation that didn't supply arguments.
+        [System.Runtime.InteropServices.DllImport("kernel32.dll", SetLastError = true)]
+        private static extern uint GetConsoleProcessList(
+            [System.Runtime.InteropServices.Out] uint[] aiProcessIds,
+            uint iCount);
+
+        [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+        private static extern IntPtr GetConsoleWindow();
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        private const int iSwHide = 0;
+
+        private static bool isLaunchedFromGui()
+        {
+            try {
+                var aiList = new uint[16];
+                uint iCount = GetConsoleProcessList(aiList, (uint)aiList.Length);
+                return iCount == 1;
+            } catch {
+                // If the API is unavailable for any reason, prefer
+                // the safer behavior: assume command-line mode.
+                return false;
+            }
+        }
+
+        // Hides this process's console window. Only safe to call
+        // when we own our console (i.e., isLaunchedFromGui()
+        // returned true). In the GUI-launch case the console was
+        // created by Windows specifically for us; hiding it removes
+        // an extra window that would otherwise confuse the user —
+        // they see only the 2htm dialog, no mysterious command
+        // prompt behind it, no extra taskbar entry, no stray Alt+Tab
+        // target.
+        //
+        // IMPORTANT: never call this when the console was inherited
+        // from a parent shell (cmd.exe, PowerShell). Hiding an
+        // inherited console would remove the user's shell window
+        // from the screen, which is not our call to make. That is
+        // why this runs ONLY on the auto-detected GUI-launch path,
+        // NOT when -g was supplied from a command line.
+        private static void hideOwnConsoleWindow()
+        {
+            try {
+                IntPtr hwnd = GetConsoleWindow();
+                if (hwnd != IntPtr.Zero) ShowWindow(hwnd, iSwHide);
+            } catch {
+                // Non-fatal: if we can't hide the console, the GUI
+                // still works, the console just stays visible.
+            }
+        }
+
         private static int run(string[] asArgs)
         {
             tempManager.sweepStale();
 
-            if (asArgs.Length == 0) { printUsage(); return c_iExitOk; }
+            // If the program was launched with no arguments, either
+            // show command-line usage (when invoked from an actual
+            // shell) or fall through into GUI mode (when invoked by
+            // double-clicking in File Explorer, launching from a
+            // Start-menu shortcut, or extracting a copy from a zip
+            // and running it). The GetConsoleProcessList API
+            // distinguishes the two cases cleanly: a process
+            // launched from cmd.exe or PowerShell shares its parent
+            // shell's console (count >= 2), whereas a process
+            // launched by the shell creating a new console for it
+            // (double-click) is the only process attached to that
+            // console (count == 1). See Raymond Chen's write-up of
+            // this technique for context.
+            if (asArgs.Length == 0) {
+                if (isLaunchedFromGui()) {
+                    bGuiMode = true;
+                    // We own our console (count == 1). Hide it so
+                    // the user sees only the GUI dialog, with no
+                    // mysterious empty command window behind or
+                    // beside it. If -g had been supplied from an
+                    // actual command-line shell, this path would
+                    // not run — the console would be the user's
+                    // shell window, and hiding it would be an
+                    // unwelcome surprise.
+                    hideOwnConsoleWindow();
+                } else {
+                    printUsage();
+                    return iExitOk;
+                }
+            }
 
             // First pass: recognize flags and separate them from
             // file/wildcard arguments. Flags starting with "-" are
@@ -157,11 +257,11 @@ namespace twoHtm
                 string sArg = asArgs[i];
                 if (sArg == "-h" || sArg == "--help" || sArg == "/?" || sArg == "-?") {
                     printUsage();
-                    return c_iExitOk;
+                    return iExitOk;
                 }
                 if (sArg == "-v" || sArg == "--version") {
-                    Console.WriteLine("2htm " + c_sVersion);
-                    return c_iExitOk;
+                    Console.WriteLine("2htm " + sVersion);
+                    return iExitOk;
                 }
                 if (sArg == "-s" || sArg == "--strip-images") {
                     bStripImages = true; bStripImagesFromCli = true;
@@ -200,7 +300,7 @@ namespace twoHtm
                         Console.Error.WriteLine("[ERROR] " + sArg +
                             " requires a directory argument.");
                         Console.Error.WriteLine("Run '2htm --help' for usage.");
-                        return c_iExitFatal;
+                        return iExitFatal;
                     }
                     sOutputDir = asArgs[++i];
                     bOutputDirFromCli = true;
@@ -209,17 +309,37 @@ namespace twoHtm
                 if (sArg.StartsWith("-") && !File.Exists(sArg) && !Directory.Exists(sArg)) {
                     Console.Error.WriteLine("[ERROR] Unknown option: " + sArg);
                     Console.Error.WriteLine("Run '2htm --help' for usage.");
-                    return c_iExitFatal;
+                    return iExitFatal;
                 }
                 lsFileArgs.Add(sArg);
                 bSourceFromCli = true;
             }
 
-            // If -u / --use-configuration was given, load saved
-            // defaults from %LOCALAPPDATA%\2htm\2htm.ini before
-            // showing the GUI. Command-line-supplied values take
-            // precedence over anything in the file; the file only
-            // fills in fields the CLI didn't set.
+            // Configuration file (opt-in, per-user INI at
+            // %LOCALAPPDATA%\2htm\2htm.ini):
+            //
+            //   - In CLI mode: the file is loaded ONLY when -u /
+            //     --use-configuration is passed. A user who never
+            //     passes -u and has never created a config file
+            //     has zero filesystem footprint from 2htm beyond
+            //     the conversions they explicitly request.
+            //
+            //   - In GUI mode: if the file exists, it is loaded
+            //     automatically and bUseConfig is treated as
+            //     implicitly true. The "Use configuration"
+            //     checkbox in the dialog will show as checked,
+            //     reflecting that a saved config is in effect.
+            //     The user can uncheck the box to stop refreshing
+            //     the saved values on future OK-clicks; the file
+            //     stays on disk until the user deletes it
+            //     manually.
+            //
+            // This asymmetry keeps the CLI zero-footprint promise
+            // while giving GUI users a natural "remember my
+            // settings" experience.
+            if (bGuiMode && !bUseConfig && configManager.configExists()) {
+                bUseConfig = true;
+            }
             if (bUseConfig) {
                 configManager.loadInto(lsFileArgs);
             }
@@ -241,7 +361,7 @@ namespace twoHtm
                 bool bUseCfg = bUseConfig;
                 if (!guiDialog.show(ref sSource, ref sOut, ref bStrip,
                     ref bPlain, ref bForceLocal, ref bView, ref bUseCfg)) {
-                    return c_iExitOk;
+                    return iExitOk;
                 }
                 bStripImages = bStrip;
                 bPlainText = bPlain;
@@ -265,7 +385,7 @@ namespace twoHtm
                 }
             } else if (lsFileArgs.Count == 0) {
                 printUsage();
-                return c_iExitOk;
+                return iExitOk;
             }
 
             // Validate the output directory. Create it if it doesn't
@@ -279,7 +399,7 @@ namespace twoHtm
                         "' does not exist and cannot be created: " + ex.Message;
                     Console.Error.WriteLine("[ERROR] " + sErr);
                     if (bGuiMode) showFinalMessage(sErr);
-                    return c_iExitFatal;
+                    return iExitFatal;
                 }
             }
 
@@ -297,9 +417,9 @@ namespace twoHtm
                 Console.SetError(oCapture);
             }
 
-            int iExitCode = c_iExitOk;
+            int iExitCode = iExitOk;
             try {
-                logger.info("2htm " + c_sVersion + " starting");
+                logger.info("2htm " + sVersion + " starting");
                 logger.info("Command line: " + string.Join(" ", asArgs));
                 logger.info("Working directory: " + Directory.GetCurrentDirectory());
                 if (!string.IsNullOrEmpty(sOutputDir))
@@ -309,34 +429,32 @@ namespace twoHtm
                 if (lsFiles.Count == 0) {
                     Console.Error.WriteLine("[INFO] No matching files.");
                     logger.info("No matching files; exiting.");
-                    iExitCode = c_iExitOk;
+                    iExitCode = iExitOk;
                 } else {
                     logger.info("Matched " + lsFiles.Count + " file(s) to convert.");
 
                     int iFailed = 0;
                     int iConverted = 0;
-                    foreach (var sFile in lsFiles) {
-                        try {
-                            if (convertOne(sFile)) iConverted++;
-                        } catch (Exception ex) {
-                            iFailed++;
-                            // The basename was already written to stdout
-                            // by convertOne before the failure. Append
-                            // the error on the same line and newline.
-                            Console.WriteLine(": " + ex.Message);
-                            logger.error("Conversion failed: " + sFile);
-                            logger.error("Exception: " + ex.GetType().FullName + ": " + ex.Message);
-                            if (ex.InnerException != null)
-                                logger.error("Inner: " + ex.InnerException.GetType().FullName +
-                                    ": " + ex.InnerException.Message);
-                            logger.error("Stack trace:\r\n" + ex.StackTrace);
-                        }
+
+                    // In GUI mode, run the conversion in a small
+                    // progress dialog that shows each file's
+                    // basename and a percent indication in a status
+                    // bar. In CLI mode, run it synchronously on
+                    // this thread with no progress UI (the user's
+                    // console already serves as a progress log via
+                    // the basenames printed by convertOne).
+                    if (bGuiMode) {
+                        guiProgress.runConversions(lsFiles,
+                            out iConverted, out iFailed);
+                    } else {
+                        runConversionLoop(lsFiles,
+                            null, out iConverted, out iFailed);
                     }
 
                     logger.info("Done. " + iConverted + " converted, " +
                         (lsFiles.Count - iConverted - iFailed) + " skipped, " +
                         iFailed + " failed.");
-                    iExitCode = iFailed == 0 ? c_iExitOk : c_iExitPartial;
+                    iExitCode = iFailed == 0 ? iExitOk : iExitPartial;
 
                     // --view-output: open the output directory in
                     // the shell, but only if at least one file was
@@ -474,7 +592,7 @@ namespace twoHtm
 
         private static void printUsage()
         {
-            Console.WriteLine("2htm " + c_sVersion + " - convert documents to accessible HTML");
+            Console.WriteLine("2htm " + sVersion + " - convert documents to accessible HTML");
             Console.WriteLine();
             Console.WriteLine("Usage: 2htm [options] <file-or-wildcard> [<file-or-wildcard> ...]");
             Console.WriteLine();
@@ -508,7 +626,12 @@ namespace twoHtm
             Console.WriteLine("  -g, --gui-mode       Launch a dialog to enter parameters. Any");
             Console.WriteLine("                       options given on the command line become");
             Console.WriteLine("                       the defaults. After conversion, a message");
-            Console.WriteLine("                       box displays the per-file results.");
+            Console.WriteLine("                       box displays the per-file results. GUI mode");
+            Console.WriteLine("                       is also entered automatically when 2htm is");
+            Console.WriteLine("                       launched with no arguments from a GUI shell");
+            Console.WriteLine("                       such as File Explorer (e.g., by double-");
+            Console.WriteLine("                       clicking the executable or extracting it");
+            Console.WriteLine("                       from a zip archive and running it).");
             Console.WriteLine("  --view-output        After conversion, open the output");
             Console.WriteLine("                       directory in the default file manager");
             Console.WriteLine("                       (typically File Explorer). Fires only if");
@@ -579,7 +702,7 @@ namespace twoHtm
         // folder. An explicit wildcard like "*.png" or an explicit
         // filename is NOT filtered — if the user specifically asked
         // for a file, the failure is informative.
-        private static readonly HashSet<string> c_hsSupportedExts =
+        private static readonly HashSet<string> hsSupportedExts =
             new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
                 ".docx", ".doc", ".rtf", ".odt", ".pdf",
                 ".xlsx", ".xls",
@@ -645,7 +768,7 @@ namespace twoHtm
                         // "Unsupported extension" visibly.
                         if (bBareDir) {
                             string sExt = Path.GetExtension(sMatch);
-                            if (!c_hsSupportedExts.Contains(sExt)) continue;
+                            if (!hsSupportedExts.Contains(sExt)) continue;
                         }
                         hsResult.Add(Path.GetFullPath(sMatch));
                     }
@@ -750,6 +873,49 @@ namespace twoHtm
             return true;
         }
 
+        // Runs the conversion loop over a list of files. Shared by
+        // CLI mode (called directly from run()) and GUI mode
+        // (called by guiProgress.runConversions on a worker
+        // thread). The onStarting callback, if non-null, is
+        // invoked once per file before convertOne runs, with the
+        // basename and a 1-based index and total. The callback is
+        // the progress hook — in GUI mode it updates the status
+        // label; in CLI mode it is null (the basenames printed by
+        // convertOne itself are the progress record).
+        public static void runConversionLoop(List<string> lsFiles,
+            Action<string, int, int> onStarting,
+            out int iConverted, out int iFailed)
+        {
+            iConverted = 0;
+            iFailed = 0;
+            int iIndex = 0;
+            foreach (var sFile in lsFiles) {
+                iIndex++;
+                if (onStarting != null) {
+                    try {
+                        onStarting(Path.GetFileName(sFile), iIndex, lsFiles.Count);
+                    } catch {
+                        // Callback failure must not abort the run.
+                    }
+                }
+                try {
+                    if (convertOne(sFile)) iConverted++;
+                } catch (Exception ex) {
+                    iFailed++;
+                    // The basename was already written to stdout
+                    // by convertOne before the failure. Append
+                    // the error on the same line and newline.
+                    Console.WriteLine(": " + ex.Message);
+                    logger.error("Conversion failed: " + sFile);
+                    logger.error("Exception: " + ex.GetType().FullName + ": " + ex.Message);
+                    if (ex.InnerException != null)
+                        logger.error("Inner: " + ex.InnerException.GetType().FullName +
+                            ": " + ex.InnerException.Message);
+                    logger.error("Stack trace:\r\n" + ex.StackTrace);
+                }
+            }
+        }
+
         private static void convertOneToHtml(string sExt, string sInPath, string sOutPath)
         {
             switch (sExt) {
@@ -836,7 +1002,7 @@ namespace twoHtm
         {
             // Build the form.
             var frm = new System.Windows.Forms.Form();
-            frm.Text = "2htm " + program.c_sVersion;
+            frm.Text = "2htm " + program.sVersion;
             frm.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             frm.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             frm.MaximizeBox = false;
@@ -848,28 +1014,28 @@ namespace twoHtm
             // Layout constants in pixels. These deliberately reflect
             // Windows desktop conventions: ~7 px gutter, ~11 px row
             // spacing, button width ~120 px.
-            const int c_iLeft = 12;
-            const int c_iRight = 12;
-            const int c_iTop = 12;
-            const int c_iGap = 7;
-            const int c_iRowGap = 11;
-            const int c_iLabelW = 110;
-            const int c_iBtnW = 130;
-            const int c_iBtnH = 26;
-            const int c_iTextH = 23;
+            const int iDefaultLeft = 12;
+            const int iDefaultRight = 12;
+            const int iDefaultTop = 12;
+            const int iDefaultGap = 7;
+            const int iDefaultRowGap = 11;
+            const int iDefaultLabelWidth = 110;
+            const int iDefaultButtonWidth = 130;
+            const int iDefaultButtonHeight = 26;
+            const int iDefaultTextHeight = 23;
 
             int iFormW = frm.ClientSize.Width;
-            int iTextX = c_iLeft + c_iLabelW + c_iGap;
-            int iTextW = iFormW - iTextX - c_iGap - c_iBtnW - c_iRight;
-            int iBtnX = iFormW - c_iRight - c_iBtnW;
+            int iTextX = iDefaultLeft + iDefaultLabelWidth + iDefaultGap;
+            int iTextW = iFormW - iTextX - iDefaultGap - iDefaultButtonWidth - iDefaultRight;
+            int iBtnX = iFormW - iDefaultRight - iDefaultButtonWidth;
 
             // --- Row 1: Source files ---
-            int y = c_iTop;
+            int y = iDefaultTop;
             var lblSource = new System.Windows.Forms.Label();
             lblSource.Text = "&Source files:";
             lblSource.AutoSize = false;
-            lblSource.Location = new System.Drawing.Point(c_iLeft, y + 3);
-            lblSource.Size = new System.Drawing.Size(c_iLabelW, c_iTextH);
+            lblSource.Location = new System.Drawing.Point(iDefaultLeft, y + 3);
+            lblSource.Size = new System.Drawing.Size(iDefaultLabelWidth, iDefaultTextHeight);
             lblSource.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             frm.Controls.Add(lblSource);
 
@@ -886,14 +1052,14 @@ namespace twoHtm
                 ? defaultSourceForGui()
                 : sSource;
             txtSource.Location = new System.Drawing.Point(iTextX, y);
-            txtSource.Size = new System.Drawing.Size(iTextW, c_iTextH);
+            txtSource.Size = new System.Drawing.Size(iTextW, iDefaultTextHeight);
             txtSource.TabIndex = 0;
             frm.Controls.Add(txtSource);
 
             var btnBrowseSource = new System.Windows.Forms.Button();
             btnBrowseSource.Text = "&Browse source...";
             btnBrowseSource.Location = new System.Drawing.Point(iBtnX, y - 1);
-            btnBrowseSource.Size = new System.Drawing.Size(c_iBtnW, c_iBtnH);
+            btnBrowseSource.Size = new System.Drawing.Size(iDefaultButtonWidth, iDefaultButtonHeight);
             btnBrowseSource.TabIndex = 1;
             btnBrowseSource.UseVisualStyleBackColor = true;
             // Click handler wired below, after txtOut is declared
@@ -901,12 +1067,12 @@ namespace twoHtm
             frm.Controls.Add(btnBrowseSource);
 
             // --- Row 2: Output directory ---
-            y += c_iTextH + c_iRowGap;
+            y += iDefaultTextHeight + iDefaultRowGap;
             var lblOut = new System.Windows.Forms.Label();
             lblOut.Text = "&Output directory:";
             lblOut.AutoSize = false;
-            lblOut.Location = new System.Drawing.Point(c_iLeft, y + 3);
-            lblOut.Size = new System.Drawing.Size(c_iLabelW, c_iTextH);
+            lblOut.Location = new System.Drawing.Point(iDefaultLeft, y + 3);
+            lblOut.Size = new System.Drawing.Size(iDefaultLabelWidth, iDefaultTextHeight);
             lblOut.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             frm.Controls.Add(lblOut);
 
@@ -925,14 +1091,14 @@ namespace twoHtm
                 txtOut.Text = deriveOutputDirFromSource(txtSource.Text);
             }
             txtOut.Location = new System.Drawing.Point(iTextX, y);
-            txtOut.Size = new System.Drawing.Size(iTextW, c_iTextH);
+            txtOut.Size = new System.Drawing.Size(iTextW, iDefaultTextHeight);
             txtOut.TabIndex = 2;
             frm.Controls.Add(txtOut);
 
             var btnBrowseOut = new System.Windows.Forms.Button();
             btnBrowseOut.Text = "&Choose output...";
             btnBrowseOut.Location = new System.Drawing.Point(iBtnX, y - 1);
-            btnBrowseOut.Size = new System.Drawing.Size(c_iBtnW, c_iBtnH);
+            btnBrowseOut.Size = new System.Drawing.Size(iDefaultButtonWidth, iDefaultButtonHeight);
             btnBrowseOut.TabIndex = 3;
             btnBrowseOut.UseVisualStyleBackColor = true;
             btnBrowseOut.Click += (s, e) => {
@@ -971,38 +1137,38 @@ namespace twoHtm
             // A 2x2 grid gives each label room to display fully and
             // aligns checkboxes predictably for screen-reader
             // traversal.
-            y += c_iTextH + c_iRowGap * 2;
-            int iChkW = (iFormW - c_iLeft - c_iRight) / 2;
+            y += iDefaultTextHeight + iDefaultRowGap * 2;
+            int iChkW = (iFormW - iDefaultLeft - iDefaultRight) / 2;
             var chkStrip = new System.Windows.Forms.CheckBox();
             chkStrip.Text = "Strip &images";
             chkStrip.Checked = bStrip;
-            chkStrip.Location = new System.Drawing.Point(c_iLeft, y);
-            chkStrip.Size = new System.Drawing.Size(iChkW, c_iTextH);
+            chkStrip.Location = new System.Drawing.Point(iDefaultLeft, y);
+            chkStrip.Size = new System.Drawing.Size(iChkW, iDefaultTextHeight);
             chkStrip.TabIndex = 4;
             frm.Controls.Add(chkStrip);
 
             var chkPlain = new System.Windows.Forms.CheckBox();
             chkPlain.Text = "&Plain text";
             chkPlain.Checked = bPlain;
-            chkPlain.Location = new System.Drawing.Point(c_iLeft + iChkW, y);
-            chkPlain.Size = new System.Drawing.Size(iChkW, c_iTextH);
+            chkPlain.Location = new System.Drawing.Point(iDefaultLeft + iChkW, y);
+            chkPlain.Size = new System.Drawing.Size(iChkW, iDefaultTextHeight);
             chkPlain.TabIndex = 5;
             frm.Controls.Add(chkPlain);
 
-            y += c_iTextH + c_iRowGap;
+            y += iDefaultTextHeight + iDefaultRowGap;
             var chkForce = new System.Windows.Forms.CheckBox();
             chkForce.Text = "&Force replacements";
             chkForce.Checked = bForce;
-            chkForce.Location = new System.Drawing.Point(c_iLeft, y);
-            chkForce.Size = new System.Drawing.Size(iChkW, c_iTextH);
+            chkForce.Location = new System.Drawing.Point(iDefaultLeft, y);
+            chkForce.Size = new System.Drawing.Size(iChkW, iDefaultTextHeight);
             chkForce.TabIndex = 6;
             frm.Controls.Add(chkForce);
 
             var chkView = new System.Windows.Forms.CheckBox();
             chkView.Text = "&View output";
             chkView.Checked = bView;
-            chkView.Location = new System.Drawing.Point(c_iLeft + iChkW, y);
-            chkView.Size = new System.Drawing.Size(iChkW, c_iTextH);
+            chkView.Location = new System.Drawing.Point(iDefaultLeft + iChkW, y);
+            chkView.Size = new System.Drawing.Size(iChkW, iDefaultTextHeight);
             chkView.TabIndex = 7;
             frm.Controls.Add(chkView);
 
@@ -1010,12 +1176,12 @@ namespace twoHtm
             // since it's a different kind of option — it controls
             // whether the OTHER fields get persisted, rather than
             // controlling the conversion itself).
-            y += c_iTextH + c_iRowGap;
+            y += iDefaultTextHeight + iDefaultRowGap;
             var chkUseCfg = new System.Windows.Forms.CheckBox();
             chkUseCfg.Text = "&Use configuration";
             chkUseCfg.Checked = bUseCfg;
-            chkUseCfg.Location = new System.Drawing.Point(c_iLeft, y);
-            chkUseCfg.Size = new System.Drawing.Size(iChkW, c_iTextH);
+            chkUseCfg.Location = new System.Drawing.Point(iDefaultLeft, y);
+            chkUseCfg.Size = new System.Drawing.Size(iChkW, iDefaultTextHeight);
             chkUseCfg.TabIndex = 8;
             frm.Controls.Add(chkUseCfg);
 
@@ -1024,11 +1190,11 @@ namespace twoHtm
             // commit or cancel the dialog), OK and Cancel on the
             // right. This matches Microsoft's UX guidance for
             // secondary dialogs.
-            y += c_iTextH + c_iRowGap * 2;
+            y += iDefaultTextHeight + iDefaultRowGap * 2;
             var btnHelp = new System.Windows.Forms.Button();
             btnHelp.Text = "&Help";
-            btnHelp.Location = new System.Drawing.Point(c_iLeft, y);
-            btnHelp.Size = new System.Drawing.Size(c_iBtnW, c_iBtnH);
+            btnHelp.Location = new System.Drawing.Point(iDefaultLeft, y);
+            btnHelp.Size = new System.Drawing.Size(iDefaultButtonWidth, iDefaultButtonHeight);
             btnHelp.TabIndex = 9;
             btnHelp.UseVisualStyleBackColor = true;
             btnHelp.Click += (s, e) => showHelpMessage();
@@ -1037,15 +1203,19 @@ namespace twoHtm
             var btnDefaults = new System.Windows.Forms.Button();
             btnDefaults.Text = "&Default settings";
             btnDefaults.Location = new System.Drawing.Point(
-                c_iLeft + c_iBtnW + c_iGap, y);
-            btnDefaults.Size = new System.Drawing.Size(c_iBtnW, c_iBtnH);
+                iDefaultLeft + iDefaultButtonWidth + iDefaultGap, y);
+            btnDefaults.Size = new System.Drawing.Size(iDefaultButtonWidth, iDefaultButtonHeight);
             btnDefaults.TabIndex = 10;
             btnDefaults.UseVisualStyleBackColor = true;
-            // Restore dialog fields to sensible defaults without
-            // touching any saved configuration file on disk. The
-            // user can then click OK with Use configuration off
-            // to do a one-off run, or leave Use configuration on
-            // to replace any prior saved config on OK.
+            // Default settings: full reset. Resets the dialog's
+            // fields to factory defaults AND deletes the saved
+            // configuration file (plus the 2htm directory under
+            // %LOCALAPPDATA% if it becomes empty). This is the
+            // explicit way for a user to fully opt out of the
+            // footprint — "start over, leave no trace." The
+            // deletion happens immediately on click, not on OK; a
+            // user who clicks Default settings and then Cancel has
+            // still cleared the saved config.
             btnDefaults.Click += (s, e) => {
                 string sDefault = defaultSourceForGui();
                 txtSource.Text = sDefault;
@@ -1055,6 +1225,7 @@ namespace twoHtm
                 chkForce.Checked = false;
                 chkView.Checked = false;
                 chkUseCfg.Checked = false;
+                configManager.eraseAll();
             };
             frm.Controls.Add(btnDefaults);
 
@@ -1062,8 +1233,8 @@ namespace twoHtm
             btnOk.Text = "OK";
             btnOk.DialogResult = System.Windows.Forms.DialogResult.OK;
             btnOk.Location = new System.Drawing.Point(
-                iFormW - c_iRight - 2 * c_iBtnW - c_iGap, y);
-            btnOk.Size = new System.Drawing.Size(c_iBtnW, c_iBtnH);
+                iFormW - iDefaultRight - 2 * iDefaultButtonWidth - iDefaultGap, y);
+            btnOk.Size = new System.Drawing.Size(iDefaultButtonWidth, iDefaultButtonHeight);
             btnOk.TabIndex = 11;
             btnOk.UseVisualStyleBackColor = true;
             frm.Controls.Add(btnOk);
@@ -1072,7 +1243,7 @@ namespace twoHtm
             btnCancel.Text = "Cancel";
             btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             btnCancel.Location = new System.Drawing.Point(iBtnX, y);
-            btnCancel.Size = new System.Drawing.Size(c_iBtnW, c_iBtnH);
+            btnCancel.Size = new System.Drawing.Size(iDefaultButtonWidth, iDefaultButtonHeight);
             btnCancel.TabIndex = 12;
             btnCancel.UseVisualStyleBackColor = true;
             frm.Controls.Add(btnCancel);
@@ -1083,7 +1254,7 @@ namespace twoHtm
 
             // Adjust form height to the last control's bottom + margin.
             frm.ClientSize = new System.Drawing.Size(iFormW,
-                y + c_iBtnH + c_iTop);
+                y + iDefaultButtonHeight + iDefaultTop);
 
             // Show it.
             var oResult = frm.ShowDialog();
@@ -1206,18 +1377,106 @@ namespace twoHtm
                 "View output: open the output folder in File Explorer after " +
                 "conversion (only if at least one file was actually converted).\r\n\r\n" +
                 "Use configuration: save the current dialog values to\r\n" +
-                "%LOCALAPPDATA%\\2htm\\2htm.ini on OK so the next run with\r\n" +
-                "-u or with this box already checked starts with these same\r\n" +
-                "defaults. Unchecking the box does not delete any existing\r\n" +
-                "file — it simply suppresses the write for this run.\r\n\r\n" +
+                "%LOCALAPPDATA%\\2htm\\2htm.ini on OK. Once the file\r\n" +
+                "exists, GUI runs auto-detect it and pre-check this box.\r\n" +
+                "Uncheck and click OK to do a one-off run without\r\n" +
+                "refreshing the file; the file itself stays on disk.\r\n\r\n" +
                 "Default settings: reset the dialog to factory defaults\r\n" +
-                "(Documents folder, all options off). Does not touch the\r\n" +
-                "configuration file on disk.\r\n\r\n" +
+                "AND delete the saved configuration file (and its\r\n" +
+                "%LOCALAPPDATA%\\2htm folder if empty). This is the\r\n" +
+                "explicit way to fully opt out: after clicking Default\r\n" +
+                "settings, 2htm has no footprint on disk unless you\r\n" +
+                "opt in again by re-checking Use configuration.\r\n\r\n" +
                 "Press OK to convert, Cancel to exit without converting, or " +
                 "Help to review these notes.";
             System.Windows.Forms.MessageBox.Show(sMsg, "2htm — Help",
                 System.Windows.Forms.MessageBoxButtons.OK,
                 System.Windows.Forms.MessageBoxIcon.Information);
+        }
+    }
+
+    // -----------------------------------------------------------------
+    // Progress dialog shown during GUI-mode conversion runs. Displays
+    // a single status line with the current file's basename and a
+    // running "N of M (P%)" indicator.
+    //
+    // Implementation: single-threaded. The form is shown non-modally
+    // and the conversion loop runs on this same (UI) thread. Between
+    // files, Application.DoEvents() pumps the Windows message queue
+    // so the form repaints and screen readers observe the status-
+    // label change. This keeps the code simple and avoids the STA /
+    // COM-apartment problems that come with background-thread
+    // automation of Office. The tradeoff is that during the
+    // conversion of any single very slow file, the UI cannot
+    // repaint — but that's a property of the file, not of the
+    // threading model, and for typical batches of reasonable-sized
+    // documents the per-file status updates give adequate feedback.
+    //
+    // Accessibility: the status label carries AccessibleName and
+    // AccessibleRole so screen readers announce each change. The
+    // form has no buttons, so there is no re-entrancy concern from
+    // DoEvents pumping a stray click.
+    // -----------------------------------------------------------------
+    public static class guiProgress
+    {
+        public static void runConversions(List<string> lsFiles,
+            out int iConverted, out int iFailed)
+        {
+            var frm = new System.Windows.Forms.Form();
+            frm.Text = "2htm — Converting";
+            frm.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            frm.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            frm.MaximizeBox = false;
+            frm.MinimizeBox = false;
+            frm.ControlBox = false;
+            frm.ShowInTaskbar = true;
+            frm.ClientSize = new System.Drawing.Size(480, 92);
+            frm.Font = System.Drawing.SystemFonts.MessageBoxFont;
+
+            var lblIntro = new System.Windows.Forms.Label();
+            lblIntro.Text = "Converting files. Please wait...";
+            lblIntro.AutoSize = false;
+            lblIntro.Location = new System.Drawing.Point(14, 14);
+            lblIntro.Size = new System.Drawing.Size(452, 22);
+            lblIntro.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            frm.Controls.Add(lblIntro);
+
+            var lblStatus = new System.Windows.Forms.Label();
+            lblStatus.Text = "Starting...";
+            lblStatus.AutoSize = false;
+            lblStatus.Location = new System.Drawing.Point(14, 42);
+            lblStatus.Size = new System.Drawing.Size(452, 22);
+            lblStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            lblStatus.AccessibleName = "Conversion status";
+            lblStatus.AccessibleRole = System.Windows.Forms.AccessibleRole.StatusBar;
+            frm.Controls.Add(lblStatus);
+
+            // Progress callback invoked by runConversionLoop before
+            // each file. Updates the status label and pumps the
+            // message queue so the new text appears and screen
+            // readers see the change. Since we're single-threaded,
+            // "update" here means "write to the property and pump";
+            // there is no cross-thread marshaling to worry about.
+            Action<string, int, int> onStarting = (sBase, iIndex, iTotal) => {
+                int iPercent = iTotal > 0 ? (iIndex * 100 / iTotal) : 0;
+                lblStatus.Text = sBase + " — " + iIndex + " of " + iTotal +
+                    ", " + iPercent + "%";
+                System.Windows.Forms.Application.DoEvents();
+            };
+
+            // Show the form non-modally so control returns here
+            // immediately. Pump once so the initial state paints
+            // before the first file's conversion starts.
+            frm.Show();
+            System.Windows.Forms.Application.DoEvents();
+
+            try {
+                program.runConversionLoop(lsFiles, onStarting,
+                    out iConverted, out iFailed);
+            } finally {
+                frm.Close();
+                frm.Dispose();
+            }
         }
     }
 
@@ -1297,7 +1556,7 @@ namespace twoHtm
     public static class fileIntegrity
     {
         // OLE Compound File magic: D0 CF 11 E0 A1 B1 1A E1
-        private static readonly byte[] c_binOleMagic =
+        private static readonly byte[] binOleMagic =
             { 0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1 };
 
         public static string check(string sPath, string sExtLower)
@@ -1354,7 +1613,7 @@ namespace twoHtm
                         return "File appears corrupted: too short to be a valid Office document.";
                 }
                 for (int i = 0; i < 8; i++) {
-                    if (binHead[i] != c_binOleMagic[i])
+                    if (binHead[i] != binOleMagic[i])
                         return "File appears corrupted: missing OLE Compound File signature. " +
                                "Try opening it manually in Office to see if it can be repaired.";
                 }
@@ -1370,8 +1629,8 @@ namespace twoHtm
     // -----------------------------------------------------------------
     public static class tempManager
     {
-        public const string c_sPrefix = "2htm_";
-        public const string c_sProcessName = "2htm";
+        public const string sTempPrefix = "2htm_";
+        public const string sProcessName = "2htm";
         private static readonly Regex oDirRegex =
             new Regex(@"^2htm_(?<pid>\d+)_[0-9a-fA-F]{32}$", RegexOptions.Compiled);
 
@@ -1379,7 +1638,7 @@ namespace twoHtm
         {
             int iPid = Process.GetCurrentProcess().Id;
             string sGuid = Guid.NewGuid().ToString("N");
-            string sDir = Path.Combine(Path.GetTempPath(), c_sPrefix + iPid + "_" + sGuid);
+            string sDir = Path.Combine(Path.GetTempPath(), sTempPrefix + iPid + "_" + sGuid);
             Directory.CreateDirectory(sDir);
             return sDir;
         }
@@ -1396,7 +1655,7 @@ namespace twoHtm
             try {
                 string sTemp = Path.GetTempPath();
                 if (!Directory.Exists(sTemp)) return;
-                foreach (string sDir in Directory.GetDirectories(sTemp, c_sPrefix + "*")) {
+                foreach (string sDir in Directory.GetDirectories(sTemp, sTempPrefix + "*")) {
                     try {
                         Match oMatch = oDirRegex.Match(Path.GetFileName(sDir));
                         if (!oMatch.Success) continue;
@@ -1414,7 +1673,7 @@ namespace twoHtm
             try {
                 Process oProc = Process.GetProcessById(iPid);
                 try {
-                    return string.Equals(oProc.ProcessName, c_sProcessName,
+                    return string.Equals(oProc.ProcessName, sProcessName,
                         StringComparison.OrdinalIgnoreCase);
                 } finally { oProc.Dispose(); }
             } catch (ArgumentException) { return false; }
@@ -1427,11 +1686,11 @@ namespace twoHtm
     // -----------------------------------------------------------------
     public static class htmlWriter
     {
-        public const string c_sDocType = "<!DOCTYPE html>";
-        public const string c_sCharset = "utf-8";
-        public const string c_sGenerator = "2htm";
+        public const string sDefaultDocType = "<!DOCTYPE html>";
+        public const string sDefaultCharset = "utf-8";
+        public const string sGeneratorName = "2htm";
 
-        public const string c_sBaseCss =
+        public const string sBaseCss =
             "html{font-size:100%}" +
             "body{font-family:sans-serif;max-width:80ch;margin:1em auto;padding:0 1em;" +
                 "line-height:1.6;color:#000;text-align:left}" +
@@ -1500,12 +1759,12 @@ namespace twoHtm
             }
             if (string.IsNullOrWhiteSpace(sDocTitle)) sDocTitle = sMetaTitle;
 
-            oOut.WriteLine(c_sDocType);
+            oOut.WriteLine(sDefaultDocType);
             oOut.WriteLine("<html lang=\"" + escape(sLang) + "\">");
             oOut.WriteLine("<head>");
-            oOut.WriteLine("<meta charset=\"" + c_sCharset + "\">");
+            oOut.WriteLine("<meta charset=\"" + sDefaultCharset + "\">");
             oOut.WriteLine("<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">");
-            oOut.WriteLine("<meta name=\"generator\" content=\"" + escape(c_sGenerator) + "\">");
+            oOut.WriteLine("<meta name=\"generator\" content=\"" + escape(sGeneratorName) + "\">");
             oOut.WriteLine("<title>" + escape(sMetaTitle) + "</title>");
 
             writeMetaTag(oOut, "author", dMeta);
@@ -1520,7 +1779,7 @@ namespace twoHtm
             writeDc(oOut, "DC.date.modified", dMeta, "modified");
             writeDc(oOut, "DC.language", dMeta, "language");
 
-            oOut.WriteLine("<style>" + c_sBaseCss + "</style>");
+            oOut.WriteLine("<style>" + sBaseCss + "</style>");
             oOut.WriteLine("</head>");
             oOut.WriteLine("<body>");
 
@@ -1871,10 +2130,10 @@ namespace twoHtm
     // -----------------------------------------------------------------
     public static class comHelper
     {
-        public const int c_iHrRpcCallFailed = unchecked((int)0x800706BE);
-        public const int c_iHrRpcServerUnavailable = unchecked((int)0x800706BA);
-        public const int c_iHrRpcDisconnected = unchecked((int)0x80010108);
-        public const int c_iHrObjectNotConnected = unchecked((int)0x80010114);
+        public const int iHrRpcCallFailed = unchecked((int)0x800706BE);
+        public const int iHrRpcServerUnavailable = unchecked((int)0x800706BA);
+        public const int iHrRpcDisconnected = unchecked((int)0x80010108);
+        public const int iHrObjectNotConnected = unchecked((int)0x80010114);
 
         public static bool isRpcFailure(Exception ex)
         {
@@ -1885,8 +2144,8 @@ namespace twoHtm
             // transient RPC failures regardless of wrapping.
             for (Exception cur = ex; cur != null; cur = cur.InnerException) {
                 int h = cur is COMException ce ? ce.HResult : Marshal.GetHRForException(cur);
-                if (h == c_iHrRpcCallFailed || h == c_iHrRpcServerUnavailable ||
-                    h == c_iHrRpcDisconnected || h == c_iHrObjectNotConnected)
+                if (h == iHrRpcCallFailed || h == iHrRpcServerUnavailable ||
+                    h == iHrRpcDisconnected || h == iHrObjectNotConnected)
                     return true;
             }
             return false;
@@ -2018,9 +2277,9 @@ namespace twoHtm
     // -----------------------------------------------------------------
     public static class wordConverter
     {
-        public const int c_iWdFormatFilteredHtml = 10;
-        public const int c_iWdDoNotSaveChanges = 0;
-        public const int c_iWdAlertsNone = 0;
+        public const int iWdFormatFilteredHtml = 10;
+        public const int iWdDoNotSaveChanges = 0;
+        public const int iWdAlertsNone = 0;
 
         public static void convert(string sInPath, string sOutPath)
         {
@@ -2040,7 +2299,7 @@ namespace twoHtm
             try {
                 oApp = comHelper.op("Word: createApp", () => comHelper.createApp("Word.Application"));
                 comHelper.op("Word: set Visible=false", () => { oApp.Visible = false; });
-                comHelper.op("Word: set DisplayAlerts", () => { oApp.DisplayAlerts = c_iWdAlertsNone; });
+                comHelper.op("Word: set DisplayAlerts", () => { oApp.DisplayAlerts = iWdAlertsNone; });
 
                 if (bIsPdf) {
                     try { oApp.Options.DoNotPromptForConvert = true; } catch { }
@@ -2054,9 +2313,9 @@ namespace twoHtm
                 string sDocTitle = pickTitle(dMeta, sInPath);
 
                 comHelper.op("Word: SaveAs2 filtered HTML",
-                    () => { oDoc.SaveAs2(FileName: sTempHtm, FileFormat: c_iWdFormatFilteredHtml); });
+                    () => { oDoc.SaveAs2(FileName: sTempHtm, FileFormat: iWdFormatFilteredHtml); });
                 comHelper.op("Word: Close",
-                    () => { oDoc.Close(c_iWdDoNotSaveChanges); });
+                    () => { oDoc.Close(iWdDoNotSaveChanges); });
                 oDoc = null;
 
                 if (!File.Exists(sTempHtm))
@@ -2073,7 +2332,7 @@ namespace twoHtm
                 // should not invalidate this success.
                 bWritten = true;
             } finally {
-                try { if (oDoc != null) { try { oDoc.Close(c_iWdDoNotSaveChanges); } catch { } comHelper.release(oDoc); } } catch { }
+                try { if (oDoc != null) { try { oDoc.Close(iWdDoNotSaveChanges); } catch { } comHelper.release(oDoc); } } catch { }
                 try { if (oApp != null) { try { oApp.Quit(); } catch { } comHelper.release(oApp); } } catch { }
                 try { tempManager.tryDelete(sTempDir); } catch { }
             }
@@ -2145,7 +2404,7 @@ namespace twoHtm
         // little-endian .txt file with BOM. We read that back in
         // and rewrite as UTF-8 without BOM so the final output
         // matches the encoding convention used by the HTML path.
-        public const int c_iWdFormatUnicodeText = 7;
+        public const int iWdFormatUnicodeText = 7;
 
         public static void convertToText(string sInPath, string sOutPath)
         {
@@ -2165,7 +2424,7 @@ namespace twoHtm
             try {
                 oApp = comHelper.op("Word: createApp", () => comHelper.createApp("Word.Application"));
                 comHelper.op("Word: set Visible=false", () => { oApp.Visible = false; });
-                comHelper.op("Word: set DisplayAlerts", () => { oApp.DisplayAlerts = c_iWdAlertsNone; });
+                comHelper.op("Word: set DisplayAlerts", () => { oApp.DisplayAlerts = iWdAlertsNone; });
 
                 if (bIsPdf) {
                     try { oApp.Options.DoNotPromptForConvert = true; } catch { }
@@ -2176,9 +2435,9 @@ namespace twoHtm
                 }
 
                 comHelper.op("Word: SaveAs2 Unicode text",
-                    () => { oDoc.SaveAs2(FileName: sTempTxt, FileFormat: c_iWdFormatUnicodeText); });
+                    () => { oDoc.SaveAs2(FileName: sTempTxt, FileFormat: iWdFormatUnicodeText); });
                 comHelper.op("Word: Close",
-                    () => { oDoc.Close(c_iWdDoNotSaveChanges); });
+                    () => { oDoc.Close(iWdDoNotSaveChanges); });
                 oDoc = null;
 
                 if (!File.Exists(sTempTxt))
@@ -2192,7 +2451,7 @@ namespace twoHtm
                 File.WriteAllText(sOutPath, sContent, new UTF8Encoding(true));
                 bWritten = true;
             } finally {
-                try { if (oDoc != null) { try { oDoc.Close(c_iWdDoNotSaveChanges); } catch { } comHelper.release(oDoc); } } catch { }
+                try { if (oDoc != null) { try { oDoc.Close(iWdDoNotSaveChanges); } catch { } comHelper.release(oDoc); } } catch { }
                 try { if (oApp != null) { try { oApp.Quit(); } catch { } comHelper.release(oApp); } } catch { }
                 try { tempManager.tryDelete(sTempDir); } catch { }
             }
@@ -2372,7 +2631,7 @@ namespace twoHtm
             // OutOfMemoryException. Both paths produce equivalent
             // region output on any sheet where the fast path would
             // have succeeded.
-            const long c_iMaxCellsForValueFetch = 200_000_000;
+            const long iMaxCellsForValueFetch = 200_000_000;
 
             var dRegions = new Dictionary<string, dynamic>(StringComparer.OrdinalIgnoreCase);
             try {
@@ -2396,13 +2655,13 @@ namespace twoHtm
                 logger.info("  UsedRange origin: row " + iUsedRow0 + ", col " + iUsedCol0);
 
                 long iCellCount = (long)iRowsUsed * iColsUsed;
-                if (iCellCount <= c_iMaxCellsForValueFetch) {
+                if (iCellCount <= iMaxCellsForValueFetch) {
                     seedRegionsFromValueWalk(oSheet, oUsed, iRowsUsed, iColsUsed,
                         iUsedRow0, iUsedCol0, dRegions);
                 } else {
                     logger.info("  UsedRange has " + iCellCount +
                         " cells, above CLR-safe threshold of " +
-                        c_iMaxCellsForValueFetch +
+                        iMaxCellsForValueFetch +
                         "; using SpecialCells seed path.");
                     seedRegionsFromSpecialCells(oSheet, dRegions);
                 }
@@ -2557,16 +2816,16 @@ namespace twoHtm
         private static void seedRegionsFromSpecialCells(dynamic oSheet,
             Dictionary<string, dynamic> dRegions)
         {
-            const int c_iXlCellTypeConstants = 2;
-            const int c_iXlCellTypeFormulas = -4123;
+            const int iXlCellTypeConstants = 2;
+            const int iXlCellTypeFormulas = -4123;
 
             int iMaxConstantsRow = seedRegionsFromSpecialCellsType(
-                oSheet, c_iXlCellTypeConstants, "constants", dRegions, iClipToRow: 0);
+                oSheet, iXlCellTypeConstants, "constants", dRegions, iClipToRow: 0);
             // Pass max-constants-row as clip bound. When it's zero
             // (no constants on the sheet), the clip helper treats
             // it as "no clipping."
             seedRegionsFromSpecialCellsType(
-                oSheet, c_iXlCellTypeFormulas, "formulas", dRegions,
+                oSheet, iXlCellTypeFormulas, "formulas", dRegions,
                 iClipToRow: iMaxConstantsRow);
         }
 
@@ -2728,8 +2987,8 @@ namespace twoHtm
         // Regions that fall below these floors degrade gracefully:
         // a 2x2 region, for example, is just four cells and reads
         // better as paragraphs than as a one-data-row "table".
-        public const int c_iMinDataRows = 2;
-        public const int c_iMinDataCols = 2;
+        public const int iMinDataRows = 2;
+        public const int iMinDataCols = 2;
 
         private static sheetRegion buildRegion(dynamic oRange)
         {
@@ -2812,7 +3071,7 @@ namespace twoHtm
         // paragraph rendering:
         //   - If neither axis classified as headers → paragraphs.
         //   - If classified but data-cell count falls below the
-        //     c_iMinDataRows / c_iMinDataCols floor → paragraphs.
+        //     iMinDataRows / iMinDataCols floor → paragraphs.
         //     (The "table" would be almost all header.)
         //   - Otherwise → <table> with appropriate scope markup.
         private static void writeRegion(TextWriter oOut, sheetRegion oReg,
@@ -2826,8 +3085,8 @@ namespace twoHtm
             // Compute required total dimensions based on which
             // axes got classified. Every header row or column
             // consumes one unit from the corresponding total.
-            int iReqRows = c_iMinDataRows + (oReg.bColHeaders ? 1 : 0);
-            int iReqCols = c_iMinDataCols + (oReg.bRowHeaders ? 1 : 0);
+            int iReqRows = iMinDataRows + (oReg.bColHeaders ? 1 : 0);
+            int iReqCols = iMinDataCols + (oReg.bRowHeaders ? 1 : 0);
             if (oReg.iRows < iReqRows || oReg.iCols < iReqCols) {
                 // Not enough data behind the classified headers.
                 // Demote: clear the flags and render the whole
@@ -3114,23 +3373,23 @@ namespace twoHtm
     // -----------------------------------------------------------------
     public static class pptConverter
     {
-        public const int c_iPpSaveAsPng = 18;
-        public const int c_iMsoTrue = -1;
-        public const int c_iMsoFalse = 0;
-        public const int c_iMsoPlaceholder = 14;
-        public const int c_iMsoPicture = 13;
-        public const int c_iMsoLinkedPicture = 11;
-        public const int c_iMsoTable = 19;
-        public const int c_iMsoTextEffect = 15;
-        public const int c_iMsoGroup = 6;
-        public const int c_iPpPlaceholderTitle = 1;
-        public const int c_iPpPlaceholderCenterTitle = 3;
-        public const int c_iPpPlaceholderSubtitle = 4;
-        public const int c_iPpBulletNone = 0;
-        public const int c_iPpBulletUnnumbered = 1;
-        public const int c_iPpBulletNumbered = 2;
-        public const int c_iPpAlertsNone = 1;
-        public const int c_iPpShapeFormatPng = 2;
+        public const int iPpSaveAsPng = 18;
+        public const int iMsoTrue = -1;
+        public const int iMsoFalse = 0;
+        public const int iMsoPlaceholder = 14;
+        public const int iMsoPicture = 13;
+        public const int iMsoLinkedPicture = 11;
+        public const int iMsoTable = 19;
+        public const int iMsoTextEffect = 15;
+        public const int iMsoGroup = 6;
+        public const int iPpPlaceholderTitle = 1;
+        public const int iPpPlaceholderCenterTitle = 3;
+        public const int iPpPlaceholderSubtitle = 4;
+        public const int iPpBulletNone = 0;
+        public const int iPpBulletUnnumbered = 1;
+        public const int iPpBulletNumbered = 2;
+        public const int iPpAlertsNone = 1;
+        public const int iPpShapeFormatPng = 2;
 
         public static void convert(string sInPath, string sOutPath)
         {
@@ -3151,14 +3410,14 @@ namespace twoHtm
                 // PowerPoint requires a visible Application in many
                 // versions. Do NOT set oApp.Visible = false. Hide
                 // individual presentation windows instead.
-                try { oApp.DisplayAlerts = c_iPpAlertsNone; } catch { }
+                try { oApp.DisplayAlerts = iPpAlertsNone; } catch { }
 
                 oPres = comHelper.op("PowerPoint: Presentations.Open",
                     () => (object)oApp.Presentations.Open(
                         FileName: sInPath,
-                        ReadOnly: c_iMsoTrue,
-                        Untitled: c_iMsoFalse,
-                        WithWindow: c_iMsoFalse));
+                        ReadOnly: iMsoTrue,
+                        Untitled: iMsoFalse,
+                        WithWindow: iMsoFalse));
 
                 var dMeta = comHelper.readBuiltInDocProps(oPres);
                 string sDocTitle = pickTitle(dMeta, sInPath);
@@ -3275,12 +3534,12 @@ namespace twoHtm
                 // compare to msoTrue (-1).
                 int iHasTitle = 0;
                 try { iHasTitle = (int)oShapes.HasTitle; } catch { return ""; }
-                if (iHasTitle != c_iMsoTrue) return "";
+                if (iHasTitle != iMsoTrue) return "";
                 oTitle = oShapes.Title;
                 oTf = oTitle.TextFrame;
                 int iHasText = 0;
                 try { iHasText = (int)oTf.HasText; } catch { return ""; }
-                if (iHasText != c_iMsoTrue) return "";
+                if (iHasText != iMsoTrue) return "";
                 return Convert.ToString(oTf.TextRange.Text, CultureInfo.InvariantCulture);
             } catch { return ""; }
             finally {
@@ -3336,7 +3595,7 @@ namespace twoHtm
             try { iType = (int)oShape.Type; } catch { return; }
 
             // Group shapes: recurse into their contained shapes.
-            if (iType == c_iMsoGroup) {
+            if (iType == iMsoGroup) {
                 dynamic oInner = null;
                 try {
                     oInner = oShape.GroupItems;
@@ -3363,7 +3622,7 @@ namespace twoHtm
             }
 
             // Table shapes: render as <table>.
-            if (iType == c_iMsoTable || hasTable(oShape)) {
+            if (iType == iMsoTable || hasTable(oShape)) {
                 writeTableShape(oOut, oShape);
                 return;
             }
@@ -3379,7 +3638,7 @@ namespace twoHtm
             }
 
             // Text-effect (WordArt) shapes: emit the effect text.
-            if (iType == c_iMsoTextEffect) {
+            if (iType == iMsoTextEffect) {
                 writeTextEffectShape(oOut, oShape);
                 return;
             }
@@ -3391,14 +3650,14 @@ namespace twoHtm
         // True if this shape exposes a Chart child object.
         private static bool hasChart(dynamic oShape)
         {
-            try { return (int)oShape.HasChart == c_iMsoTrue; }
+            try { return (int)oShape.HasChart == iMsoTrue; }
             catch { return false; }
         }
 
         // True if this shape exposes a Table child object.
         private static bool hasTable(dynamic oShape)
         {
-            try { return (int)oShape.HasTable == c_iMsoTrue; }
+            try { return (int)oShape.HasTable == iMsoTrue; }
             catch { return false; }
         }
 
@@ -3408,7 +3667,7 @@ namespace twoHtm
             try {
                 dynamic oChart = oShape.Chart;
                 try {
-                    if ((int)oChart.HasTitle == c_iMsoTrue) {
+                    if ((int)oChart.HasTitle == iMsoTrue) {
                         sTitle = Convert.ToString(oChart.ChartTitle.Text,
                             CultureInfo.InvariantCulture);
                     }
@@ -3490,7 +3749,7 @@ namespace twoHtm
                 string sText = Convert.ToString(oTr.Text, CultureInfo.InvariantCulture);
                 if (string.IsNullOrWhiteSpace(sText)) return;
 
-                int iBulletType = c_iPpBulletNone;
+                int iBulletType = iPpBulletNone;
                 try { iBulletType = (int)oTr.ParagraphFormat.Bullet.Type; } catch { }
 
                 // Split the shape's text into paragraphs. PowerPoint
@@ -3508,12 +3767,12 @@ namespace twoHtm
 
                 bool bIsSubtitle = isSubtitleShape(oShape);
 
-                if (iBulletType == c_iPpBulletUnnumbered) {
+                if (iBulletType == iPpBulletUnnumbered) {
                     oOut.WriteLine("<ul>");
                     foreach (var s in lsParas)
                         oOut.WriteLine("<li>" + htmlWriter.escape(s) + "</li>");
                     oOut.WriteLine("</ul>");
-                } else if (iBulletType == c_iPpBulletNumbered) {
+                } else if (iBulletType == iPpBulletNumbered) {
                     oOut.WriteLine("<ol>");
                     foreach (var s in lsParas)
                         oOut.WriteLine("<li>" + htmlWriter.escape(s) + "</li>");
@@ -3532,9 +3791,9 @@ namespace twoHtm
         {
             try {
                 int iType = (int)oShape.Type;
-                if (iType != c_iMsoPlaceholder) return false;
+                if (iType != iMsoPlaceholder) return false;
                 int iPh = (int)oShape.PlaceholderFormat.Type;
-                return iPh == c_iPpPlaceholderSubtitle;
+                return iPh == iPpPlaceholderSubtitle;
             } catch { return false; }
         }
 
@@ -3545,11 +3804,11 @@ namespace twoHtm
         {
             try {
                 int iType = (int)oShape.Type;
-                if (iType == c_iMsoPicture || iType == c_iMsoLinkedPicture) return true;
-                if (iType == c_iMsoPlaceholder) {
+                if (iType == iMsoPicture || iType == iMsoLinkedPicture) return true;
+                if (iType == iMsoPlaceholder) {
                     try {
                         int iContained = (int)oShape.PlaceholderFormat.ContainedType;
-                        return iContained == c_iMsoPicture || iContained == c_iMsoLinkedPicture;
+                        return iContained == iMsoPicture || iContained == iMsoLinkedPicture;
                     } catch { return false; }
                 }
                 return false;
@@ -3577,7 +3836,7 @@ namespace twoHtm
             } catch { }
 
             try {
-                oShape.Export(sPng, c_iPpShapeFormatPng, 0, 0);
+                oShape.Export(sPng, iPpShapeFormatPng, 0, 0);
                 if (!File.Exists(sPng)) return;
 
                 byte[] binPng = File.ReadAllBytes(sPng);
@@ -3598,9 +3857,9 @@ namespace twoHtm
         {
             try {
                 int iType = (int)oShape.Type;
-                if (iType != c_iMsoPlaceholder) return false;
+                if (iType != iMsoPlaceholder) return false;
                 int iPh = (int)oShape.PlaceholderFormat.Type;
-                return iPh == c_iPpPlaceholderTitle || iPh == c_iPpPlaceholderCenterTitle;
+                return iPh == iPpPlaceholderTitle || iPh == iPpPlaceholderCenterTitle;
             } catch { return false; }
         }
 
@@ -3611,8 +3870,8 @@ namespace twoHtm
                 // Read as int and compare to msoTrue (-1).
                 int iHasFrame = 0;
                 try { iHasFrame = (int)oShape.HasTextFrame; } catch { return false; }
-                if (iHasFrame != c_iMsoTrue) return false;
-                return (int)oShape.TextFrame.HasText == c_iMsoTrue;
+                if (iHasFrame != iMsoTrue) return false;
+                return (int)oShape.TextFrame.HasText == iMsoTrue;
             } catch { return false; }
         }
 
@@ -3661,14 +3920,14 @@ namespace twoHtm
             try {
                 oApp = comHelper.op("PowerPoint: createApp",
                     () => comHelper.createApp("PowerPoint.Application"));
-                try { oApp.DisplayAlerts = c_iPpAlertsNone; } catch { }
+                try { oApp.DisplayAlerts = iPpAlertsNone; } catch { }
 
                 oPres = comHelper.op("PowerPoint: Presentations.Open",
                     () => (object)oApp.Presentations.Open(
                         FileName: sInPath,
-                        ReadOnly: c_iMsoTrue,
-                        Untitled: c_iMsoFalse,
-                        WithWindow: c_iMsoFalse));
+                        ReadOnly: iMsoTrue,
+                        Untitled: iMsoFalse,
+                        WithWindow: iMsoFalse));
 
                 using (var oOut = new StreamWriter(sOutPath, false, new UTF8Encoding(true))) {
                     int iCount = comHelper.op("PowerPoint: Slides.Count",
@@ -3752,7 +4011,7 @@ namespace twoHtm
             int iType = 0;
             try { iType = (int)oShape.Type; } catch { return; }
 
-            if (iType == c_iMsoGroup) {
+            if (iType == iMsoGroup) {
                 dynamic oInner = null;
                 try {
                     oInner = oShape.GroupItems;
@@ -3773,7 +4032,7 @@ namespace twoHtm
 
             if (isPictureShape(oShape)) return;  // nothing to emit in text mode
 
-            if (iType == c_iMsoTable || hasTable(oShape)) {
+            if (iType == iMsoTable || hasTable(oShape)) {
                 writeTableShapeAsText(oOut, oShape);
                 return;
             }
@@ -3783,7 +4042,7 @@ namespace twoHtm
                 // fall through
             }
 
-            if (iType == c_iMsoTextEffect) {
+            if (iType == iMsoTextEffect) {
                 writeTextEffectAsText(oOut, oShape);
                 return;
             }
@@ -3797,7 +4056,7 @@ namespace twoHtm
             try {
                 dynamic oChart = oShape.Chart;
                 try {
-                    if ((int)oChart.HasTitle == c_iMsoTrue)
+                    if ((int)oChart.HasTitle == iMsoTrue)
                         sTitle = Convert.ToString(oChart.ChartTitle.Text,
                             CultureInfo.InvariantCulture);
                 } catch { }
@@ -4036,19 +4295,19 @@ namespace twoHtm
             // the start of the Private Use Area — as the marker
             // for real paragraph breaks, and then normalize all
             // other whitespace before converting the marker back.
-            const string c_sBreak = "\uE000";
+            const string sBreakSentinel = "\uE000";
 
             // Place the sentinel at the boundaries of block-level
             // elements. Double sentinels signal a stronger break
             // (blank line in output).
-            s = Regex.Replace(s, @"<br\s*/?>", c_sBreak, RegexOptions.IgnoreCase);
+            s = Regex.Replace(s, @"<br\s*/?>", sBreakSentinel, RegexOptions.IgnoreCase);
             s = Regex.Replace(s,
                 @"</(p|div|blockquote|pre|section|article|header|footer|nav|aside|figcaption)\s*>",
-                c_sBreak + c_sBreak, RegexOptions.IgnoreCase);
-            s = Regex.Replace(s, @"</(li|dt|dd|tr)\s*>", c_sBreak, RegexOptions.IgnoreCase);
-            s = Regex.Replace(s, @"</(h[1-6])\s*>", c_sBreak + c_sBreak, RegexOptions.IgnoreCase);
-            s = Regex.Replace(s, @"<(h[1-6])\b[^>]*>", c_sBreak, RegexOptions.IgnoreCase);
-            s = Regex.Replace(s, @"<li\b[^>]*>", c_sBreak + "- ", RegexOptions.IgnoreCase);
+                sBreakSentinel + sBreakSentinel, RegexOptions.IgnoreCase);
+            s = Regex.Replace(s, @"</(li|dt|dd|tr)\s*>", sBreakSentinel, RegexOptions.IgnoreCase);
+            s = Regex.Replace(s, @"</(h[1-6])\s*>", sBreakSentinel + sBreakSentinel, RegexOptions.IgnoreCase);
+            s = Regex.Replace(s, @"<(h[1-6])\b[^>]*>", sBreakSentinel, RegexOptions.IgnoreCase);
+            s = Regex.Replace(s, @"<li\b[^>]*>", sBreakSentinel + "- ", RegexOptions.IgnoreCase);
 
             // Strip remaining tags.
             s = Regex.Replace(s, @"<[^>]+>", "");
@@ -4076,7 +4335,7 @@ namespace twoHtm
             // paragraph and heading ends) becomes a blank line.
             // Collapse runs of sentinels to at most two so we never
             // emit more than one blank line in a row.
-            s = Regex.Replace(s, c_sBreak + "+", m => {
+            s = Regex.Replace(s, sBreakSentinel + "+", m => {
                 return m.Length >= 2 ? "\n\n" : "\n";
             });
 
@@ -4575,7 +4834,7 @@ namespace twoHtm
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         private static extern bool IsIconic(IntPtr hWnd);
 
-        private const int c_iSwRestore = 9;
+        private const int iSwRestore = 9;
 
         public static void openFolderSmart(string sPath)
         {
@@ -4676,7 +4935,7 @@ namespace twoHtm
                         IntPtr hwnd = IntPtr.Zero;
                         try { hwnd = new IntPtr((int)oWin.HWND); } catch { }
                         if (hwnd == IntPtr.Zero) return false;
-                        if (IsIconic(hwnd)) ShowWindow(hwnd, c_iSwRestore);
+                        if (IsIconic(hwnd)) ShowWindow(hwnd, iSwRestore);
                         SetForegroundWindow(hwnd);
                         return true;
                     } finally {
@@ -4733,6 +4992,50 @@ namespace twoHtm
             return Path.Combine(getConfigDir(), "2htm.ini");
         }
 
+        public static bool configExists()
+        {
+            try { return File.Exists(getConfigPath()); }
+            catch { return false; }
+        }
+
+        // Deletes the saved configuration file and, if the 2htm
+        // folder under %LOCALAPPDATA% is left empty afterwards,
+        // removes the folder too. Invoked by the GUI's "Default
+        // settings" button. Silently no-ops if nothing is present;
+        // non-fatal on failure (logs the error but does not
+        // throw), because the whole point is to clean up gracefully.
+        public static void eraseAll()
+        {
+            string sDir = getConfigDir();
+            string sPath = getConfigPath();
+            try {
+                if (File.Exists(sPath)) {
+                    File.Delete(sPath);
+                    logger.info("Deleted configuration file: " + sPath);
+                }
+            } catch (Exception ex) {
+                logger.info("Could not delete configuration file " +
+                    sPath + ": " + ex.Message);
+            }
+            try {
+                if (Directory.Exists(sDir)) {
+                    // Remove only if empty, to preserve any other
+                    // content a future version of 2htm — or a
+                    // curious user — might have placed there.
+                    bool bEmpty = Directory.EnumerateFileSystemEntries(sDir)
+                        .GetEnumerator().MoveNext() == false;
+                    if (bEmpty) {
+                        Directory.Delete(sDir);
+                        logger.info("Removed empty configuration directory: " +
+                            sDir);
+                    }
+                }
+            } catch (Exception ex) {
+                logger.info("Could not remove configuration directory " +
+                    sDir + ": " + ex.Message);
+            }
+        }
+
         // Loads saved values into the program's globals. Called
         // before the GUI is shown (so saved values become dialog
         // defaults) and is a no-op if the file doesn't exist.
@@ -4747,8 +5050,17 @@ namespace twoHtm
             try {
                 dVals = parseFile(sPath);
             } catch (Exception ex) {
-                Console.Error.WriteLine("[WARN] Could not read " + sPath +
-                    ": " + ex.Message);
+                string sMsg = "Could not read configuration from:\r\n" +
+                    sPath + "\r\n\r\n" + ex.Message;
+                Console.Error.WriteLine("[WARN] " + sMsg);
+                if (program.bGuiMode) {
+                    try {
+                        System.Windows.Forms.MessageBox.Show(sMsg,
+                            "2htm — Configuration not loaded",
+                            System.Windows.Forms.MessageBoxButtons.OK,
+                            System.Windows.Forms.MessageBoxIcon.Warning);
+                    } catch { }
+                }
                 return;
             }
 
@@ -4784,8 +5096,8 @@ namespace twoHtm
                 var sb = new StringBuilder();
                 sb.AppendLine("; 2htm configuration");
                 sb.AppendLine("; auto-written on OK-click when Use configuration was checked.");
-                sb.AppendLine("; Delete this file to reset, or uncheck Use configuration");
-                sb.AppendLine("; in the GUI and run once to stop maintaining it.");
+                sb.AppendLine("; Delete this file to reset, or click Default settings in");
+                sb.AppendLine("; the GUI, which also deletes the file and the 2htm folder.");
                 sb.AppendLine("source_files=" + (sSource ?? ""));
                 sb.AppendLine("output_directory=" + (sOutDir ?? ""));
                 sb.AppendLine("strip_images=" + (bStrip ? "1" : "0"));
@@ -4796,10 +5108,22 @@ namespace twoHtm
                 logger.info("Saved configuration to " + sPath);
             } catch (Exception ex) {
                 // Writing the config is a convenience; don't fail
-                // the whole run if it can't be written.
-                Console.Error.WriteLine("[WARN] Could not write " + sPath +
-                    ": " + ex.Message);
+                // the whole run if it can't be written, but do
+                // surface the failure to a GUI user — otherwise
+                // the "Use configuration" feature silently fails
+                // to persist and the user has no way to tell.
+                string sMsg = "Could not save configuration to:\r\n" +
+                    sPath + "\r\n\r\n" + ex.Message;
+                Console.Error.WriteLine("[WARN] " + sMsg);
                 logger.info("Could not save configuration: " + ex.Message);
+                if (program.bGuiMode) {
+                    try {
+                        System.Windows.Forms.MessageBox.Show(sMsg,
+                            "2htm — Configuration not saved",
+                            System.Windows.Forms.MessageBoxButtons.OK,
+                            System.Windows.Forms.MessageBoxIcon.Warning);
+                    } catch { }
+                }
             }
         }
 

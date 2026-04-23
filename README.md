@@ -1,7 +1,7 @@
 ﻿# 2htm
 
 **Author:** Jamal Mazrui
-**License:** MIT (see `License.htm`)
+**License:** MIT (see `license.htm`)
 
 `2htm` is a single, independent Windows executable that converts popular document file types to accessible HTML (WCAG 2.2 AAA) or plain text. It runs on any modern Windows version with Microsoft Office installed. There is no installer, no .NET runtime to download, no sidecar DLLs — just one .exe file that works from any folder.
 
@@ -158,23 +158,31 @@ Running `2htm -g` opens a small dialog with these controls (keyboard hotkeys in 
 - **Force replacements** (Alt+F) — overwrite existing output.
 - **View output** (Alt+V) — open the output directory in File Explorer when done.
 - **Use configuration** (Alt+U) — save these settings as defaults for next run.
-- **Default settings** (Alt+D) — reset all fields to factory defaults.
+- **Default settings** (Alt+D) — reset all fields to factory defaults AND delete any saved configuration (see "Saved configuration" below).
 - **Help** (Alt+H) — show a quick help message.
 - **OK** / **Cancel** — Enter / Esc.
 
 Every option in the GUI corresponds one-to-one with a command-line flag, so a workflow prototyped in the dialog can be translated to a batch file without surprises.
 
-After conversion, a results dialog shows what was converted, skipped, or failed.
+**Auto-GUI launch**: 2htm enters GUI mode automatically when launched with no arguments from a GUI shell such as File Explorer (double-click, Start-menu shortcut, pinned taskbar button, or even running a copy extracted from a zip archive). This means the same `2htm.exe` is friendly to non-technical users who don't want to think about command lines, while still behaving conventionally when run from `cmd.exe` or a build script. The detection uses the Windows `GetConsoleProcessList` API to recognize whether the process was given its own fresh console (GUI launch) or is sharing one with a parent shell (command-line launch). When 2htm auto-detects a GUI launch, it also hides the empty console window Windows created for it, so the user sees only the dialog.
+
+During conversion, a small progress dialog shows the basename of the current file and a running "N of M (P%)" indicator, so the user can see which file is being processed and gauge how much of the batch remains. When the run finishes, a results dialog shows what was converted, skipped, or failed.
 
 ---
 
 ## Saved configuration (opt-in)
 
-Pass `-u` on the command line, or check **Use configuration** in the GUI, to have 2htm remember the last-used values between runs. Values live in `%LOCALAPPDATA%\2htm\2htm.ini` — a small text file in the standard per-user Windows location.
+2htm leaves no footprint on your system unless you explicitly opt in to saving your settings. Until you opt in, every GUI run starts from factory defaults, and no `.ini` file is created.
 
-Without `-u` and without the checkbox, 2htm creates no files of its own. Unchecking the box in the GUI suppresses the write for that run but does not delete any existing configuration file.
+**Opting in:** in the GUI dialog, set the values you want, check the **Use configuration** box (Alt+U), and click OK. Your choices are written to `%LOCALAPPDATA%\2htm\2htm.ini`.
 
-**Precedence:** command-line values override saved values, and GUI edits override both.
+**Subsequent GUI runs:** while the file exists, every GUI run loads your saved values as the dialog's defaults and shows the Use configuration box already checked. Clicking OK refreshes the file with your current choices. If you don't want to refresh the file on a particular run (e.g., you want to do a one-off conversion with different settings), uncheck the box before clicking OK — the file stays on disk unchanged, and the next GUI run will still load it.
+
+**Fully opting out:** click the **Default settings** button (Alt+D) in the GUI dialog. This resets all form fields to factory defaults AND deletes the `.ini` file (and removes the `2htm` folder under `%LOCALAPPDATA%` if it's empty afterwards). 2htm now has no footprint again. If you later want to opt in again, check the Use configuration box and click OK — a fresh `.ini` will be written.
+
+**Command-line mode:** the `-u` / `--use-configuration` flag is required to read the saved config from the command line. This preserves zero-footprint behavior for CLI users: someone who runs `2htm file.docx` without `-u` will never load the saved config, even if one exists on disk.
+
+**Precedence:** command-line values always override saved values, and GUI edits override both. So `2htm -p file.docx` with `-u` will use plain-text mode regardless of what the saved config says.
 
 ---
 
@@ -272,11 +280,7 @@ All source lives in a single file: `2htm.cs` (~4,800 lines). The file is organiz
 - `shellHelper` — smart Explorer-window detection for `--view-output`.
 - `configManager` — opt-in `.ini` read/write for `-u`.
 
-The code is written in **Camel Type**, a coding style the author developed to convey type information succinctly through variable names themselves, rather than through external type annotations or the reader's memory. Each identifier carries a short prefix signaling its type: `s` for string, `b` for bool, `i` for integer, `n` for real number, `dt` for datetime, `ls` for list, `d` for dictionary, and so on. A reader glancing at `sSource`, `bForce`, or `lsFileArgs` knows the type without cross-referencing a declaration or hovering for IDE tooltips — useful when reading source in a plain text editor, when navigating by screen reader, or when reviewing code in a diff or a printout. Beyond type clarity, Camel Type standardizes capitalization (lower camel case throughout), prefers methods that return meaningful values over void subprocedures, alphabetizes variable declarations at the top of each scope, and requires named constants in place of all magic numbers. The consistency makes the source uniformly easy to scan, audit, and refactor.
-
-One related benefit is readability under a screen reader. Identifiers in lower camel case break naturally into syllables that the screen reader pronounces as distinct words — `sFileName` reads as "s, file, name," not as a single unreadable run. For the same reason, this project uses `readMe.md` rather than the common `README.md` (the all-caps form either gets spelled out letter-by-letter or mis-pronounced as one run-on sound, and also carries an unintended shouting connotation in written English).
-
-Camel Type is language-agnostic; within `2htm.cs` it is applied to C# but the same conventions carry over to any procedural or object-oriented language. For the full C# guidelines see `CamelType_CSharp.md` in this repository; an equivalent document for JavaScript is available as `CamelType_JavaScript.md` in the author's other projects.
+The code is written in **Camel Type**, a coding style the author developed to make type information visible in identifier names themselves (so that variables read as `sPath`, `bFound`, `iCount`, `lsFiles` without the reader having to look up a declaration or hover for a tooltip), to standardize capitalization and scope layout for consistent scanning, and to read cleanly under a screen reader. The full C# guidelines are included in this repository as `Camel_Type_C#.md`.
 
 ### Running from source
 
@@ -294,12 +298,12 @@ This project was developed in collaboration with Anthropic's Claude AI assistant
 
 ## License
 
-MIT License. See `License.htm`.
+MIT License. See `license.htm`.
 
 ---
 
 ## Download
 
-The whole 2htm project may be downloaded in a single zip archive from:
+You can download the whole project in a single zip archive using the following link:
 
 <http://GitHub.com/JamalMazrui/2htm/archive/main.zip>

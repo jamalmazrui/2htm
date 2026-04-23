@@ -173,26 +173,26 @@
 </head>
 <body>
 <h1
-id="htm-convert-office-pdf-and-markdown-files-to-accessible-html">2htm —
-Convert Office, PDF, and Markdown Files to Accessible HTML</h1>
+id="htm-produce-accessible-html-versions-of-popular-file-formats-from-a-single-windows-executable">2htm
+— Produce accessible HTML versions of popular file formats from a single
+Windows executable</h1>
 <p>I am pleased to share a new free, open-source tool I have just
 released on GitHub. <code>2htm</code> is a single, independent
 executable that runs on any modern Windows computer with Microsoft
-Office installed — no installer, no runtime to download, no sidecar
-DLLs.</p>
+Office installed (no installer to run, no runtime to download, no
+additional DLLs to track).</p>
 <h2 id="htm">2htm</h2>
 <p><a href="https://github.com/jamalmazrui/2htm"
 class="uri">https://github.com/jamalmazrui/2htm</a></p>
 <p><code>2htm</code> converts Microsoft Word, Excel, PowerPoint, PDF,
-HTML, Markdown, JSON, CSV, and plain text files into a single-file HTML
-equivalent that opens in any modern browser — Chrome, Edge, Firefox,
-Safari — with no companion folders or special viewer required. It can
-also produce plain-text output instead.</p>
-<p>The same executable runs in two modes with the same set of options.
-Command-line mode handles scripted and batch use. GUI mode opens a
-small, keyboard-accessible dialog with every option exposed as a field
-or checkbox, for users who prefer an interactive workflow. A single flag
-(<code>-g</code>) toggles between them.</p>
+and Markdown files into a single-file, HTML equivalent that opens in any
+modern browser — Chrome, Edge, Firefox, Safari — with no companion
+folders or special viewer required. It can also produce plain-text
+output instead.</p>
+<p>The single executable can run in two modes with the same set of
+options. Command-line mode handles scripted and batch use. GUI mode
+opens a small, keyboard-accessible dialog with every option exposed as a
+field or checkbox, for users who prefer an interactive workflow.</p>
 <p>The conversion aims for WCAG 2.2 AAA conformance to the extent the
 source document’s structure and content permit. Landmarks, headings,
 table markup, alt-text propagation, color contrast, and language
@@ -201,20 +201,18 @@ designed to work cleanly with screen readers and to reflow on small
 screens.</p>
 <p><code>2htm</code> fits naturally into pipelines that produce
 “alternate formats” — accessible versions of public documents for users
-with disabilities. Call it synchronously from a batch file, a scheduled
-task, or a CI job; inspect the exit code; serve the resulting
-<code>.htm</code> files directly from any web host. Because the output
-is self-contained, downstream steps never have to track sidecar
-resources.</p>
+with disabilities. Call it synchronously from a batch file or scheduled
+task – even serve the resulting <code>.htm</code> files directly from
+any web host.</p>
 <p>The tool is released under the permissive MIT license, so programmers
-can freely modify or extend the code. The entire source is one C# file
-(<code>2htm.cs</code>); C# is Microsoft’s flagship application language,
-well-documented, with a mature free toolchain from Microsoft (Visual
-Studio Community or Visual Studio Build Tools, both free downloads) for
-developers who want to build from source.</p>
+can freely modify or extend the code. It is written in C# – Microsoft’s
+flagship application language, well-documented, with a mature free
+toolchain.</p>
 <p>This project was developed in collaboration with Anthropic’s Claude
-AI assistant. Feedback and contributions are welcome.</p>
-<p>#accessibility #wcag #a11y #assistivetechnology #commandlinetools
-#opensource</p>
+AI.</p>
+<p>You can download the whole project in a single zip archive using the
+following link:</p>
+<p><a href="http://GitHub.com/JamalMazrui/2htm/archive/main.zip"
+class="uri">http://GitHub.com/JamalMazrui/2htm/archive/main.zip</a></p>
 </body>
 </html>
