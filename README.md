@@ -28,9 +28,26 @@ Plain text, CSV, JSON, HTML, and Markdown files can be converted without Office 
 
 ---
 
+## Installation
+
+2htm is a single-file executable that needs no installer — just drop `2htm.exe` into any folder and run it.
+
+A Windows installer is also provided. Download `2htm_setup.exe` from the releases page, double-click it, and follow the prompts. The installer:
+
+- Installs `2htm.exe` and documentation to `C:\Program Files\2htm`.
+- Creates a Start Menu group with program launcher, readMe, and uninstall entries.
+- Creates a **desktop shortcut** (`2htm.lnk`) with the hotkey **Ctrl+Alt+2**. Press this combination to launch the 2htm GUI instantly. (Microsoft Word uses Ctrl+Alt+2 for "Heading 2" style, so the hotkey is intercepted by Word when Word has focus.) The shortcut launches 2htm in GUI mode with saved-configuration loading enabled (equivalent to `2htm -g -u`).
+- Adds **"Convert with 2htm"** to the File Explorer right-click / Shift+F10 menu for all files. Selecting the entry converts the clicked file to `.htm` in the same folder. If the file type isn't supported, 2htm reports the problem and exits cleanly.
+- Generates `readMe.htm` from `readMe.md` at install time by running 2htm on its own documentation, so the HTML readMe is always in sync with the Markdown source.
+- Offers two final-page options, both checked by default: **Launch 2htm now** and **Read documentation for 2htm**.
+
+The uninstaller removes the installed files, the right-click menu entry, and the Start Menu group, but leaves the per-user configuration file at `%LOCALAPPDATA%\2htm\2htm.ini` intact. Use the GUI's "Default settings" button, or delete that file manually, to clear saved settings.
+
+---
+
 ## Why 2htm
 
-**Accessibility pipelines.** Organizations publishing documents to the public often need to produce "alternate formats" — versions of content that are more accessible to users with disabilities. Running 2htm as a step in a content pipeline turns Word, Excel, PowerPoint, and PDF files into clean, landmark-rich HTML automatically. The HTML output reads well on screen readers, reflows on small screens, and opens on any device with a browser.
+**Accessibility pipelines.** Organizations publishing documents to the public often need to produce "alternate formats" — versions of content that are more accessible to users with disabilities. Running 2htm as a step in a content pipeline turns Word, Excel, PowerPoint, and PDF files into clean, landmark-rich HTML automatically. The HTML output reflows on small screens and opens on any device with a browser.
 
 **Single-file portability.** Because 2htm is one executable, it can be dropped into a folder, attached to an email, or stored on a thumb drive. Administrators can deploy it across an organization without installer paperwork. Developers can call it from batch files, scheduled tasks, or CI jobs.
 
@@ -82,13 +99,17 @@ A bare folder path processes every file type 2htm recognizes inside that folder.
 2htm -g
 ```
 
-A small dialog lets you pick source files, an output directory, and conversion options. The GUI is designed to work cleanly with screen readers; every field has a keyboard hotkey.
+A small dialog lets you pick source files, an output directory, and conversion options. Every field has a keyboard hotkey.
 
 ### Get help
+
+From the command line:
 
 ```cmd
 2htm -h
 ```
+
+In the GUI, press **F1** or click **Help** to see a summary of each field. The help dialog ends with a Yes/No prompt; choose Yes to open this full HTML documentation (`readMe.htm`) in your default browser.
 
 ---
 
@@ -194,11 +215,13 @@ Pass `--view-output` or check the box in the GUI to open the output directory in
 
 ## Output
 
-For each input file, a new file is written to the output directory:
+For each input file, a new file is written to the current working directory:
 
 - `report.docx` → `report.htm` (or `report.txt` with `-p`)
 - Original file is never modified.
 - If an output file already exists, the input is skipped unless `-f` is given.
+
+Use `-o <dir>` to write to a specific directory instead of the current working directory. When 2htm is launched via the File Explorer right-click menu, Windows sets the current working directory to the folder containing the clicked file, so output naturally lands alongside the input without any special flag.
 
 The HTML output is a single standalone file. Images (when kept) are embedded as base64 data URIs, so the `.htm` file can be shared without a sidecar folder. The result passes automated WCAG 2.2 AAA checks in axe-core for landmarks, headings, table structure, alt-text propagation, color contrast, and language declaration.
 
@@ -268,7 +291,7 @@ The build targets `x64` to match the 64-bit Office that Microsoft has installed 
 
 ### Source layout
 
-All source lives in a single file: `2htm.cs` (~4,800 lines). The file is organized into several `static class` sections:
+All source lives in a single file: `2htm.cs` (about 5,200 lines). The file is organized into several `static class` sections:
 
 - `program` — entry point, argument parsing, conversion dispatch, temp-folder management.
 - `logger` — diagnostic logging (opt-in via `-l`).
@@ -280,7 +303,7 @@ All source lives in a single file: `2htm.cs` (~4,800 lines). The file is organiz
 - `shellHelper` — smart Explorer-window detection for `--view-output`.
 - `configManager` — opt-in `.ini` read/write for `-u`.
 
-The code is written in **Camel Type**, a coding style the author developed to make type information visible in identifier names themselves (so that variables read as `sPath`, `bFound`, `iCount`, `lsFiles` without the reader having to look up a declaration or hover for a tooltip), to standardize capitalization and scope layout for consistent scanning, and to read cleanly under a screen reader. The full C# guidelines are included in this repository as `Camel_Type_C#.md`.
+The code is written in **Camel Type**, a coding style that makes type information visible in identifier names (variables read as `sPath`, `bFound`, `iCount`, `lsFiles` without the reader having to look up a declaration or hover for a tooltip). The full C# guidelines are included in this repository as `Camel_Type_C#.md`.
 
 ### Running from source
 
@@ -292,7 +315,7 @@ There is no "run from source" path — C# requires compilation. After `build2htm
 
 ### Development history
 
-This project was developed in collaboration with Anthropic's Claude AI assistant, over a sustained series of design and implementation sessions. The author drove the product decisions — naming, command-line conventions, accessibility priorities, configuration philosophy, GUI layout, and the Camel Type coding style described above — while the AI assisted with C# implementation details, COM automation quirks, Windows API research, and iterative debugging of edge cases (pathological Excel workbooks, PowerPoint shape enumeration, screen-reader keyboard conventions, and so on).
+This project was developed in collaboration with Anthropic's Claude AI assistant, over a sustained series of design and implementation sessions. The author drove the product decisions — naming, command-line conventions, configuration philosophy, GUI layout, and the Camel Type coding style described above — while the AI assisted with C# implementation details, COM automation quirks, Windows API research, and iterative debugging of edge cases (pathological Excel workbooks, PowerPoint shape enumeration, and so on).
 
 ---
 

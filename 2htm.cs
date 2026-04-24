@@ -46,7 +46,7 @@ namespace twoHtm
         public const int iExitPartial = 1;
         public const int iExitFatal = 2;
 
-        public const string sVersion = "1.17.2";
+        public const string sVersion = "1.18.3";
 
         // Global flags set by command-line switches. All converters
         // read these directly rather than having them threaded
@@ -77,6 +77,14 @@ namespace twoHtm
         public static bool bForce = false;
         public static bool bLog = false;
         public static bool bGuiMode = false;
+
+        // When true, the program was launched from File Explorer
+        // with arguments (typically via the "Convert with 2htm"
+        // right-click menu) and its console window has been
+        // hidden. Any error output produced during the run should
+        // be surfaced as a MessageBox at the end, since the user
+        // has no visible console to see stderr in.
+        public static bool bHideConsoleMode = false;
         // When true, open the output directory in the default
         // file manager after conversion (--view-output). The open
         // fires only if at least one file was actually converted,
@@ -222,25 +230,37 @@ namespace twoHtm
             // launched from cmd.exe or PowerShell shares its parent
             // shell's console (count >= 2), whereas a process
             // launched by the shell creating a new console for it
-            // (double-click) is the only process attached to that
-            // console (count == 1). See Raymond Chen's write-up of
-            // this technique for context.
+            // (double-click, context-menu verb) is the only process
+            // attached to that console (count == 1). See Raymond
+            // Chen's write-up of this technique for context.
+            //
+            // The console-hiding logic applies whenever we own our
+            // console, regardless of whether arguments are present.
+            // That handles TWO user-visible cases:
+            //   (a) Double-click from Explorer with no arguments:
+            //       auto-GUI mode triggers, dialog appears, no
+            //       mysterious blank console window.
+            //   (b) Right-click "Convert with 2htm" on a file in
+            //       Explorer: arguments ARE present (the filename),
+            //       so CLI mode runs, but we still hide the
+            //       console flash that would otherwise occur.
+            //       Any error output is captured and shown as a
+            //       MessageBox at the end of the run.
+            bool bOwnConsole = isLaunchedFromGui();
             if (asArgs.Length == 0) {
-                if (isLaunchedFromGui()) {
+                if (bOwnConsole) {
                     bGuiMode = true;
-                    // We own our console (count == 1). Hide it so
-                    // the user sees only the GUI dialog, with no
-                    // mysterious empty command window behind or
-                    // beside it. If -g had been supplied from an
-                    // actual command-line shell, this path would
-                    // not run — the console would be the user's
-                    // shell window, and hiding it would be an
-                    // unwelcome surprise.
                     hideOwnConsoleWindow();
                 } else {
                     printUsage();
                     return iExitOk;
                 }
+            } else if (bOwnConsole) {
+                // CLI launched by Explorer (context-menu verb).
+                // Hide the console flash and mark that we should
+                // report any conversion errors via MessageBox.
+                bHideConsoleMode = true;
+                hideOwnConsoleWindow();
             }
 
             // First pass: recognize flags and separate them from
@@ -405,16 +425,25 @@ namespace twoHtm
 
             if (bLog) logger.open();
 
-            // In GUI mode, capture stdout so we can show it to the
-            // user at the end. The user likely launched the process
-            // without a console attached.
+            // In GUI mode, capture all console output so we can
+            // show it to the user at the end via MessageBox. In
+            // hide-console mode (CLI launched from Explorer's
+            // context menu, console hidden), capture stderr only —
+            // stdout's basename-progress noise is not worth
+            // interrupting the user with on a successful run, but
+            // errors must still be surfaced somehow since the user
+            // has no visible console to read them from.
             TextWriter oOriginalOut = Console.Out;
             TextWriter oOriginalErr = Console.Error;
             StringWriter oCapture = null;
+            StringWriter oErrCapture = null;
             if (bGuiMode) {
                 oCapture = new StringWriter();
                 Console.SetOut(oCapture);
                 Console.SetError(oCapture);
+            } else if (bHideConsoleMode) {
+                oErrCapture = new StringWriter();
+                Console.SetError(oErrCapture);
             }
 
             int iExitCode = iExitOk;
@@ -476,6 +505,30 @@ namespace twoHtm
                     showFinalMessage(string.IsNullOrWhiteSpace(sCaptured)
                         ? "Done. No output."
                         : sCaptured);
+                } else if (bHideConsoleMode) {
+                    Console.SetError(oOriginalErr);
+                    string sErrText = oErrCapture != null ? oErrCapture.ToString() : "";
+                    // Only interrupt the user if something actually
+                    // went wrong. Silent success is the right UX
+                    // for a right-click-to-convert action: the
+                    // output file appears, the console flash never
+                    // happened, done. On error, surface the
+                    // stderr text so the user knows why no output
+                    // appeared.
+                    if (!string.IsNullOrWhiteSpace(sErrText) &&
+                        iExitCode != iExitOk) {
+                        try {
+                            System.Windows.Forms.MessageBox.Show(sErrText,
+                                "2htm — Conversion error",
+                                System.Windows.Forms.MessageBoxButtons.OK,
+                                System.Windows.Forms.MessageBoxIcon.Warning);
+                        } catch { }
+                    }
+                    // Successful silent conversion from a right-
+                    // click invocation: the output file appears
+                    // in the folder, no dialog, no console. The
+                    // user confirms completion by finding the
+                    // new file in the same folder as the input.
                 }
             }
             return iExitCode;
@@ -663,11 +716,11 @@ namespace twoHtm
             Console.WriteLine("  JSON:       .json  (native)");
             Console.WriteLine("  Text:       .txt   (native)");
             Console.WriteLine();
-            Console.WriteLine("Output files are written to the current working directory:");
-            Console.WriteLine("  .htm by default, .txt when --plain-text is given.");
-            Console.WriteLine("If the output file already exists, the input is skipped");
-            Console.WriteLine("unless --force is given. The tool never overwrites a");
-            Console.WriteLine("source file with its own converted output.");
+            Console.WriteLine("Output files are written to the current working directory by");
+            Console.WriteLine("default (.htm, or .txt when --plain-text is given), or to the");
+            Console.WriteLine("directory given by -o / --output-dir if one is specified. Existing");
+            Console.WriteLine("output files are skipped unless --force is given. The tool never");
+            Console.WriteLine("overwrites a source file with its own converted output.");
             Console.WriteLine();
             Console.WriteLine("Exit codes:");
             Console.WriteLine("  0  all files converted (or help/version shown)");
@@ -798,6 +851,14 @@ namespace twoHtm
             // Output directory: caller-specified (via -o or GUI),
             // else the current working directory. The caller ensures
             // the directory exists before the conversion begins.
+            // Decide where this input's converted output goes.
+            // Simple rule: use the directory specified by -o if
+            // given; otherwise use the current working directory.
+            // When 2htm is launched from the File Explorer
+            // right-click menu, Windows sets the process's working
+            // directory to the folder containing the right-clicked
+            // file, so "CWD" is already the right answer in that
+            // case without any special logic here.
             string sOutDir = string.IsNullOrEmpty(sOutputDir)
                 ? Directory.GetCurrentDirectory()
                 : sOutputDir;
@@ -1002,7 +1063,7 @@ namespace twoHtm
         {
             // Build the form.
             var frm = new System.Windows.Forms.Form();
-            frm.Text = "2htm " + program.sVersion;
+            frm.Text = "2htm";
             frm.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             frm.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             frm.MaximizeBox = false;
@@ -1010,6 +1071,22 @@ namespace twoHtm
             frm.ShowInTaskbar = false;
             frm.ClientSize = new System.Drawing.Size(560, 220);
             frm.Font = System.Drawing.SystemFonts.MessageBoxFont;
+
+            // Route F1 to the same action as clicking the Help
+            // button: show the help MessageBox with an option to
+            // launch the full HTML documentation. KeyPreview lets
+            // the form see the keystroke before whatever child
+            // control currently has focus consumes it. F1 is the
+            // standard Windows help shortcut and is expected by
+            // keyboard-driven users, including screen-reader users.
+            frm.KeyPreview = true;
+            frm.KeyDown += (s, e) => {
+                if (e.KeyCode == System.Windows.Forms.Keys.F1) {
+                    e.Handled = true;
+                    e.SuppressKeyPress = true;
+                    showHelpMessage();
+                }
+            };
 
             // Layout constants in pixels. These deliberately reflect
             // Windows desktop conventions: ~7 px gutter, ~11 px row
@@ -1363,35 +1440,62 @@ namespace twoHtm
         private static void showHelpMessage()
         {
             string sMsg =
-                "2htm converts Office and text documents to accessible HTML.\r\n\r\n" +
-                "Source files: a file path, a folder path, or a wildcard pattern " +
-                "such as C:\\docs\\*.xlsx. A bare folder path processes every " +
-                "supported file in that folder. Multiple entries can be separated " +
-                "by spaces; quote paths containing spaces.\r\n\r\n" +
-                "Output directory: where the converted files are written. If " +
-                "left blank, the directory of the source is used. The directory " +
-                "is created if it does not exist.\r\n\r\n" +
-                "Strip images: remove images from output (faster, smaller files).\r\n" +
-                "Plain text: produce .txt files instead of .htm.\r\n" +
-                "Force replacements: overwrite existing output files.\r\n" +
-                "View output: open the output folder in File Explorer after " +
-                "conversion (only if at least one file was actually converted).\r\n\r\n" +
-                "Use configuration: save the current dialog values to\r\n" +
-                "%LOCALAPPDATA%\\2htm\\2htm.ini on OK. Once the file\r\n" +
-                "exists, GUI runs auto-detect it and pre-check this box.\r\n" +
-                "Uncheck and click OK to do a one-off run without\r\n" +
-                "refreshing the file; the file itself stays on disk.\r\n\r\n" +
-                "Default settings: reset the dialog to factory defaults\r\n" +
-                "AND delete the saved configuration file (and its\r\n" +
-                "%LOCALAPPDATA%\\2htm folder if empty). This is the\r\n" +
-                "explicit way to fully opt out: after clicking Default\r\n" +
-                "settings, 2htm has no footprint on disk unless you\r\n" +
-                "opt in again by re-checking Use configuration.\r\n\r\n" +
-                "Press OK to convert, Cancel to exit without converting, or " +
-                "Help to review these notes.";
-            System.Windows.Forms.MessageBox.Show(sMsg, "2htm — Help",
-                System.Windows.Forms.MessageBoxButtons.OK,
-                System.Windows.Forms.MessageBoxIcon.Information);
+                "2htm converts documents (Word, Excel, PowerPoint, PDF, " +
+                "Markdown, and more) to accessible HTML or plain text.\r\n\r\n" +
+                "Fill in the source files to convert, pick any options, " +
+                "and press OK. Leave the output directory blank to write " +
+                "results to the current folder.\r\n\r\n" +
+                "Press Cancel to exit without converting.\r\n\r\n" +
+                "Open the full documentation in your browser?";
+            var oResult = System.Windows.Forms.MessageBox.Show(sMsg,
+                "2htm — Help",
+                System.Windows.Forms.MessageBoxButtons.YesNo,
+                System.Windows.Forms.MessageBoxIcon.Information,
+                System.Windows.Forms.MessageBoxDefaultButton.Button2);
+            if (oResult == System.Windows.Forms.DialogResult.Yes) {
+                launchReadMe();
+            }
+        }
+
+        // Opens readMe.htm in the user's default browser. readMe.htm
+        // lives alongside 2htm.exe (generated by the installer at
+        // install time, or put there by the user when deploying
+        // 2htm standalone). If the file is missing, fall back to
+        // readMe.md, and if that's also missing, show a polite
+        // notice rather than a system-level "file not found" error.
+        private static void launchReadMe()
+        {
+            string sExeDir = Path.GetDirectoryName(
+                System.Reflection.Assembly.GetExecutingAssembly().Location);
+            string sHtm = Path.Combine(sExeDir, "readMe.htm");
+            string sMd = Path.Combine(sExeDir, "readMe.md");
+            string sTarget = File.Exists(sHtm)
+                ? sHtm
+                : (File.Exists(sMd) ? sMd : null);
+            if (sTarget == null) {
+                System.Windows.Forms.MessageBox.Show(
+                    "Documentation (readMe.htm or readMe.md) was not found " +
+                    "in the 2htm install folder:\r\n\r\n" + sExeDir + "\r\n\r\n" +
+                    "If 2htm was installed via the installer, reinstall it. " +
+                    "If you deployed 2htm.exe manually, place readMe.htm " +
+                    "(or readMe.md) in the same folder.",
+                    "2htm — Documentation not found",
+                    System.Windows.Forms.MessageBoxButtons.OK,
+                    System.Windows.Forms.MessageBoxIcon.Warning);
+                return;
+            }
+            try {
+                var oPsi = new System.Diagnostics.ProcessStartInfo(sTarget) {
+                    UseShellExecute = true
+                };
+                System.Diagnostics.Process.Start(oPsi);
+            } catch (Exception ex) {
+                System.Windows.Forms.MessageBox.Show(
+                    "Could not open the documentation:\r\n\r\n" + ex.Message,
+                    "2htm — Error",
+                    System.Windows.Forms.MessageBoxButtons.OK,
+                    System.Windows.Forms.MessageBoxIcon.Warning);
+            }
         }
     }
 
@@ -5160,5 +5264,5 @@ namespace twoHtm
             return s ?? "";
         }
     }
-}
 
+}
