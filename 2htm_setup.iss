@@ -20,29 +20,29 @@
 ;     documentation.
 ; =====================================================================
 
-#define cAppName       "2htm"
-#define cAppVersion    "1.18.3"
-#define cAppPublisher  "Jamal Mazrui"
-#define cAppUrl        "https://github.com/jamalmazrui/2htm"
-#define cAppExeName    "2htm.exe"
-#define cAppCopyright  "Copyright (c) 2026 Jamal Mazrui. MIT License."
+#define sAppName       "2htm"
+#define sAppVersion    "1.18.3"
+#define sAppPublisher  "Jamal Mazrui"
+#define sAppUrl        "https://github.com/jamalmazrui/2htm"
+#define sAppExeName    "2htm.exe"
+#define sAppCopyright  "Copyright (c) 2026 Jamal Mazrui. MIT License."
 
 [Setup]
 AppId={{AD1DA195-AEA7-406B-9B92-AB52D0F3E48A}
 
-AppName={#cAppName}
-AppVersion={#cAppVersion}
-AppVerName={#cAppName} {#cAppVersion}
-AppPublisher={#cAppPublisher}
-AppPublisherURL={#cAppUrl}
-AppSupportURL={#cAppUrl}
-AppUpdatesURL={#cAppUrl}/releases
-AppCopyright={#cAppCopyright}
-VersionInfoVersion={#cAppVersion}
+AppName={#sAppName}
+AppVersion={#sAppVersion}
+AppVerName={#sAppName} {#sAppVersion}
+AppPublisher={#sAppPublisher}
+AppPublisherURL={#sAppUrl}
+AppSupportURL={#sAppUrl}
+AppUpdatesURL={#sAppUrl}/releases
+AppCopyright={#sAppCopyright}
+VersionInfoVersion={#sAppVersion}
 
 ; Install under Program Files (standard GUI-program location).
-DefaultDirName={pf}\{#cAppName}
-DefaultGroupName={#cAppName}
+DefaultDirName={pf}\{#sAppName}
+DefaultGroupName={#sAppName}
 DisableProgramGroupPage=yes
 UsePreviousAppDir=yes
 UsePreviousGroup=yes
@@ -51,7 +51,7 @@ OutputDir=.
 OutputBaseFilename=2htm_setup
 Compression=lzma2
 SolidCompression=yes
-SetupIconFile=
+SetupIconFile=2htm.ico
 
 ; Installer requires admin to write to Program Files and HKLM.
 PrivilegesRequired=admin
@@ -62,8 +62,8 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 
 Uninstallable=yes
-UninstallDisplayIcon={app}\{#cAppExeName}
-UninstallDisplayName={#cAppName} {#cAppVersion}
+UninstallDisplayIcon={app}\{#sAppExeName}
+UninstallDisplayName={#sAppName} {#sAppVersion}
 
 MinVersion=10.0
 
@@ -71,6 +71,13 @@ MinVersion=10.0
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
+; Note: 2htm.ico is NOT copied to {app} because the icon is embedded
+; in 2htm.exe at build time (via /win32icon=2htm.ico in build2htm.cmd).
+; Shortcut icons in [Icons] inherit from the exe's embedded icon by
+; default. The .ico file IS still needed at COMPILE time for the
+; SetupIconFile= directive above, which gives 2htm_setup.exe itself
+; an icon -- but that's a compile-time dependency only and does not
+; need to ship with the installed program.
 Source: "2htm.exe";         DestDir: "{app}"; Flags: ignoreversion
 Source: "readMe.md";        DestDir: "{app}"; Flags: ignoreversion
 Source: "license.htm";      DestDir: "{app}"; Flags: ignoreversion
@@ -81,27 +88,27 @@ Source: "build2htm.cmd";    DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 ; Start Menu group.
-Name: "{group}\{#cAppName}"; \
-  Filename: "{app}\{#cAppExeName}"; \
+Name: "{group}\{#sAppName}"; \
+  Filename: "{app}\{#sAppExeName}"; \
   WorkingDir: "{app}"; \
   Comment: "Convert Office, PDF, and Markdown files to accessible HTML"
 
-Name: "{group}\{#cAppName} readMe"; \
+Name: "{group}\{#sAppName} readMe"; \
   Filename: "{app}\readMe.htm"; \
   WorkingDir: "{app}"; \
-  Comment: "Documentation for {#cAppName}"
+  Comment: "Documentation for {#sAppName}"
 
-Name: "{group}\Uninstall {#cAppName}"; \
+Name: "{group}\Uninstall {#sAppName}"; \
   Filename: "{uninstallexe}"; \
-  Comment: "Remove {#cAppName} from this computer"
+  Comment: "Remove {#sAppName} from this computer"
 
 ; Desktop shortcut with the Alt+Ctrl+2 hotkey. Launches 2htm in
 ; GUI mode (-g) with saved-configuration loading (-u). The
 ; hotkey is free on Windows but is intercepted by Microsoft
 ; Word (where it maps to Heading 2 style) when Word has focus;
 ; it works from Explorer, the desktop, and all non-Word apps.
-Name: "{userdesktop}\{#cAppName}"; \
-  Filename: "{app}\{#cAppExeName}"; \
+Name: "{userdesktop}\{#sAppName}"; \
+  Filename: "{app}\{#sAppExeName}"; \
   WorkingDir: "{app}"; \
   Parameters: "-g -u"; \
   HotKey: Alt+Ctrl+2; \
@@ -125,10 +132,10 @@ Root: HKLM; Subkey: "SOFTWARE\Classes\*\shell\2htm"; \
   ValueType: string; ValueName: ""; ValueData: "Convert with &2htm"; \
   Flags: uninsdeletekey
 Root: HKLM; Subkey: "SOFTWARE\Classes\*\shell\2htm"; \
-  ValueType: string; ValueName: "Icon"; ValueData: """{app}\{#cAppExeName}"",0"
+  ValueType: string; ValueName: "Icon"; ValueData: """{app}\{#sAppExeName}"",0"
 Root: HKLM; Subkey: "SOFTWARE\Classes\*\shell\2htm\command"; \
   ValueType: string; ValueName: ""; \
-  ValueData: """{app}\{#cAppExeName}"" -f ""%1"""
+  ValueData: """{app}\{#sAppExeName}"" -f ""%1"""
 
 [Run]
 ; Install-phase step (runs before the final wizard page):
@@ -137,7 +144,7 @@ Root: HKLM; Subkey: "SOFTWARE\Classes\*\shell\2htm\command"; \
 ; previous install. runhidden keeps any console window from
 ; flashing; waituntilterminated blocks until done so postinstall
 ; can launch readMe.htm without a race.
-FileName: "{app}\{#cAppExeName}"; \
+FileName: "{app}\{#sAppExeName}"; \
   Parameters: "-f readMe.md"; \
   WorkingDir: "{app}"; \
   StatusMsg: "Generating HTML documentation..."; \
@@ -147,15 +154,15 @@ FileName: "{app}\{#cAppExeName}"; \
 ; default to checked; the user can uncheck either to skip.
 
 ; Launch 2htm (GUI mode).
-FileName: "{app}\{#cAppExeName}"; \
+FileName: "{app}\{#sAppExeName}"; \
   Parameters: "-g"; \
   WorkingDir: "{app}"; \
-  Description: "Launch {#cAppName} now"; \
+  Description: "Launch {#sAppName} now"; \
   Flags: nowait postinstall skipifsilent
 
 ; Open the HTML documentation.
 FileName: "{app}\readMe.htm"; \
-  Description: "Read documentation for {#cAppName}"; \
+  Description: "Read documentation for {#sAppName}"; \
   Flags: postinstall shellexec skipifsilent
 
 [UninstallDelete]

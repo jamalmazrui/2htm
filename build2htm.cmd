@@ -35,36 +35,36 @@ rem Search known install locations for Roslyn. The .NET Framework
 rem redistributable csc.exe is intentionally NOT used here — it is
 rem pre-Roslyn and cannot compile modern C#.
 rem -------------------------------------------------------------------
-set "c_sCsc="
+set "sCsc="
 
 rem Visual Studio Build Tools 2022
 if exist "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\Roslyn\csc.exe" (
-    set "c_sCsc=C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\Roslyn\csc.exe"
+    set "sCsc=C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\Roslyn\csc.exe"
     goto :cscFound
 )
 
 rem Visual Studio 2022 editions (Community, Professional, Enterprise)
 for %%E in (Community Professional Enterprise) do (
     if exist "C:\Program Files\Microsoft Visual Studio\2022\%%E\MSBuild\Current\Bin\Roslyn\csc.exe" (
-        set "c_sCsc=C:\Program Files\Microsoft Visual Studio\2022\%%E\MSBuild\Current\Bin\Roslyn\csc.exe"
+        set "sCsc=C:\Program Files\Microsoft Visual Studio\2022\%%E\MSBuild\Current\Bin\Roslyn\csc.exe"
         goto :cscFound
     )
     if exist "C:\Program Files (x86)\Microsoft Visual Studio\2022\%%E\MSBuild\Current\Bin\Roslyn\csc.exe" (
-        set "c_sCsc=C:\Program Files (x86)\Microsoft Visual Studio\2022\%%E\MSBuild\Current\Bin\Roslyn\csc.exe"
+        set "sCsc=C:\Program Files (x86)\Microsoft Visual Studio\2022\%%E\MSBuild\Current\Bin\Roslyn\csc.exe"
         goto :cscFound
     )
 )
 
 rem Visual Studio Build Tools 2019
 if exist "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\Roslyn\csc.exe" (
-    set "c_sCsc=C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\Roslyn\csc.exe"
+    set "sCsc=C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\Roslyn\csc.exe"
     goto :cscFound
 )
 
 rem Visual Studio 2019 editions
 for %%E in (Community Professional Enterprise) do (
     if exist "C:\Program Files (x86)\Microsoft Visual Studio\2019\%%E\MSBuild\Current\Bin\Roslyn\csc.exe" (
-        set "c_sCsc=C:\Program Files (x86)\Microsoft Visual Studio\2019\%%E\MSBuild\Current\Bin\Roslyn\csc.exe"
+        set "sCsc=C:\Program Files (x86)\Microsoft Visual Studio\2019\%%E\MSBuild\Current\Bin\Roslyn\csc.exe"
         goto :cscFound
     )
 )
@@ -72,7 +72,7 @@ for %%E in (Community Professional Enterprise) do (
 rem Visual Studio 2017 editions
 for %%E in (Community Professional Enterprise BuildTools) do (
     if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\%%E\MSBuild\15.0\Bin\Roslyn\csc.exe" (
-        set "c_sCsc=C:\Program Files (x86)\Microsoft Visual Studio\2017\%%E\MSBuild\15.0\Bin\Roslyn\csc.exe"
+        set "sCsc=C:\Program Files (x86)\Microsoft Visual Studio\2017\%%E\MSBuild\15.0\Bin\Roslyn\csc.exe"
         goto :cscFound
     )
 )
@@ -86,7 +86,7 @@ if not errorlevel 1 (
     for /f "delims=" %%P in ('where csc.exe') do (
         echo %%P | findstr /i "Microsoft.NET\\Framework" >nul
         if errorlevel 1 (
-            set "c_sCsc=%%P"
+            set "sCsc=%%P"
             goto :cscFound
         )
     )
@@ -112,15 +112,27 @@ echo         is the older pre-Roslyn compiler and will NOT work.
 exit /b 2
 
 :cscFound
-echo [INFO] Using compiler: %c_sCsc%
+echo [INFO] Using compiler: %sCsc%
 
 rem ---- Markdig dependency -------------------------------------------
-set "c_sMarkdigVersion=0.18.3"
-set "c_sMarkdigUrl=https://www.nuget.org/api/v2/package/Markdig/%c_sMarkdigVersion%"
+set "sMarkdigVersion=0.18.3"
+set "sMarkdigUrl=https://www.nuget.org/api/v2/package/Markdig/%sMarkdigVersion%"
 
 if not exist "Markdig.dll" call :fnFetchMarkdig
 if not exist "Markdig.dll" (
     echo [ERROR] Markdig.dll could not be obtained. Build cannot proceed.
+    exit /b 2
+)
+
+rem ---- Icon check ---------------------------------------------------
+rem 2htm.ico is embedded into 2htm.exe at build time via /win32icon
+rem below. It must be present in this directory or the build will
+rem produce an iconless exe (which Windows would still run, but the
+rem File Explorer / taskbar / Alt+Tab presentation would default to
+rem the generic-application icon).
+if not exist "2htm.ico" (
+    echo [ERROR] 2htm.ico not found in %CD%.
+    echo         The icon file is required to embed into the exe.
     exit /b 2
 )
 
@@ -130,7 +142,7 @@ rem installs by default since Office 2019. If your Office is 32-bit,
 rem change /platform:x64 to /platform:x86 and rebuild. A 64-bit
 rem process cannot automate a 32-bit Office COM server and vice
 rem versa.
-"%c_sCsc%" /nologo /target:exe /platform:x64 /optimize+ ^
+"%sCsc%" /nologo /target:exe /platform:x64 /optimize+ ^
     /reference:System.dll ^
     /reference:System.Core.dll ^
     /reference:System.Xml.dll ^
@@ -141,6 +153,7 @@ rem versa.
     /reference:Microsoft.CSharp.dll ^
     /reference:Markdig.dll ^
     /resource:Markdig.dll,Markdig.dll ^
+    /win32icon:2htm.ico ^
     /out:2htm.exe ^
     2htm.cs
 
@@ -148,7 +161,7 @@ if errorlevel 1 (
     echo [ERROR] Build failed.
     exit /b 1
 )
-echo [INFO] Built 2htm.exe successfully.
+echo [INFO] Built 2htm.exe successfully (with embedded icon).
 
 endlocal
 goto :eof
@@ -160,7 +173,7 @@ rem Uses built-in curl (Windows 10 1803+) and PowerShell's
 rem Expand-Archive for extraction. Temp files are cleaned up.
 rem ===================================================================
 :fnFetchMarkdig
-    echo [INFO] Markdig.dll not found. Fetching Markdig %c_sMarkdigVersion% from nuget.org ...
+    echo [INFO] Markdig.dll not found. Fetching Markdig %sMarkdigVersion% from nuget.org ...
     set "sTempDir=%TEMP%\2htm_markdig_%RANDOM%%RANDOM%"
     mkdir "%sTempDir%" 2>nul
     if not exist "%sTempDir%" (
@@ -168,10 +181,10 @@ rem ===================================================================
         goto :eof
     )
 
-    curl -sL -o "%sTempDir%\markdig.zip" "%c_sMarkdigUrl%"
+    curl -sL -o "%sTempDir%\markdig.zip" "%sMarkdigUrl%"
     if errorlevel 1 (
         echo [ERROR] Download failed. Check your internet connection or firewall.
-        echo         URL: %c_sMarkdigUrl%
+        echo         URL: %sMarkdigUrl%
         goto :fnFetchCleanup
     )
 

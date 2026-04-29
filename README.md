@@ -138,7 +138,7 @@ In the GUI, press **F1** or click **Help** to see a summary of each field. The h
 | `-s` | `--strip-images` | Remove images from output (smaller, faster) |
 | `-p` | `--plain-text` | Produce .txt instead of .htm |
 | `-f` | `--force` | Overwrite existing output files |
-| `-l` | `--log` | Write detailed diagnostics to `2htm.log` |
+| `-l` | `--log` | Write detailed diagnostics to `2htm.log` (in the output directory if set, else the current directory; replaced each session) |
 | `-g` | `--gui-mode` | Launch the dialog |
 | `-o <dir>` | `--output-dir <dir>` | Write output to `<dir>` instead of the current directory |
 |   | `--view-output` | After conversion, open the output directory in File Explorer |
@@ -178,6 +178,7 @@ Running `2htm -g` opens a small dialog with these controls (keyboard hotkeys in 
 - **Plain text** (Alt+P) — write .txt files instead of .htm.
 - **Force replacements** (Alt+F) — overwrite existing output.
 - **View output** (Alt+V) — open the output directory in File Explorer when done.
+- **Log session** (Alt+L) — write a fresh `2htm.log` to the output directory (or the current directory if no output directory is set) capturing diagnostics for this run.
 - **Use configuration** (Alt+U) — save these settings as defaults for next run.
 - **Default settings** (Alt+D) — reset all fields to factory defaults AND delete any saved configuration (see "Saved configuration" below).
 - **Help** (Alt+H) — show a quick help message.
@@ -210,6 +211,16 @@ During conversion, a small progress dialog shows the basename of the current fil
 ## View output
 
 Pass `--view-output` or check the box in the GUI to open the output directory in File Explorer after conversion. The open fires only if at least one file was actually converted. If an Explorer window is already displaying that directory, 2htm brings it to the foreground instead of spawning a duplicate.
+
+---
+
+## Log session
+
+Pass `-l` / `--log`, or check the **Log session** box in the GUI, to have 2htm write a `2htm.log` file capturing detailed diagnostics for the run: command-line arguments, the resolved input/output paths, per-file conversion outcomes, and any errors.
+
+The log is written to the output directory (the `-o` directory, or whatever was chosen in the GUI Output field) if one is set, and to the current working directory otherwise. The file is recreated fresh at the start of every run, so its contents always reflect only the current session — no log rotation needed. The file is UTF-8 with a byte-order mark, so Notepad and any screen reader-compatible text editor open it cleanly.
+
+When reporting a conversion problem, attaching the log file removes a lot of guesswork.
 
 ---
 

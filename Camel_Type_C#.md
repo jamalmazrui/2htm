@@ -80,8 +80,6 @@ static readonly HashSet<string> hsSupportedExts =
 
 **Note on PascalCase constants**: C# convention often uses `PascalCase` for `public const` and `public static readonly` fields (`int.MaxValue`, `DateTime.Now`). Camel Type diverges from this — constants follow the same naming rules as variables. For `public` constants on classes that participate in a public API consumed by non-Camel-Type code, you may choose to follow the external convention as an interoperability concession; otherwise, lower camel case applies.
 
-**Historical note**: an earlier version of Camel Type used a `c_` prefix on constant names (e.g., `c_sDefaultEncoding`, `c_iTimeoutMs`). The current rule is to treat constants and variables identically in naming and let the `const` / `static readonly` keyword convey the constant-ness. Older Camel Type codebases — including the original `2htm.cs` — still use the `c_` prefix; when editing such code, match the surrounding style for consistency within a file, but new files should use the current rule.
-
 ---
 
 ## 4. Capitalization

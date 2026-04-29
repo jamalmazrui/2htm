@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>ReadMe</title>
+  <title>README</title>
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -478,7 +478,9 @@ prompt; choose Yes to open this full HTML documentation
 <tr>
 <td><code>-l</code></td>
 <td><code>--log</code></td>
-<td>Write detailed diagnostics to <code>2htm.log</code></td>
+<td>Write detailed diagnostics to <code>2htm.log</code> (in the output
+directory if set, else the current directory; replaced each
+session)</td>
 </tr>
 <tr>
 <td><code>-g</code></td>
@@ -538,6 +540,9 @@ faster output.</li>
 output.</li>
 <li><strong>View output</strong> (Alt+V) — open the output directory in
 File Explorer when done.</li>
+<li><strong>Log session</strong> (Alt+L) — write a fresh
+<code>2htm.log</code> to the output directory (or the current directory
+if no output directory is set) capturing diagnostics for this run.</li>
 <li><strong>Use configuration</strong> (Alt+U) — save these settings as
 defaults for next run.</li>
 <li><strong>Default settings</strong> (Alt+D) — reset all fields to
@@ -606,6 +611,22 @@ the output directory in File Explorer after conversion. The open fires
 only if at least one file was actually converted. If an Explorer window
 is already displaying that directory, 2htm brings it to the foreground
 instead of spawning a duplicate.</p>
+<hr />
+<h2 id="log-session">Log session</h2>
+<p>Pass <code>-l</code> / <code>--log</code>, or check the <strong>Log
+session</strong> box in the GUI, to have 2htm write a
+<code>2htm.log</code> file capturing detailed diagnostics for the run:
+command-line arguments, the resolved input/output paths, per-file
+conversion outcomes, and any errors.</p>
+<p>The log is written to the output directory (the <code>-o</code>
+directory, or whatever was chosen in the GUI Output field) if one is
+set, and to the current working directory otherwise. The file is
+recreated fresh at the start of every run, so its contents always
+reflect only the current session — no log rotation needed. The file is
+UTF-8 with a byte-order mark, so Notepad and any screen
+reader-compatible text editor open it cleanly.</p>
+<p>When reporting a conversion problem, attaching the log file removes a
+lot of guesswork.</p>
 <hr />
 <h2 id="output">Output</h2>
 <p>For each input file, a new file is written to the current working

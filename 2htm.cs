@@ -67,11 +67,15 @@ namespace twoHtm
         // file instead of skipping it. Without this flag, a file is
         // only converted when its target does not yet exist.
         //
-        // bLog: set by --log / -l. Creates 2htm.log in the current
-        // directory and streams detailed diagnostic information to
-        // it (in addition to the normal console output). Intended
-        // to help debug conversion failures; upload the log file
-        // when reporting an issue.
+        // bLog: set by --log / -l, or by the GUI Log session
+        // checkbox. Creates 2htm.log in the output directory if one
+        // was specified (-o or the GUI Output field), or in the
+        // current directory otherwise. Streams detailed diagnostic
+        // information to it (in addition to the normal console
+        // output). Each session starts with a fresh file -- any
+        // prior log is overwritten. Intended to help debug
+        // conversion failures; upload the log file when reporting
+        // an issue.
         public static bool bStripImages = false;
         public static bool bPlainText = false;
         public static bool bForce = false;
@@ -110,6 +114,7 @@ namespace twoHtm
         public static bool bStripImagesFromCli = false;
         public static bool bPlainTextFromCli = false;
         public static bool bForceFromCli = false;
+        public static bool bLogFromCli = false;
         public static bool bViewOutputFromCli = false;
         public static bool bOutputDirFromCli = false;
         public static bool bSourceFromCli = false;
@@ -296,7 +301,7 @@ namespace twoHtm
                     continue;
                 }
                 if (sArg == "-l" || sArg == "--log") {
-                    bLog = true;
+                    bLog = true; bLogFromCli = true;
                     continue;
                 }
                 if (sArg == "-g" || sArg == "--gui-mode") {
@@ -378,15 +383,17 @@ namespace twoHtm
                 bool bPlain = bPlainText;
                 bool bForceLocal = bForce;
                 bool bView = bViewOutput;
+                bool bLogLocal = bLog;
                 bool bUseCfg = bUseConfig;
                 if (!guiDialog.show(ref sSource, ref sOut, ref bStrip,
-                    ref bPlain, ref bForceLocal, ref bView, ref bUseCfg)) {
+                    ref bPlain, ref bForceLocal, ref bView, ref bLogLocal, ref bUseCfg)) {
                     return iExitOk;
                 }
                 bStripImages = bStrip;
                 bPlainText = bPlain;
                 bForce = bForceLocal;
                 bViewOutput = bView;
+                bLog = bLogLocal;
                 bUseConfig = bUseCfg;
                 sOutputDir = sOut;
                 // Re-parse the source field. It may contain multiple
@@ -401,7 +408,7 @@ namespace twoHtm
                 // call).
                 if (bUseConfig) {
                     configManager.save(sSource, sOutputDir, bStripImages,
-                        bPlainText, bForce, bViewOutput);
+                        bPlainText, bForce, bViewOutput, bLog);
                 }
             } else if (lsFileArgs.Count == 0) {
                 printUsage();
@@ -423,7 +430,7 @@ namespace twoHtm
                 }
             }
 
-            if (bLog) logger.open();
+            if (bLog) logger.open(sOutputDir);
 
             // In GUI mode, capture all console output so we can
             // show it to the user at the end via MessageBox. In
@@ -702,7 +709,11 @@ namespace twoHtm
             Console.WriteLine("                       Without -u (and no checkbox), 2htm");
             Console.WriteLine("                       creates no files of its own.");
             Console.WriteLine("  -l, --log            Write detailed diagnostics to 2htm.log");
-            Console.WriteLine("                       in the current directory (UTF-8 with BOM).");
+            Console.WriteLine("                       (UTF-8 with BOM) in the output directory if");
+            Console.WriteLine("                       one was specified, or the current working");
+            Console.WriteLine("                       directory otherwise. Any prior 2htm.log in");
+            Console.WriteLine("                       that location is overwritten so the file");
+            Console.WriteLine("                       always reflects only the current session.");
             Console.WriteLine("                       Useful for reporting conversion problems.");
             Console.WriteLine();
             Console.WriteLine("Supported input formats:");
@@ -1059,7 +1070,7 @@ namespace twoHtm
     {
         public static bool show(ref string sSource, ref string sOutDir,
             ref bool bStrip, ref bool bPlain, ref bool bForce, ref bool bView,
-            ref bool bUseCfg)
+            ref bool bLog, ref bool bUseCfg)
         {
             // Build the form.
             var frm = new System.Windows.Forms.Form();
@@ -1249,17 +1260,25 @@ namespace twoHtm
             chkView.TabIndex = 7;
             frm.Controls.Add(chkView);
 
-            // Third row: Use configuration (alone on its own row,
-            // since it's a different kind of option — it controls
-            // whether the OTHER fields get persisted, rather than
-            // controlling the conversion itself).
+            // Third row: Log session and Use configuration. Both
+            // are "meta" options that affect persistence/diagnostics
+            // rather than the conversion itself, so they sit
+            // together below the conversion-control checkboxes.
             y += iDefaultTextHeight + iDefaultRowGap;
+            var chkLog = new System.Windows.Forms.CheckBox();
+            chkLog.Text = "&Log session";
+            chkLog.Checked = bLog;
+            chkLog.Location = new System.Drawing.Point(iDefaultLeft, y);
+            chkLog.Size = new System.Drawing.Size(iChkW, iDefaultTextHeight);
+            chkLog.TabIndex = 8;
+            frm.Controls.Add(chkLog);
+
             var chkUseCfg = new System.Windows.Forms.CheckBox();
             chkUseCfg.Text = "&Use configuration";
             chkUseCfg.Checked = bUseCfg;
-            chkUseCfg.Location = new System.Drawing.Point(iDefaultLeft, y);
+            chkUseCfg.Location = new System.Drawing.Point(iDefaultLeft + iChkW, y);
             chkUseCfg.Size = new System.Drawing.Size(iChkW, iDefaultTextHeight);
-            chkUseCfg.TabIndex = 8;
+            chkUseCfg.TabIndex = 9;
             frm.Controls.Add(chkUseCfg);
 
             // --- Bottom row: commit buttons per Windows UX ---
@@ -1272,7 +1291,7 @@ namespace twoHtm
             btnHelp.Text = "&Help";
             btnHelp.Location = new System.Drawing.Point(iDefaultLeft, y);
             btnHelp.Size = new System.Drawing.Size(iDefaultButtonWidth, iDefaultButtonHeight);
-            btnHelp.TabIndex = 9;
+            btnHelp.TabIndex = 10;
             btnHelp.UseVisualStyleBackColor = true;
             btnHelp.Click += (s, e) => showHelpMessage();
             frm.Controls.Add(btnHelp);
@@ -1282,7 +1301,7 @@ namespace twoHtm
             btnDefaults.Location = new System.Drawing.Point(
                 iDefaultLeft + iDefaultButtonWidth + iDefaultGap, y);
             btnDefaults.Size = new System.Drawing.Size(iDefaultButtonWidth, iDefaultButtonHeight);
-            btnDefaults.TabIndex = 10;
+            btnDefaults.TabIndex = 11;
             btnDefaults.UseVisualStyleBackColor = true;
             // Default settings: full reset. Resets the dialog's
             // fields to factory defaults AND deletes the saved
@@ -1301,6 +1320,7 @@ namespace twoHtm
                 chkPlain.Checked = false;
                 chkForce.Checked = false;
                 chkView.Checked = false;
+                chkLog.Checked = false;
                 chkUseCfg.Checked = false;
                 configManager.eraseAll();
             };
@@ -1312,7 +1332,7 @@ namespace twoHtm
             btnOk.Location = new System.Drawing.Point(
                 iFormW - iDefaultRight - 2 * iDefaultButtonWidth - iDefaultGap, y);
             btnOk.Size = new System.Drawing.Size(iDefaultButtonWidth, iDefaultButtonHeight);
-            btnOk.TabIndex = 11;
+            btnOk.TabIndex = 12;
             btnOk.UseVisualStyleBackColor = true;
             frm.Controls.Add(btnOk);
 
@@ -1321,7 +1341,7 @@ namespace twoHtm
             btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             btnCancel.Location = new System.Drawing.Point(iBtnX, y);
             btnCancel.Size = new System.Drawing.Size(iDefaultButtonWidth, iDefaultButtonHeight);
-            btnCancel.TabIndex = 12;
+            btnCancel.TabIndex = 13;
             btnCancel.UseVisualStyleBackColor = true;
             frm.Controls.Add(btnCancel);
 
@@ -1352,6 +1372,7 @@ namespace twoHtm
             bPlain = chkPlain.Checked;
             bForce = chkForce.Checked;
             bView = chkView.Checked;
+            bLog = chkLog.Checked;
             bUseCfg = chkUseCfg.Checked;
             return true;
         }
@@ -1445,6 +1466,16 @@ namespace twoHtm
                 "Fill in the source files to convert, pick any options, " +
                 "and press OK. Leave the output directory blank to write " +
                 "results to the current folder.\r\n\r\n" +
+                "Options:\r\n" +
+                "  Strip images - omit images from the output\r\n" +
+                "  Plain text - write .txt instead of .htm\r\n" +
+                "  Force replacements - overwrite existing output files\r\n" +
+                "  View output - open the output folder when done\r\n" +
+                "  Log session - write 2htm.log (replacing any prior log) " +
+                "to the output folder, or to the current folder if no " +
+                "output folder is set\r\n" +
+                "  Use configuration - remember these settings for next time, " +
+                "in %LOCALAPPDATA%\\2htm\\2htm.ini\r\n\r\n" +
                 "Press Cancel to exit without converting.\r\n\r\n" +
                 "Open the full documentation in your browser?";
             var oResult = System.Windows.Forms.MessageBox.Show(sMsg,
@@ -1585,13 +1616,18 @@ namespace twoHtm
     }
 
     // -----------------------------------------------------------------
-    // Diagnostic logger. Off by default; enabled with --log / -l.
+    // Diagnostic logger. Off by default; enabled with --log / -l or
+    // by checking "Log session" in the GUI dialog.
     //
     // When enabled, writes a UTF-8 file named 2htm.log (with BOM) to
-    // the current directory. Each line is prefixed with an ISO-8601
-    // timestamp and severity level. The log stream is flushed after
-    // every write so that if the process crashes, the log captures
-    // everything up to the crash point.
+    // the output directory if one was specified (-o or the GUI Output
+    // directory field), or to the current directory otherwise. Each
+    // line is prefixed with an ISO-8601 timestamp and severity level.
+    // The log stream is flushed after every write so that if the
+    // process crashes, the log captures everything up to the crash
+    // point. Each session starts with a fresh file -- any prior
+    // 2htm.log in the same location is overwritten, so the file
+    // always reflects only the current run.
     //
     // All methods no-op silently when the log is not open, so call
     // sites can log unconditionally without guarding each call.
@@ -1604,13 +1640,31 @@ namespace twoHtm
     {
         private static StreamWriter oWriter = null;
 
-        public static void open()
+        public static void open(string sDir = "")
         {
             if (oWriter != null) return;
-            string sPath = Path.Combine(Directory.GetCurrentDirectory(), "2htm.log");
+            // Resolve the directory: use sDir if non-empty and it is
+            // (or can be) an existing directory; otherwise fall back
+            // to the current directory. We deliberately do NOT create
+            // the directory ourselves; that's the responsibility of
+            // the conversion code which has the same writability
+            // expectations.
+            string sLogDir;
+            try {
+                if (!string.IsNullOrWhiteSpace(sDir) && Directory.Exists(sDir)) {
+                    sLogDir = Path.GetFullPath(sDir);
+                } else {
+                    sLogDir = Directory.GetCurrentDirectory();
+                }
+            } catch {
+                sLogDir = Directory.GetCurrentDirectory();
+            }
+            string sPath = Path.Combine(sLogDir, "2htm.log");
             try {
                 // UTF-8 WITH BOM so the user's editor/screen reader
-                // knows the encoding without guessing.
+                // knows the encoding without guessing. append:false
+                // truncates any prior log so the file reflects only
+                // the current session.
                 oWriter = new StreamWriter(sPath, append: false, encoding: new UTF8Encoding(true));
                 oWriter.AutoFlush = true;
             } catch (Exception ex) {
@@ -5188,10 +5242,12 @@ namespace twoHtm
                 program.bForce = getBool(dVals, "force_replacements");
             if (!program.bViewOutputFromCli)
                 program.bViewOutput = getBool(dVals, "view_output");
+            if (!program.bLogFromCli)
+                program.bLog = getBool(dVals, "log_session");
         }
 
         public static void save(string sSource, string sOutDir,
-            bool bStrip, bool bPlain, bool bForce, bool bView)
+            bool bStrip, bool bPlain, bool bForce, bool bView, bool bLog)
         {
             string sDir = getConfigDir();
             string sPath = getConfigPath();
@@ -5208,6 +5264,7 @@ namespace twoHtm
                 sb.AppendLine("plain_text=" + (bPlain ? "1" : "0"));
                 sb.AppendLine("force_replacements=" + (bForce ? "1" : "0"));
                 sb.AppendLine("view_output=" + (bView ? "1" : "0"));
+                sb.AppendLine("log_session=" + (bLog ? "1" : "0"));
                 File.WriteAllText(sPath, sb.ToString(), new UTF8Encoding(true));
                 logger.info("Saved configuration to " + sPath);
             } catch (Exception ex) {
