@@ -115,10 +115,71 @@ exit /b 2
 echo [INFO] Using compiler: %sCsc%
 
 rem ---- Markdig dependency -------------------------------------------
+rem
+rem If Markdig.dll is not present in the build folder, fetch it from
+rem nuget.org. The .nupkg is a ZIP archive; we extract
+rem lib/net40/Markdig.dll (or net35) into the build folder. Uses
+rem built-in curl (Windows 10 1803+) and PowerShell's Expand-Archive
+rem for extraction. The temp directory is removed afterwards.
+rem
+rem The fetch logic is inlined rather than placed in a separate
+rem `:fnFetchMarkdig` subroutine. cmd.exe has a known chunk-boundary
+rem bug in its label-search code (the search reads file content in
+rem 512/1024-byte chunks; a label at certain byte positions can be
+rem missed) that has been observed to cause "The system cannot find
+rem the batch label specified" failures here. Inlining sidesteps the
+rem bug entirely; there is no forward `call :label` to resolve.
+rem
+rem sTempDir is computed BEFORE the parenthesized if-block. Inside a
+rem parenthesized block, cmd.exe expands %vars% at parse time, so a
+rem `set` followed by `%var%` in the same block silently uses the
+rem pre-set value (or empty string). Pre-computing avoids that.
+rem -------------------------------------------------------------------
 set "sMarkdigVersion=0.18.3"
 set "sMarkdigUrl=https://www.nuget.org/api/v2/package/Markdig/%sMarkdigVersion%"
+set "sTempDir=%TEMP%\2htm_markdig_%RANDOM%%RANDOM%"
 
-if not exist "Markdig.dll" call :fnFetchMarkdig
+if not exist "Markdig.dll" (
+    echo [INFO] Markdig.dll not found. Fetching Markdig %sMarkdigVersion% from nuget.org ...
+
+    mkdir "%sTempDir%" 2>nul
+    if not exist "%sTempDir%" (
+        echo [ERROR] Could not create temp directory %sTempDir%.
+        exit /b 2
+    )
+
+    curl -sL -o "%sTempDir%\markdig.zip" "%sMarkdigUrl%"
+    if errorlevel 1 (
+        echo [ERROR] Download failed. Check your internet connection or firewall.
+        echo         URL: %sMarkdigUrl%
+        rmdir /s /q "%sTempDir%" 2>nul
+        exit /b 2
+    )
+
+    powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+        "Expand-Archive -Path '%sTempDir%\markdig.zip' -DestinationPath '%sTempDir%\unpacked' -Force"
+    if errorlevel 1 (
+        echo [ERROR] Could not extract Markdig nupkg.
+        rmdir /s /q "%sTempDir%" 2>nul
+        exit /b 2
+    )
+
+    rem The nupkg targets .NET Framework 3.5 and 4.0. Prefer net40.
+    if exist "%sTempDir%\unpacked\lib\net40\Markdig.dll" (
+        copy /y "%sTempDir%\unpacked\lib\net40\Markdig.dll" "Markdig.dll" >nul
+    ) else if exist "%sTempDir%\unpacked\lib\net35\Markdig.dll" (
+        copy /y "%sTempDir%\unpacked\lib\net35\Markdig.dll" "Markdig.dll" >nul
+    ) else (
+        echo [ERROR] Expected Markdig.dll not found in the nupkg. Package contents:
+        dir /s /b "%sTempDir%\unpacked\lib"
+        rmdir /s /q "%sTempDir%" 2>nul
+        exit /b 2
+    )
+
+    rmdir /s /q "%sTempDir%" 2>nul
+    echo [INFO] Markdig.dll fetched successfully.
+)
+
 if not exist "Markdig.dll" (
     echo [ERROR] Markdig.dll could not be obtained. Build cannot proceed.
     exit /b 2
@@ -165,49 +226,3 @@ echo [INFO] Built 2htm.exe successfully (with embedded icon).
 
 endlocal
 goto :eof
-
-rem ===================================================================
-rem Fetch Markdig.dll from nuget.org. The .nupkg is a ZIP archive;
-rem we extract lib/net40/Markdig.dll (or net35) into the build folder.
-rem Uses built-in curl (Windows 10 1803+) and PowerShell's
-rem Expand-Archive for extraction. Temp files are cleaned up.
-rem ===================================================================
-:fnFetchMarkdig
-    echo [INFO] Markdig.dll not found. Fetching Markdig %sMarkdigVersion% from nuget.org ...
-    set "sTempDir=%TEMP%\2htm_markdig_%RANDOM%%RANDOM%"
-    mkdir "%sTempDir%" 2>nul
-    if not exist "%sTempDir%" (
-        echo [ERROR] Could not create temp directory %sTempDir%.
-        goto :eof
-    )
-
-    curl -sL -o "%sTempDir%\markdig.zip" "%sMarkdigUrl%"
-    if errorlevel 1 (
-        echo [ERROR] Download failed. Check your internet connection or firewall.
-        echo         URL: %sMarkdigUrl%
-        goto :fnFetchCleanup
-    )
-
-    powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-        "Expand-Archive -Path '%sTempDir%\markdig.zip' -DestinationPath '%sTempDir%\unpacked' -Force"
-    if errorlevel 1 (
-        echo [ERROR] Could not extract Markdig nupkg.
-        goto :fnFetchCleanup
-    )
-
-    rem The nupkg targets .NET Framework 3.5 and 4.0. Prefer net40.
-    if exist "%sTempDir%\unpacked\lib\net40\Markdig.dll" (
-        copy /y "%sTempDir%\unpacked\lib\net40\Markdig.dll" "Markdig.dll" >nul
-    ) else if exist "%sTempDir%\unpacked\lib\net35\Markdig.dll" (
-        copy /y "%sTempDir%\unpacked\lib\net35\Markdig.dll" "Markdig.dll" >nul
-    ) else (
-        echo [ERROR] Expected Markdig.dll not found in the nupkg. Package contents:
-        dir /s /b "%sTempDir%\unpacked\lib"
-        goto :fnFetchCleanup
-    )
-
-    echo [INFO] Markdig.dll fetched successfully.
-
-:fnFetchCleanup
-    if exist "%sTempDir%" rmdir /s /q "%sTempDir%"
-    goto :eof

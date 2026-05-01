@@ -37,10 +37,10 @@ Use Hungarian prefix notation to indicate type. Prefix rules:
 - `s` — string
 - `d` — dictionary (`Dictionary<K,V>`)
 - `hs` — hash set (`HashSet<T>`)
-- `o` — object of unspecified class (use sparingly; prefer a class-name prefix)
-- `v` — variant (`object`, `dynamic`, or mixed types)
+- `o` — **reserved for COM objects only** (e.g., `oWord`, `oExcel`, `oWorkbook`, `oRange`, `oSlide`). Do not use `o` as a generic "other object" prefix.
+- `v` — variant (`object`, `dynamic`, or mixed types where the actual class is unknown or varies)
 
-For **class instances** (your own classes, library objects), use the **lowercase class name** as the prefix. If there is only one instance of that class in scope, the class name prefix is the entire variable name — no additional suffix needed.
+For **class instances** (your own classes, library objects), use the **lowercase class name** as the prefix, OR a common abbreviation if one is universally understood. If there is only one instance of that class in scope, the class name prefix is the entire variable name — no additional suffix needed.
 
 Examples:
 
@@ -60,6 +60,17 @@ HttpClient httpClient = new HttpClient();
 // Two instances of the same class → distinguishing suffix
 StreamWriter writerLog = new StreamWriter(sLogPath);
 StreamWriter writerOut = new StreamWriter(sOutPath);
+
+// COM objects use the o-prefix (the ONLY use of o in Camel Type)
+dynamic oWord = com.createApp("Word.Application");
+dynamic oDocument = oWord.Documents.Open(sFilePath);
+dynamic oRange = oDocument.Content;
+
+// Managed equivalents use the class-name prefix, NOT o
+Form form = new Form();              // not oForm
+Button btnOk = new Button();         // not oBtn
+OpenFileDialog dialog = new OpenFileDialog();  // not oDlg
+Exception ex = caughtException;     // not oError
 ```
 
 Common class abbreviations are acceptable when they are universally understood: `sb` for `StringBuilder`, `ex` for `Exception`, `args` for method arguments array.
@@ -291,6 +302,50 @@ if (sInPath.Equals(sOutPath, StringComparison.OrdinalIgnoreCase))
 
 ---
 
-## 17. Summary
+## 17. Cross-Program Naming Conventions
+
+When the same concept appears across multiple programs in a related project (e.g., a family of companion tools that share a common command-line and GUI layout), use the **same identifier name** in each program for that concept. Consistency of naming across programs makes it easy for a reader who knows one program to understand another.
+
+The following shared names are conventional in the author's project family:
+
+| Concept | Identifier |
+|---|---|
+| Program's display name | `sProgramName` |
+| Program's version string | `sProgramVersion` |
+| Config directory name | `sConfigDirName` |
+| Config file name | `sConfigFileName` |
+| Log file name | `sLogFileName` |
+| Source-input variable (the user's source files / URLs / etc.) | `sSource` |
+| Output directory variable | `sOutputDir` |
+| GUI layout: left margin | `iLayoutLeft` |
+| GUI layout: right margin | `iLayoutRight` |
+| GUI layout: top margin | `iLayoutTop` |
+| GUI layout: gap between adjacent controls | `iLayoutGap` |
+| GUI layout: gap between rows | `iLayoutRowGap` |
+| GUI layout: width of leading labels | `iLayoutLabelWidth` |
+| GUI layout: width of buttons | `iLayoutButtonWidth` |
+| GUI layout: height of buttons | `iLayoutButtonHeight` |
+| GUI layout: height of text fields and rows | `iLayoutTextHeight` |
+| GUI layout: form (dialog) width | `iLayoutFormWidth` |
+
+These are typically declared on the `program` class as `public const` (string and int values) or `public static readonly` (array values).
+
+The following shared classes are conventional in the project family (using lowerCamelCase for class names per Camel Type):
+
+| Class | Purpose |
+|---|---|
+| `program` | The top-level program class (entry point, argument parsing, dispatch) |
+| `logger` | Diagnostic logger with `open`, `close`, `info`, `warn`, `error`, `debug` methods |
+| `configManager` | Loads and saves a per-program INI under `%LOCALAPPDATA%\<program>\` |
+| `guiDialog` | The parameter dialog with `show` / `run` methods |
+| `comHelper` | COM lifecycle helper (creating apps, releasing references, retrying ops). Used only when the program drives Office or other COM servers. |
+
+For the `logger` class, all six methods (`open`, `close`, `info`, `warn`, `error`, `debug`) should be present even if the program currently calls only some of them. This keeps the surface uniform across the family so future code (or a developer moving between programs) can use any level method without having to check whether it exists.
+
+A consequence of these conventions is that the layout-constants block is the same across the family's GUI dialogs, so changes that adjust the visual rhythm of one dialog (e.g., a wider button) propagate trivially to the others by editing the same-named constant.
+
+---
+
+## 18. Summary
 
 Camel Type in C# means: Hungarian type prefixes on identifiers, lower camel case throughout (except PascalCase for class names, namespaces, and optionally public API), alphabetized grouped declarations at the top of each scope, `foreach` over `for`, methods that return meaningful values, explicit types over `var` when not obvious, constants named like variables but declared with `const` or `static readonly`, named constants in place of all magic numbers, double-quoted strings, and `using` directives grouped and alphabetized at the top of the file. The goal throughout is that the source is as self-describing as the language allows, so that a reader — including a reader using a screen reader — can comprehend any section of code from the text alone, without hovering, without cross-referencing, and without holding a mental map of types declared fifty lines earlier.

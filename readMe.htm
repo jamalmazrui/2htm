@@ -1,14 +1,13 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
 <head>
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>README</title>
+  <meta name="author" content="Jamal Mazrui" />
+  <meta name="description" content="Convert Documents to Accessible HTML" />
+  <title>2htm ReadMe</title>
   <style>
-    /* Default styles provided by pandoc.
-    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-    */
     html {
       color: #1a1a1a;
       background-color: #fdfdfd;
@@ -63,10 +62,6 @@
     img {
       max-width: 100%;
     }
-    svg {
-      height: auto;
-      max-width: 100%;
-    }
     h1, h2, h3, h4, h5, h6 {
       margin-top: 1.4em;
     }
@@ -91,7 +86,6 @@
       color: #606060;
     }
     code {
-      white-space: pre-wrap;
       font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
       font-size: 85%;
       margin: 0;
@@ -111,8 +105,8 @@
      overflow: visible;
     }
     hr {
+      background-color: #1a1a1a;
       border: none;
-      border-top: 1px solid #1a1a1a;
       height: 1px;
       margin: 1em 0;
     }
@@ -155,6 +149,7 @@
     #TOC a:not(:hover) {
       text-decoration: none;
     }
+    code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
     div.columns{display: flex; gap: min(4vw, 1.5em);}
     div.column{flex: auto; overflow-x: auto;}
@@ -170,9 +165,8 @@
     }
     .display.math{display: block; text-align: center; margin: 0.5rem auto;}
     /* CSS for syntax highlighting */
-    html { -webkit-text-size-adjust: 100%; }
     pre > code.sourceCode { white-space: pre; position: relative; }
-    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span { line-height: 1.25; }
     pre > code.sourceCode > span:empty { height: 1.2em; }
     .sourceCode { overflow: visible; }
     code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -235,205 +229,181 @@
     code span.vs { color: #4070a0; } /* VerbatimString */
     code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
+  <style>
+  body { font-family: Arial, Helvetica, sans-serif; max-width: 50em; margin: 1em auto; padding: 0 1em; line-height: 1.5; color: #222; }
+  h1 { font-size: 1.5em; border-bottom: 1px solid #ccc; padding-bottom: 0.2em; }
+  h2 { font-size: 1.25em; margin-top: 1.5em; }
+  h3 { font-size: 1.1em; margin-top: 1.3em; }
+  p { margin: 0.7em 0; }
+  code { font-family: Consolas, "Courier New", monospace; background: #f4f4f4; padding: 1px 4px; border-radius: 3px; }
+  pre { background: #f4f4f4; padding: 0.6em 1em; border-radius: 4px; overflow-x: auto; line-height: 1.35; }
+  pre code { background: transparent; padding: 0; }
+  ul, ol { margin: 0.5em 0; padding-left: 1.6em; }
+  li { margin: 0.25em 0; }
+  table { border-collapse: collapse; margin: 1em 0; }
+  th, td { border: 1px solid #bbb; padding: 0.3em 0.7em; text-align: left; }
+  th { background: #efefef; }
+  blockquote { border-left: 4px solid #bbb; margin: 1em 0; padding: 0.2em 1em; color: #555; }
+  a { color: #0645ad; }
+  a:visited { color: #0b0080; }
+  hr { border: 0; border-top: 1px solid #ccc; margin: 2em 0; }
+  </style>
 </head>
 <body>
+<header id="title-block-header">
+<h1 class="title">2htm ReadMe</h1>
+<p class="author">Jamal Mazrui</p>
+</header>
 <h1 id="htm">2htm</h1>
-<p><strong>Author:</strong> Jamal Mazrui <strong>License:</strong> MIT
-(see <code>license.htm</code>)</p>
-<p><code>2htm</code> is a single, independent Windows executable that
-converts popular document file types to accessible HTML (WCAG 2.2 AAA)
-or plain text. It runs on any modern Windows version with Microsoft
-Office installed. There is no installer, no .NET runtime to download, no
-sidecar DLLs — just one .exe file that works from any folder.</p>
-<p>The same executable runs in two modes with the same set of options: a
-command-line mode for scripting and batch processing, and a GUI dialog
-mode for interactive use. A single command-line flag (<code>-g</code>)
-switches between them.</p>
-<p>The tool converts each input into a single-file HTML equivalent that
-can be opened in any modern web browser — Chrome, Edge, Firefox, Safari
-— with no dependencies, no companion folders, and no special viewer
-required. The conversion aims for WCAG 2.2 AAA conformance to the extent
-the source document’s structure and content allow. Headings, landmarks,
-table markup, alt-text propagation, color contrast, and language
-declaration are all preserved or inferred where possible.</p>
-<p>2htm is free to use and free to modify under the permissive MIT
-license. The source is a single C# file (<code>2htm.cs</code>) — C# is
-Microsoft’s flagship application language, well-documented, with a
-mature free toolchain (Visual Studio Community or Visual Studio Build
-Tools, both free downloads from Microsoft). Developers can customize or
-extend the conversion logic without paying for commercial tooling.</p>
-<p>This project was developed in collaboration with Claude, Anthropic’s
-AI coding assistant.</p>
-<p>The whole 2htm project may be downloaded in a single zip archive
-from:</p>
-<p><a href="http://GitHub.com/JamalMazrui/2htm/archive/main.zip"
-class="uri">http://GitHub.com/JamalMazrui/2htm/archive/main.zip</a></p>
+<p><strong>Author:</strong> Jamal Mazrui <strong>License:</strong>
+MIT</p>
+<p><code>2htm</code> is one of three companion accessibility tools by
+Jamal Mazrui:</p>
+<ul>
+<li><strong>2htm</strong> — convert documents (Word, Excel, PowerPoint,
+PDF, Markdown) to accessible HTML</li>
+<li><strong>extCheck</strong> — check Office and Markdown files for
+accessibility problems</li>
+<li><strong>urlCheck</strong> — check web pages for accessibility
+problems</li>
+</ul>
+<p>The three tools share a common command-line and GUI layout, so
+learning one makes the others easy to pick up.</p>
+<p><code>2htm</code> is a Windows tool that converts documents in
+several formats (Microsoft Word, Excel, PowerPoint, PDF, and Pandoc
+Markdown) into accessible HTML files. For each input file you give it,
+2htm writes a <code>.htm</code> companion file alongside the source. The
+output preserves headings, lists, tables, and image alternative text in
+a structure that screen readers and other assistive technologies can
+navigate.</p>
+<p>Like its companion tools, <code>2htm</code> runs in two modes: a
+<strong>GUI mode</strong> (a small parameter dialog launched by
+double-clicking the program, pressing its desktop hotkey, or running
+with <code>-g</code>) and a <strong>command-line mode</strong> (any
+other invocation, suitable for batch files and pipelines). Both modes
+accept the same options.</p>
 <hr />
 <h2 id="what-you-need">What you need</h2>
 <ul>
-<li>Windows 10 or later</li>
-<li>Microsoft Office 2016 or later (Word, Excel, PowerPoint) for
-converting Office documents and PDFs</li>
+<li>Windows 10 or later (64-bit)</li>
+<li>Microsoft Word, Excel, or PowerPoint installed to convert the
+corresponding <code>.docx</code>, <code>.xlsx</code>, or
+<code>.pptx</code> files</li>
+<li>No Office installation needed for <code>.md</code> or
+<code>.pdf</code> files</li>
 </ul>
-<p>Plain text, CSV, JSON, HTML, and Markdown files can be converted
-without Office installed.</p>
+<p>You do <strong>not</strong> need to install .NET separately. The .NET
+Framework 4.8.1 used by <code>2htm</code> ships in-box with Windows 10
+(since version 22H2) and Windows 11.</p>
+<p><strong>Bitness note.</strong> <code>2htm</code> is built as a 64-bit
+program, and Microsoft Office automation requires the controller process
+and the installed Office to share the same bitness. Modern Office
+(Microsoft 365, Office 2019+, Office 2024) is 64-bit by default, so this
+matches the common case. If you have 32-bit Office on your machine,
+<code>2htm</code> will surface a clear error pointing at the bitness
+mismatch; you can either install 64-bit Office or rebuild
+<code>2htm</code> with <code>/platform:x86</code> (see Development
+below).</p>
 <hr />
-<h2 id="installation">Installation</h2>
-<p>2htm is a single-file executable that needs no installer — just drop
-<code>2htm.exe</code> into any folder and run it.</p>
-<p>A Windows installer is also provided. Download
-<code>2htm_setup.exe</code> from the releases page, double-click it, and
-follow the prompts. The installer:</p>
+<h2 id="installing">Installing</h2>
+<p>Download <code>2htm_setup.exe</code> from the <a
+href="https://github.com/JamalMazrui/2htm">GitHub repository</a> and run
+it. The setup wizard:</p>
 <ul>
-<li>Installs <code>2htm.exe</code> and documentation to
-<code>C:\Program Files\2htm</code>.</li>
-<li>Creates a Start Menu group with program launcher, readMe, and
-uninstall entries.</li>
-<li>Creates a <strong>desktop shortcut</strong> (<code>2htm.lnk</code>)
-with the hotkey <strong>Ctrl+Alt+2</strong>. Press this combination to
-launch the 2htm GUI instantly. (Microsoft Word uses Ctrl+Alt+2 for
-“Heading 2” style, so the hotkey is intercepted by Word when Word has
-focus.) The shortcut launches 2htm in GUI mode with saved-configuration
-loading enabled (equivalent to <code>2htm -g -u</code>).</li>
-<li>Adds <strong>“Convert with 2htm”</strong> to the File Explorer
-right-click / Shift+F10 menu for all files. Selecting the entry converts
-the clicked file to <code>.htm</code> in the same folder. If the file
-type isn’t supported, 2htm reports the problem and exits cleanly.</li>
-<li>Generates <code>readMe.htm</code> from <code>readMe.md</code> at
-install time by running 2htm on its own documentation, so the HTML
-readMe is always in sync with the Markdown source.</li>
-<li>Offers two final-page options, both checked by default:
-<strong>Launch 2htm now</strong> and <strong>Read documentation for
-2htm</strong>.</li>
+<li>Prompts you for the installation directory (default:
+<code>C:\Program Files\2htm</code>).</li>
+<li>Includes a brief MIT license summary on the welcome page; the full
+license text is installed alongside the program as
+<code>License.htm</code>.</li>
+<li>Adds a Start-menu shortcut and a desktop shortcut whose hotkey is
+<strong>Alt+Ctrl+2</strong>. Pressing <strong>Alt+Ctrl+2</strong> from
+anywhere in Windows opens the <code>2htm</code> dialog.</li>
+<li>The installer also adds a <strong>Convert with 2htm</strong> entry
+to the File Explorer right-click menu for all file types. Right-clicking
+any supported file and choosing this entry is the fastest way to convert
+a single file.</li>
 </ul>
-<p>The uninstaller removes the installed files, the right-click menu
-entry, and the Start Menu group, but leaves the per-user configuration
-file at <code>%LOCALAPPDATA%\2htm\2htm.ini</code> intact. Use the GUI’s
-“Default settings” button, or delete that file manually, to clear saved
-settings.</p>
+<p>The final wizard page offers two checkboxes (both checked by
+default): launch <code>2htm</code> (with a hotkey reminder) and read the
+HTML documentation.</p>
 <hr />
-<h2 id="why-2htm">Why 2htm</h2>
-<p><strong>Accessibility pipelines.</strong> Organizations publishing
-documents to the public often need to produce “alternate formats” —
-versions of content that are more accessible to users with disabilities.
-Running 2htm as a step in a content pipeline turns Word, Excel,
-PowerPoint, and PDF files into clean, landmark-rich HTML automatically.
-The HTML output reflows on small screens and opens on any device with a
-browser.</p>
-<p><strong>Single-file portability.</strong> Because 2htm is one
-executable, it can be dropped into a folder, attached to an email, or
-stored on a thumb drive. Administrators can deploy it across an
-organization without installer paperwork. Developers can call it from
-batch files, scheduled tasks, or CI jobs.</p>
-<p><strong>No vendor lock-in for the output.</strong> A
-<code>.htm</code> file produced by 2htm has no sidecar folder of images
-or styles. Images are embedded as base64 data URIs; CSS is inlined. The
-file can be stored, emailed, archived, or served from any web host
-without worrying about what gets left behind.</p>
-<p><strong>The same interface for GUI and CLI users.</strong> Every
-option available on the command line is also a field in the GUI dialog.
-Users who prefer a visual workflow get a keyboard-accessible form (every
-control has an Alt+Letter hotkey and a tab-order sequence); users who
-prefer scripting get a conventional POSIX-style command-line
-interface.</p>
-<hr />
-<h2 id="how-to-use-it">How to use it</h2>
-<p>Put <code>2htm.exe</code> in any folder. Open a Command Prompt in the
-folder containing the files you want to convert, and run:</p>
+<h2 id="running-2htm">Running 2htm</h2>
+<h3 id="from-the-dialog-easiest">From the dialog (easiest)</h3>
+<p>Launch <code>2htm</code> from any of these:</p>
+<ul>
+<li>The desktop shortcut (or its <strong>Alt+Ctrl+2</strong>
+hotkey)</li>
+<li>The Start-menu shortcut</li>
+<li>Double-clicking <code>2htm.exe</code> in File Explorer</li>
+<li>A Run dialog (<code>Win+R</code>) typing <code>2htm</code></li>
+</ul>
+<p>The parameter dialog has these controls. Each label has an underlined
+letter that you can press with <strong>Alt</strong> to jump straight to
+that control:</p>
+<ul>
+<li><strong>Source files</strong> [S] — a single file path, a wildcard
+pattern (e.g., <code>*.docx</code>), or several of either separated by
+spaces. Wrap paths containing spaces in double quotes.</li>
+<li><strong>Browse source…</strong> [B] — pick a single source from a
+file picker</li>
+<li><strong>Output directory</strong> [O] — where the output is written.
+Blank means the current working directory.</li>
+<li><strong>Choose output…</strong> [C] — pick the output directory from
+a folder picker</li>
+<li><strong>Strip images</strong> [I] — drop image references from the
+output</li>
+<li><strong>Plain text</strong> [P] — produce plain-text
+<code>.txt</code> output instead of HTML</li>
+<li><strong>Force replacements</strong> [F] — overwrite an existing
+<code>&lt;basename&gt;.htm</code> instead of skipping the input. Without
+this, 2htm skips an input whose .htm already exists in the output
+directory.</li>
+<li><strong>View output</strong> [V] — open the output directory in File
+Explorer when the run is done</li>
+<li><strong>Log session</strong> [L] — write a fresh
+<code>2htm.log</code> in the output directory (or current directory if
+no output directory is set)</li>
+<li><strong>Use configuration</strong> [U] — load these field values
+from the saved configuration at startup, and save them back when you
+press OK</li>
+<li><strong>Help</strong> [H] — show this help summary and offer to open
+the full README. F1 also shows Help.</li>
+<li><strong>Default settings</strong> [D] — clear all fields, uncheck
+all boxes, and delete the saved configuration if any</li>
+<li><strong>OK</strong> / <strong>Cancel</strong> — start the run, or
+cancel without running. Enter is OK; Esc is Cancel.</li>
+</ul>
+<p>The Browse source and Choose output pickers open at the directory
+derived from the corresponding text field’s current value when that
+value points to an existing path; otherwise they open at your Documents
+folder. With <strong>Use configuration</strong> checked, those text
+fields are pre-populated from your last session, so the pickers
+naturally pick up where you left off.</p>
+<p>When all files have been processed, a final results dialog summarizes
+what was done.</p>
+<h3 id="from-the-command-line">From the command line</h3>
+<p>Open a Command Prompt and run <code>2htm</code> with the source as an
+argument:</p>
 <div class="sourceCode" id="cb1"><pre
-class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>2htm report.docx</span></code></pre></div>
-<p>The command above creates <code>report.htm</code> in the current
-directory — a fully accessible, single-file HTML document you can open
-in any browser, share by email, or post to a website.</p>
-<h3 id="convert-one-file">Convert one file</h3>
-<div class="sourceCode" id="cb2"><pre
-class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>2htm annual<span class="at">-report</span>.docx</span></code></pre></div>
-<h3 id="convert-many-files-at-once">Convert many files at once</h3>
-<div class="sourceCode" id="cb3"><pre
-class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>2htm *.xlsx</span></code></pre></div>
-<h3 id="convert-every-supported-file-in-a-folder">Convert every
-supported file in a folder</h3>
-<div class="sourceCode" id="cb4"><pre
-class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>2htm C:\work\documents</span></code></pre></div>
-<p>A bare folder path processes every file type 2htm recognizes inside
-that folder. Files with unsupported extensions (images, archives, and so
-on) are silently skipped.</p>
-<h3 id="convert-to-plain-text-instead-of-html">Convert to plain text
-instead of HTML</h3>
-<div class="sourceCode" id="cb5"><pre
-class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>2htm <span class="at">-p</span> report.docx</span></code></pre></div>
-<h3 id="open-the-gui">Open the GUI</h3>
-<div class="sourceCode" id="cb6"><pre
-class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>2htm <span class="at">-g</span></span></code></pre></div>
-<p>A small dialog lets you pick source files, an output directory, and
-conversion options. Every field has a keyboard hotkey.</p>
-<h3 id="get-help">Get help</h3>
-<p>From the command line:</p>
-<div class="sourceCode" id="cb7"><pre
-class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>2htm <span class="at">-h</span></span></code></pre></div>
-<p>In the GUI, press <strong>F1</strong> or click <strong>Help</strong>
-to see a summary of each field. The help dialog ends with a Yes/No
-prompt; choose Yes to open this full HTML documentation
-(<code>readMe.htm</code>) in your default browser.</p>
-<hr />
-<h2 id="supported-input-formats">Supported input formats</h2>
-<table>
-<thead>
-<tr>
-<th>Format</th>
-<th>Extensions</th>
-<th>Notes</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Microsoft Word</td>
-<td><code>.docx</code> <code>.doc</code> <code>.rtf</code>
-<code>.odt</code></td>
-<td>Word automation</td>
-</tr>
-<tr>
-<td>PDF</td>
-<td><code>.pdf</code></td>
-<td>Word 2013+ PDF Reflow</td>
-</tr>
-<tr>
-<td>Microsoft Excel</td>
-<td><code>.xlsx</code> <code>.xls</code></td>
-<td>Region-aware tables</td>
-</tr>
-<tr>
-<td>Microsoft PowerPoint</td>
-<td><code>.pptx</code> <code>.ppt</code></td>
-<td>One section per slide</td>
-</tr>
-<tr>
-<td>CSV</td>
-<td><code>.csv</code></td>
-<td>Native</td>
-</tr>
-<tr>
-<td>Web</td>
-<td><code>.html</code> <code>.htm</code></td>
-<td>Native (cleaned)</td>
-</tr>
-<tr>
-<td>Markdown</td>
-<td><code>.md</code></td>
-<td>Pandoc / CommonMark via Markdig</td>
-</tr>
-<tr>
-<td>JSON</td>
-<td><code>.json</code></td>
-<td>Pretty-printed</td>
-</tr>
-<tr>
-<td>Text</td>
-<td><code>.txt</code></td>
-<td>Native</td>
-</tr>
-</tbody>
-</table>
+class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a># Convert one file:</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>2htm report.docx</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a># Several files at once:</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>2htm *.docx *.md</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a># Files in different folders:</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>2htm docs\*.docx data\*.xlsx</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a># Plain text instead of HTML:</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>2htm <span class="at">-p</span> article.md</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a># Open the GUI:</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>2htm <span class="at">-g</span></span></code></pre></div>
+<p>When invoked without arguments from a GUI shell (Explorer
+double-click, Start-menu shortcut, desktop hotkey), <code>2htm</code>
+shows the dialog automatically. When invoked without arguments from a
+console shell, it prints help and exits. The <code>-g</code> flag forces
+GUI mode regardless.</p>
 <hr />
 <h2 id="command-line-options">Command-line options</h2>
 <table>
@@ -443,383 +413,219 @@ prompt; choose Yes to open this full HTML documentation
 <col style="width: 33%" />
 </colgroup>
 <thead>
-<tr>
+<tr class="header">
 <th>Option</th>
 <th>Long form</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
-<tr>
+<tr class="odd">
 <td><code>-h</code></td>
 <td><code>--help</code></td>
 <td>Show usage and exit</td>
 </tr>
-<tr>
+<tr class="even">
 <td><code>-v</code></td>
 <td><code>--version</code></td>
 <td>Show version and exit</td>
 </tr>
-<tr>
-<td><code>-s</code></td>
-<td><code>--strip-images</code></td>
-<td>Remove images from output (smaller, faster)</td>
-</tr>
-<tr>
-<td><code>-p</code></td>
-<td><code>--plain-text</code></td>
-<td>Produce .txt instead of .htm</td>
-</tr>
-<tr>
-<td><code>-f</code></td>
-<td><code>--force</code></td>
-<td>Overwrite existing output files</td>
-</tr>
-<tr>
-<td><code>-l</code></td>
-<td><code>--log</code></td>
-<td>Write detailed diagnostics to <code>2htm.log</code> (in the output
-directory if set, else the current directory; replaced each
-session)</td>
-</tr>
-<tr>
+<tr class="odd">
 <td><code>-g</code></td>
 <td><code>--gui-mode</code></td>
-<td>Launch the dialog</td>
+<td>Show the parameter dialog</td>
 </tr>
-<tr>
-<td><code>-o &lt;dir&gt;</code></td>
-<td><code>--output-dir &lt;dir&gt;</code></td>
-<td>Write output to <code>&lt;dir&gt;</code> instead of the current
-directory</td>
+<tr class="even">
+<td><code>-o &lt;d&gt;</code></td>
+<td><code>--output-dir &lt;d&gt;</code></td>
+<td>Write output to <code>&lt;d&gt;</code> (created if missing);
+defaults to current directory</td>
 </tr>
-<tr>
-<td></td>
-<td><code>--view-output</code></td>
-<td>After conversion, open the output directory in File Explorer</td>
-</tr>
-<tr>
-<td><code>-u</code></td>
-<td><code>--use-configuration</code></td>
-<td>Read saved defaults from
-<code>%LOCALAPPDATA%\2htm\2htm.ini</code></td>
+<tr class="odd">
+<td><code>-f</code></td>
+<td><code>--force</code></td>
+<td>overwrite an existing
+<code>&lt;basename&gt; | |   |</code>–view-output<code>| After the run, open the output directory in File Explorer | |</code>-l<code>|</code>–log<code>| Write</code>2htm.log<code>(UTF-8 with BOM) in the output directory; replaced each session | |</code>-u<code>|</code>–use-configuration<code>| Read saved defaults from</code>%LOCALAPPDATA%\2htm\2htm.ini<code>| |</code>-s<code>|</code>–strip-images<code>| Drop image references from the output | |</code>-p<code>|</code>–plain-text<code>| Produce plain-text</code>.txt`
+output instead of HTML</td>
 </tr>
 </tbody>
 </table>
-<h3 id="examples">Examples</h3>
-<p>Convert every Word and Excel file in two folders, write the output to
-a third folder, and open that folder in File Explorer when done:</p>
-<div class="sourceCode" id="cb8"><pre
-class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>2htm <span class="at">-o</span> C:\converted -<span class="at">-view-output</span> C:\reports\*.docx C:\finance\*.xlsx</span></code></pre></div>
-<p>Convert a PDF to plain text, overwriting any existing output
-file:</p>
-<div class="sourceCode" id="cb9"><pre
-class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>2htm <span class="at">-p</span> <span class="at">-f</span> handbook.pdf</span></code></pre></div>
-<p>Run the GUI with options pre-populated:</p>
-<div class="sourceCode" id="cb10"><pre
-class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>2htm <span class="at">-g</span> <span class="at">-p</span> <span class="at">-s</span> C:\docs\*.docx</span></code></pre></div>
-<hr />
-<h2 id="gui-mode">GUI mode</h2>
-<p>Running <code>2htm -g</code> opens a small dialog with these controls
-(keyboard hotkeys in parentheses):</p>
-<ul>
-<li><strong>Source files</strong> (Alt+S) — a file path, a folder path,
-or a wildcard pattern. A bare folder processes every supported file in
-it.</li>
-<li><strong>Browse source…</strong> (Alt+B) — pick a folder with the
-Windows folder-chooser dialog.</li>
-<li><strong>Output directory</strong> (Alt+O) — where converted files
-are written. Defaults to the source directory.</li>
-<li><strong>Choose output…</strong> (Alt+C) — pick the output
-folder.</li>
-<li><strong>Strip images</strong> (Alt+I) — remove images for smaller,
-faster output.</li>
-<li><strong>Plain text</strong> (Alt+P) — write .txt files instead of
-.htm.</li>
-<li><strong>Force replacements</strong> (Alt+F) — overwrite existing
-output.</li>
-<li><strong>View output</strong> (Alt+V) — open the output directory in
-File Explorer when done.</li>
-<li><strong>Log session</strong> (Alt+L) — write a fresh
-<code>2htm.log</code> to the output directory (or the current directory
-if no output directory is set) capturing diagnostics for this run.</li>
-<li><strong>Use configuration</strong> (Alt+U) — save these settings as
-defaults for next run.</li>
-<li><strong>Default settings</strong> (Alt+D) — reset all fields to
-factory defaults AND delete any saved configuration (see “Saved
-configuration” below).</li>
-<li><strong>Help</strong> (Alt+H) — show a quick help message.</li>
-<li><strong>OK</strong> / <strong>Cancel</strong> — Enter / Esc.</li>
-</ul>
 <p>Every option in the GUI corresponds one-to-one with a command-line
 flag, so a workflow prototyped in the dialog can be translated to a
 batch file without surprises.</p>
-<p><strong>Auto-GUI launch</strong>: 2htm enters GUI mode automatically
-when launched with no arguments from a GUI shell such as File Explorer
-(double-click, Start-menu shortcut, pinned taskbar button, or even
-running a copy extracted from a zip archive). This means the same
-<code>2htm.exe</code> is friendly to non-technical users who don’t want
-to think about command lines, while still behaving conventionally when
-run from <code>cmd.exe</code> or a build script. The detection uses the
-Windows <code>GetConsoleProcessList</code> API to recognize whether the
-process was given its own fresh console (GUI launch) or is sharing one
-with a parent shell (command-line launch). When 2htm auto-detects a GUI
-launch, it also hides the empty console window Windows created for it,
-so the user sees only the dialog.</p>
-<p>During conversion, a small progress dialog shows the basename of the
-current file and a running “N of M (P%)” indicator, so the user can see
-which file is being processed and gauge how much of the batch remains.
-When the run finishes, a results dialog shows what was converted,
-skipped, or failed.</p>
 <hr />
-<h2 id="saved-configuration-opt-in">Saved configuration (opt-in)</h2>
-<p>2htm leaves no footprint on your system unless you explicitly opt in
-to saving your settings. Until you opt in, every GUI run starts from
-factory defaults, and no <code>.ini</code> file is created.</p>
-<p><strong>Opting in:</strong> in the GUI dialog, set the values you
-want, check the <strong>Use configuration</strong> box (Alt+U), and
-click OK. Your choices are written to
-<code>%LOCALAPPDATA%\2htm\2htm.ini</code>.</p>
-<p><strong>Subsequent GUI runs:</strong> while the file exists, every
-GUI run loads your saved values as the dialog’s defaults and shows the
-Use configuration box already checked. Clicking OK refreshes the file
-with your current choices. If you don’t want to refresh the file on a
-particular run (e.g., you want to do a one-off conversion with different
-settings), uncheck the box before clicking OK — the file stays on disk
-unchanged, and the next GUI run will still load it.</p>
-<p><strong>Fully opting out:</strong> click the <strong>Default
-settings</strong> button (Alt+D) in the GUI dialog. This resets all form
-fields to factory defaults AND deletes the <code>.ini</code> file (and
-removes the <code>2htm</code> folder under <code>%LOCALAPPDATA%</code>
-if it’s empty afterwards). 2htm now has no footprint again. If you later
-want to opt in again, check the Use configuration box and click OK — a
-fresh <code>.ini</code> will be written.</p>
-<p><strong>Command-line mode:</strong> the <code>-u</code> /
-<code>--use-configuration</code> flag is required to read the saved
-config from the command line. This preserves zero-footprint behavior for
-CLI users: someone who runs <code>2htm file.docx</code> without
-<code>-u</code> will never load the saved config, even if one exists on
-disk.</p>
-<p><strong>Precedence:</strong> command-line values always override
-saved values, and GUI edits override both. So
-<code>2htm -p file.docx</code> with <code>-u</code> will use plain-text
-mode regardless of what the saved config says.</p>
-<hr />
-<h2 id="view-output">View output</h2>
-<p>Pass <code>--view-output</code> or check the box in the GUI to open
-the output directory in File Explorer after conversion. The open fires
-only if at least one file was actually converted. If an Explorer window
-is already displaying that directory, 2htm brings it to the foreground
-instead of spawning a duplicate.</p>
-<hr />
-<h2 id="log-session">Log session</h2>
-<p>Pass <code>-l</code> / <code>--log</code>, or check the <strong>Log
-session</strong> box in the GUI, to have 2htm write a
-<code>2htm.log</code> file capturing detailed diagnostics for the run:
-command-line arguments, the resolved input/output paths, per-file
-conversion outcomes, and any errors.</p>
-<p>The log is written to the output directory (the <code>-o</code>
-directory, or whatever was chosen in the GUI Output field) if one is
-set, and to the current working directory otherwise. The file is
-recreated fresh at the start of every run, so its contents always
-reflect only the current session — no log rotation needed. The file is
-UTF-8 with a byte-order mark, so Notepad and any screen
-reader-compatible text editor open it cleanly.</p>
-<p>When reporting a conversion problem, attaching the log file removes a
-lot of guesswork.</p>
-<hr />
-<h2 id="output">Output</h2>
-<p>For each input file, a new file is written to the current working
-directory:</p>
-<ul>
-<li><code>report.docx</code> → <code>report.htm</code> (or
-<code>report.txt</code> with <code>-p</code>)</li>
-<li>Original file is never modified.</li>
-<li>If an output file already exists, the input is skipped unless
-<code>-f</code> is given.</li>
-</ul>
-<p>Use <code>-o &lt;dir&gt;</code> to write to a specific directory
-instead of the current working directory. When 2htm is launched via the
-File Explorer right-click menu, Windows sets the current working
-directory to the folder containing the clicked file, so output naturally
-lands alongside the input without any special flag.</p>
-<p>The HTML output is a single standalone file. Images (when kept) are
-embedded as base64 data URIs, so the <code>.htm</code> file can be
-shared without a sidecar folder. The result passes automated WCAG 2.2
-AAA checks in axe-core for landmarks, headings, table structure,
-alt-text propagation, color contrast, and language declaration.</p>
-<h3 id="exit-codes">Exit codes</h3>
+<h2 id="supported-input-formats">Supported input formats</h2>
 <table>
 <thead>
-<tr>
-<th>Code</th>
-<th>Meaning</th>
+<tr class="header">
+<th>Extension</th>
+<th>Format</th>
 </tr>
 </thead>
 <tbody>
-<tr>
-<td>0</td>
-<td>All files converted (or help/version shown)</td>
+<tr class="odd">
+<td>.docx</td>
+<td>Microsoft Word document</td>
 </tr>
-<tr>
-<td>1</td>
-<td>Some files failed</td>
+<tr class="even">
+<td>.xlsx</td>
+<td>Microsoft Excel workbook</td>
 </tr>
-<tr>
-<td>2</td>
-<td>Fatal error (unknown option, unwritable output directory)</td>
+<tr class="odd">
+<td>.pptx</td>
+<td>Microsoft PowerPoint presentation</td>
+</tr>
+<tr class="even">
+<td>.pdf</td>
+<td>PDF document</td>
+</tr>
+<tr class="odd">
+<td>.md</td>
+<td>Pandoc Markdown file</td>
 </tr>
 </tbody>
 </table>
 <hr />
+<h2 id="output">Output</h2>
+<p>For each file converted, an HTML file named
+<code>&lt;basename&gt;.htm</code> is written next to the input (or to
+the output directory if <code>-o</code> is given). The HTML preserves
+heading structure, lists, tables, and image alternative text. CSS is
+embedded inline so the file can be opened in any browser without
+external dependencies.</p>
+<p>In <strong>plain text</strong> mode (<code>-p</code> or the dialog’s
+Plain text checkbox), the output is a <code>.txt</code> file instead of
+<code>.htm</code>. Image lines are stripped and the text is normalized
+for use as input to a synthesizer or for paste-into-email scenarios.</p>
+<hr />
+<h2 id="configuration-file">Configuration file</h2>
+<p>When <strong>Use configuration</strong> is checked in the dialog (or
+<code>-u</code> is on the command line), <code>2htm</code> reads and
+writes a small INI file at:</p>
+<pre><code>%LOCALAPPDATA%\2htm\2htm.ini</code></pre>
+<p>It stores the source field, the output directory, and the option
+checkboxes. Without <strong>Use configuration</strong>,
+<code>2htm</code> leaves nothing on disk between runs. <strong>Default
+settings</strong> in the dialog deletes this file.</p>
+<hr />
+<h2 id="log-file">Log file</h2>
+<p>When <strong>Log session</strong> is checked (or <code>-l</code> is
+on the command line), <code>2htm</code> writes a fresh
+<code>2htm.log</code> to the output directory (or current directory if
+no output directory is set). Any prior log is replaced at the start of
+the run, so the file always reflects only the current session.</p>
+<p>The log captures: program version, command-line arguments, GUI
+auto-detection, the resolved output directory, per-file events, and any
+errors (including tracebacks for unexpected failures).</p>
+<p>Without <strong>Log session</strong>, <code>2htm</code> does not
+create any log or error file on disk. Errors are reported only to the
+console (and the GUI results dialog, in GUI mode).</p>
+<p>The log is UTF-8 with a byte-order mark, so Notepad opens it
+correctly.</p>
+<hr />
 <h2 id="notes">Notes</h2>
 <ul>
-<li>Office must be installed and licensed. 2htm drives Word, Excel, and
-PowerPoint via COM automation; it cannot read these formats without
-Office.</li>
-<li>2htm cleans up Office COM servers when it’s done, even if conversion
-fails mid-run. If a workbook or document ever appears hung in Task
-Manager after a 2htm run, it’s a bug — please report it.</li>
-<li>Excel workbooks with very large “used ranges” (hundreds of millions
-of cells) are handled on a special code path that uses
-<code>SpecialCells</code> instead of reading the full array. This is
-effective for workbooks that have auto-extended formulas down empty
-columns.</li>
-<li>PowerPoint automation requires a visible application window
-(PowerPoint does not support invisible automation). The window is
-minimized while 2htm works and closed at the end.</li>
+<li>2htm output preserves heading structure, lists, tables, and image
+alternative text. The output is a single self-contained
+<code>.htm</code> file with CSS embedded inline; it can be opened in any
+browser without external dependencies.</li>
+<li>For <code>.docx</code>, <code>.xlsx</code>, and <code>.pptx</code>
+files, 2htm uses Microsoft Office’s COM automation. Office must be
+installed and runnable; modern (64-bit) Office is the common case.</li>
+<li>For <code>.md</code> files, 2htm uses the Markdig library (bundled
+inside the executable). No Office is needed.</li>
+<li>Plain text mode (<code>-p</code> or the dialog’s Plain text
+checkbox) produces a <code>.txt</code> file instead. Image lines are
+stripped and the text is normalized for use as input to a synthesizer or
+for paste-into-email scenarios.</li>
 </ul>
-<hr />
-<h2 id="pipelines-and-integration">Pipelines and integration</h2>
-<p>Because 2htm is a portable single file with well-defined exit codes,
-it integrates naturally into automation:</p>
-<ul>
-<li><strong>Batch scripts</strong> can call <code>2htm</code>
-synchronously and inspect <code>%ERRORLEVEL%</code>.</li>
-<li><strong>Scheduled tasks</strong> can convert folders of documents on
-a nightly basis to keep an accessible-formats mirror up to date.</li>
-<li><strong>CI/CD jobs</strong> can turn design docs committed as
-<code>.docx</code> into <code>.htm</code> for web publication as part of
-a build.</li>
-<li><strong>Content management workflows</strong> can use 2htm as an
-“alternate format” step, producing accessible HTML versions of public
-documents alongside the original Office files.</li>
-</ul>
-<p>The output file is self-contained, so downstream steps can simply
-copy or serve the <code>.htm</code> file without worrying about
-dependencies.</p>
 <hr />
 <h2 id="development">Development</h2>
-<p>This section is for developers who want to build
-<code>2htm.exe</code> from source, or modify the conversion logic.</p>
-<p>Because 2htm is released under the MIT license, anyone may use,
-modify, or redistribute the code for any purpose, including commercial
-use, as long as the copyright notice is preserved. C# is Microsoft’s
-primary application language, backed by extensive documentation and a
-mature ecosystem of Office automation examples. The required toolchain
-(Roslyn, via Visual Studio Community or Visual Studio Build Tools) is
-free from Microsoft.</p>
+<p>This section is for developers who want to build the executable from
+source. End users can skip it.</p>
+<h3 id="distribution-layout">Distribution layout</h3>
+<p>The runtime distribution shipped by <code>2htm_setup.exe</code> is
+just a few files: <code>2htm.exe</code> plus the HTML documentation
+(<code>ReadMe.htm</code>, <code>Announce.htm</code>,
+<code>License.htm</code>). The Markdown sources, the build script, the
+installer script, the icon, the program source, and the coding-style
+guide live in the GitHub repository (and in this <code>2htm.zip</code>
+archive).</p>
+<h3 id="source-layout">Source layout</h3>
+<p>The whole program is one C# file: <code>2htm.cs</code>. It uses
+standard <code>System.Windows.Forms</code> for the parameter dialog, the
+COM <code>dynamic</code> keyword to drive Office, and the <a
+href="https://github.com/xoofx/markdig">Markdig</a> library (downloaded
+automatically by the build script) for Markdown rendering. PDF support
+is via the bundled <code>PdfPig</code> library; PowerPoint via Office
+COM. The classes inside <code>2htm.cs</code> are arranged as a shared
+infrastructure layer (<code>issue</code>, <code>results</code>,
+<code>shared</code>, <code>comHelper</code>, <code>logger</code>,
+<code>configManager</code>, <code>guiDialog</code>) plus per-format
+converter classes, with a top-level <code>program</code> class that
+parses arguments, optionally shows the dialog, and dispatches.</p>
+<h3 id="coding-style">Coding style</h3>
+<p>The source uses what the author calls “Camel Type” (C# variant):
+Hungarian prefix notation for variables (<code>b</code> for boolean,
+<code>i</code> for integer, <code>s</code> for string, <code>ls</code>
+for <code>List&lt;T&gt;</code>, <code>d</code> for dictionary, etc.),
+lower camelCase for everything other than where the language requires
+PascalCase. The <code>o</code> prefix is reserved for COM objects only;
+managed C# objects use the lowercase class name as their prefix (e.g.,
+<code>Form form</code>, <code>OpenFileDialog dialog</code>). Constants
+follow the same naming as variables — only the <code>const</code> or
+<code>static readonly</code> keyword conveys constant-ness. See
+<code>Camel_Type_C#.md</code> in this archive for the full
+guidelines.</p>
+<h3 id="threading-and-bitness">Threading and bitness</h3>
+<p><code>Main</code> is decorated with <code>[STAThread]</code>. This is
+required for two reasons:</p>
+<ul>
+<li>Office COM automation requires a single-threaded apartment. Without
+it, Word/Excel/PowerPoint COM servers can disconnect mid-operation with
+HRESULT 0x80010108 (RPC_E_DISCONNECTED) or 0x80010114
+(OLE_E_OBJNOTCONNECTED).</li>
+<li>WinForms common dialogs (<code>OpenFileDialog</code>,
+<code>FolderBrowserDialog</code>) require an STA thread.</li>
+</ul>
+<p>The build is <code>/platform:x64</code>. Office COM automation
+requires the controller process and the installed Office to share the
+same bitness. Modern Office is 64-bit by default; if a user has 32-bit
+Office, <code>com.createApp</code> surfaces a clear error message
+pointing at the mismatch and recommending a 32-bit rebuild.</p>
 <h3 id="prerequisites">Prerequisites</h3>
 <ul>
-<li>Windows 10 or later</li>
-<li><strong>.NET Framework 4.x</strong> — ships with every supported
-Windows version (Windows 10 and Windows 11 include it out of the box).
-No .NET SDK or .NET Core install is needed; the legacy .NET Framework
-that’s already on your machine provides the runtime libraries 2htm links
-against.</li>
-<li><strong>A Roslyn C# compiler</strong> — this is the modern compiler
-that supports current language features. It ships with any of:
-<ul>
-<li>Visual Studio 2017 or later (any edition, including the free
-<strong>Community</strong> edition).</li>
-<li><strong>Visual Studio Build Tools 2019 or 2022</strong> — a free,
-smaller download that installs just the compiler (no IDE). During
-install, select the workload <strong>“.NET desktop build
-tools”</strong>. Download from <a
-href="https://visualstudio.microsoft.com/downloads/"
-class="uri">https://visualstudio.microsoft.com/downloads/</a>.</li>
+<li>The .NET Framework 4.8.1 Developer Pack (provides
+<code>csc.exe</code> and the 4.8.1 reference assemblies). Install from
+<a href="https://dotnet.microsoft.com/download/dotnet-framework/net481"
+class="uri">https://dotnet.microsoft.com/download/dotnet-framework/net481</a>.</li>
+<li>Inno Setup 6.x to compile the installer.</li>
 </ul>
-<strong>Important</strong>: the <code>csc.exe</code> bundled with .NET
-Framework at
-<code>%WINDIR%\Microsoft.NET\Framework64\v4.0.30319\csc.exe</code> is
-the older pre-Roslyn compiler and cannot build 2htm — it only supports
-C# 5 and earlier. The build script detects and rejects this compiler;
-install Roslyn via Visual Studio or the Build Tools.</li>
-</ul>
-<p>The build script searches several known Visual Studio install paths
-automatically.</p>
-<h3 id="build">Build</h3>
-<p>Open a Command Prompt in the project folder and run:</p>
-<div class="sourceCode" id="cb11"><pre
-class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>build2htm.cmd</span></code></pre></div>
-<p>On the first build, the script downloads <code>Markdig.dll</code>
-from nuget.org (the CommonMark parser for Markdown input). Markdig is
-embedded into <code>2htm.exe</code> as a manifest resource, so the
-resulting executable is a true single file — no sidecar DLLs are needed
-at runtime.</p>
-<p>On subsequent builds, <code>Markdig.dll</code> sits next to
-<code>2htm.cs</code> and is reused.</p>
-<p>The build targets <code>x64</code> to match the 64-bit Office that
-Microsoft has installed by default since Office 2019. If your Office is
-32-bit, edit <code>build2htm.cmd</code> and change
-<code>/platform:x64</code> to <code>/platform:x86</code> before
-building. A 64-bit process cannot automate a 32-bit Office COM server
-and vice versa.</p>
-<h3 id="source-layout">Source layout</h3>
-<p>All source lives in a single file: <code>2htm.cs</code> (about 5,200
-lines). The file is organized into several <code>static class</code>
-sections:</p>
-<ul>
-<li><code>program</code> — entry point, argument parsing, conversion
-dispatch, temp-folder management.</li>
-<li><code>logger</code> — diagnostic logging (opt-in via
-<code>-l</code>).</li>
-<li><code>fileIntegrity</code>, <code>tempManager</code> — pre-flight
-checks and temp file handling.</li>
-<li><code>htmlWriter</code> — WCAG-conformant HTML emitter shared by all
-converters.</li>
-<li><code>comHelper</code> — COM late-binding helpers for Office
-automation.</li>
-<li><code>wordConverter</code>, <code>excelConverter</code>,
-<code>csvConverter</code>, <code>pptConverter</code>,
-<code>htmlConverter</code>, <code>markdownConverter</code>,
-<code>jsonConverter</code>, <code>textConverter</code>,
-<code>textPassthrough</code> — per-format converters.</li>
-<li><code>guiDialog</code> — WinForms dialog (the <code>-g</code>
-mode).</li>
-<li><code>shellHelper</code> — smart Explorer-window detection for
-<code>--view-output</code>.</li>
-<li><code>configManager</code> — opt-in <code>.ini</code> read/write for
-<code>-u</code>.</li>
-</ul>
-<p>The code is written in <strong>Camel Type</strong>, a coding style
-that makes type information visible in identifier names (variables read
-as <code>sPath</code>, <code>bFound</code>, <code>iCount</code>,
-<code>lsFiles</code> without the reader having to look up a declaration
-or hover for a tooltip). The full C# guidelines are included in this
-repository as <code>Camel_Type_C#.md</code>.</p>
-<h3 id="running-from-source">Running from source</h3>
-<p>There is no “run from source” path — C# requires compilation. After
-<code>build2htm.cmd</code> finishes, run the resulting executable:</p>
-<div class="sourceCode" id="cb12"><pre
-class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>2htm.exe -<span class="at">-help</span></span></code></pre></div>
-<h3 id="development-history">Development history</h3>
-<p>This project was developed in collaboration with Anthropic’s Claude
-AI assistant, over a sustained series of design and implementation
-sessions. The author drove the product decisions — naming, command-line
-conventions, configuration philosophy, GUI layout, and the Camel Type
-coding style described above — while the AI assisted with C#
-implementation details, COM automation quirks, Windows API research, and
-iterative debugging of edge cases (pathological Excel workbooks,
-PowerPoint shape enumeration, and so on).</p>
-<hr />
+<h3 id="building-the-executable">Building the executable</h3>
+<p>Run the included script:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>build2htm.cmd</span></code></pre></div>
+<p>It auto-detects the compiler, verifies the build environment, embeds
+the icon into <code>2htm.exe</code>, and produces the runtime
+distribution in <code>dist\</code>.</p>
+<h3 id="building-the-installer">Building the installer</h3>
+<p>Open <code>2htm_setup.iss</code> in Inno Setup and click Compile. The
+result is <code>dist\2htm_setup.exe</code>.</p>
+<p>The installer ships only the runtime files: <code>2htm.exe</code>
+plus the HTML documentation (<code>ReadMe.htm</code>,
+<code>Announce.htm</code>, <code>License.htm</code>). Markdown sources,
+the build script, this <code>.iss</code> script, the icon, the source
+file, and any coding-style guideline files live in the GitHub
+repository.</p>
+<h3 id="uninstalling">Uninstalling</h3>
+<p>Use Apps &amp; Features in Windows Settings, or run the uninstaller
+from the <code>2htm</code> Start-menu group. The uninstaller removes the
+program files. It does not touch
+<code>%LOCALAPPDATA%\2htm\2htm.ini</code> or any <code>2htm.log</code>
+files in working directories — delete those manually if you want a fully
+clean removal.</p>
 <h2 id="license">License</h2>
-<p>MIT License. See <code>license.htm</code>.</p>
-<hr />
-<h2 id="download">Download</h2>
-<p>You can download the whole project in a single zip archive using the
-following link:</p>
-<p><a href="http://GitHub.com/JamalMazrui/2htm/archive/main.zip"
-class="uri">http://GitHub.com/JamalMazrui/2htm/archive/main.zip</a></p>
+<p>MIT License. See <code>License.htm</code> (installed alongside the
+program) or <code>License.md</code> (in the GitHub repository).</p>
 </body>
 </html>

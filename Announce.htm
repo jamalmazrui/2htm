@@ -1,14 +1,11 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
 <head>
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Announce</title>
+  <title>2htm Announce</title>
   <style>
-    /* Default styles provided by pandoc.
-    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-    */
     html {
       color: #1a1a1a;
       background-color: #fdfdfd;
@@ -63,10 +60,6 @@
     img {
       max-width: 100%;
     }
-    svg {
-      height: auto;
-      max-width: 100%;
-    }
     h1, h2, h3, h4, h5, h6 {
       margin-top: 1.4em;
     }
@@ -91,7 +84,6 @@
       color: #606060;
     }
     code {
-      white-space: pre-wrap;
       font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
       font-size: 85%;
       margin: 0;
@@ -111,8 +103,8 @@
      overflow: visible;
     }
     hr {
+      background-color: #1a1a1a;
       border: none;
-      border-top: 1px solid #1a1a1a;
       height: 1px;
       margin: 1em 0;
     }
@@ -155,6 +147,7 @@
     #TOC a:not(:hover) {
       text-decoration: none;
     }
+    code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
     div.columns{display: flex; gap: min(4vw, 1.5em);}
     div.column{flex: auto; overflow-x: auto;}
@@ -170,49 +163,97 @@
     }
     .display.math{display: block; text-align: center; margin: 0.5rem auto;}
   </style>
+  <style>
+  body { font-family: Arial, Helvetica, sans-serif; max-width: 50em; margin: 1em auto; padding: 0 1em; line-height: 1.5; color: #222; }
+  h1 { font-size: 1.5em; border-bottom: 1px solid #ccc; padding-bottom: 0.2em; }
+  h2 { font-size: 1.25em; margin-top: 1.5em; }
+  h3 { font-size: 1.1em; margin-top: 1.3em; }
+  p { margin: 0.7em 0; }
+  code { font-family: Consolas, "Courier New", monospace; background: #f4f4f4; padding: 1px 4px; border-radius: 3px; }
+  pre { background: #f4f4f4; padding: 0.6em 1em; border-radius: 4px; overflow-x: auto; line-height: 1.35; }
+  pre code { background: transparent; padding: 0; }
+  ul, ol { margin: 0.5em 0; padding-left: 1.6em; }
+  li { margin: 0.25em 0; }
+  table { border-collapse: collapse; margin: 1em 0; }
+  th, td { border: 1px solid #bbb; padding: 0.3em 0.7em; text-align: left; }
+  th { background: #efefef; }
+  blockquote { border-left: 4px solid #bbb; margin: 1em 0; padding: 0.2em 1em; color: #555; }
+  a { color: #0645ad; }
+  a:visited { color: #0b0080; }
+  hr { border: 0; border-top: 1px solid #ccc; margin: 2em 0; }
+  </style>
 </head>
 <body>
-<h1
-id="htm-produce-accessible-html-versions-of-popular-file-formats-from-a-single-windows-executable">2htm
-— Produce accessible HTML versions of popular file formats from a single
-Windows executable</h1>
-<p>I am pleased to share a new free, open-source tool I have just
-released on GitHub. <code>2htm</code> is a single, independent
-executable that runs on any modern Windows computer with Microsoft
-Office installed (no installer to run, no runtime to download, no
-additional DLLs to track).</p>
-<h2 id="htm">2htm</h2>
-<p><a href="https://github.com/jamalmazrui/2htm"
-class="uri">https://github.com/jamalmazrui/2htm</a></p>
-<p><code>2htm</code> converts Microsoft Word, Excel, PowerPoint, PDF,
-and Markdown files into a single-file, HTML equivalent that opens in any
-modern browser — Chrome, Edge, Firefox, Safari — with no companion
-folders or special viewer required. It can also produce plain-text
-output instead.</p>
-<p>The single executable can run in two modes with the same set of
-options. Command-line mode handles scripted and batch use. GUI mode
-opens a small, keyboard-accessible dialog with every option exposed as a
-field or checkbox, for users who prefer an interactive workflow.</p>
-<p>The conversion aims for WCAG 2.2 AAA conformance to the extent the
-source document’s structure and content permit. Landmarks, headings,
-table markup, alt-text propagation, color contrast, and language
-declaration are preserved or inferred where possible. The output is
-designed to work cleanly with screen readers and to reflow on small
-screens.</p>
-<p><code>2htm</code> fits naturally into pipelines that produce
-“alternate formats” — accessible versions of public documents for users
-with disabilities. Call it synchronously from a batch file or scheduled
-task – even serve the resulting <code>.htm</code> files directly from
-any web host.</p>
-<p>The tool is released under the permissive MIT license, so programmers
-can freely modify or extend the code. It is written in C# – Microsoft’s
-flagship application language, well-documented, with a mature free
-toolchain.</p>
-<p>This project was developed in collaboration with Anthropic’s Claude
-AI.</p>
-<p>You can download the whole project in a single zip archive using the
-following link:</p>
-<p><a href="http://GitHub.com/JamalMazrui/2htm/archive/main.zip"
-class="uri">http://GitHub.com/JamalMazrui/2htm/archive/main.zip</a></p>
+<header id="title-block-header">
+<h1 class="title">2htm Announce</h1>
+</header>
+<h1 id="htm-release-notes">2htm Release Notes</h1>
+<h2 id="version-1.18.3">Version 1.18.3</h2>
+<p>This release brings 2htm’s source code into compliance with the
+project’s Camel Type coding standard:</p>
+<ul>
+<li>The Hungarian <code>o</code> prefix is now reserved for COM objects
+only. Variables holding managed .NET objects (StreamWriter, FileStream,
+Process, Regex, Match, ProcessStartInfo, ZipArchive, FileInfo, etc.) now
+use the lowercase class name as their prefix per the rule.</li>
+<li>Renames are mechanical and do not change runtime behavior. Examples:
+<code>oOut</code> → <code>writer</code>, <code>oFs</code> →
+<code>fileStream</code>, <code>oZip</code> → <code>zipArchive</code>,
+<code>oMatch</code> → <code>match</code>, <code>oResult</code> →
+<code>dialogResult</code>. COM objects driving Word/Excel/PowerPoint
+(<code>oWord</code>, <code>oExcel</code>, <code>oPpt</code>,
+<code>oWb</code>, <code>oDoc</code>, <code>oCell</code>,
+<code>oRange</code>, <code>oSheet</code>, <code>oSlide</code>,
+<code>oShape</code>, <code>oTable</code>, <code>oChart</code>, etc.)
+keep their <code>o</code> prefix.</li>
+<li><strong>Cross-program naming.</strong> Identifier names for shared
+concepts now match across the three companion tools (urlCheck, extCheck,
+2htm). The program-name and version constants are
+<code>sProgramName</code> and <code>sProgramVersion</code> (was
+<code>sVersion</code>). New constants <code>sConfigDirName</code>,
+<code>sConfigFileName</code>, <code>sLogFileName</code> replace the
+inline string literals. GUI layout constants are now all
+<code>iLayout*</code> (was <code>iDefault*</code>). The output-directory
+parameter is <code>sOutputDir</code> everywhere (was
+<code>sOutDir</code> in some signatures). The <code>logger</code>
+surface is uniform: <code>open</code>, <code>close</code>,
+<code>info</code>, <code>warn</code>, <code>error</code>,
+<code>debug</code>.</li>
+<li><strong>Picker initial directory.</strong> The Browse source and
+Choose output buttons now open at the directory derived from the
+text-field value when that value points to an existing path (whether the
+user just typed it or it was loaded from a saved configuration), and at
+the user’s Documents folder otherwise.</li>
+<li><strong>Markdig fetch logic inlined.</strong> The previous
+<code>build2htm.cmd</code> placed the Markdig-download routine in a
+separate <code>:fnFetchMarkdig</code> subroutine and used
+<code>call :fnFetchMarkdig</code> to invoke it. cmd.exe has a known
+chunk-boundary bug in its label-search code (the search reads the file
+in 512/1024-byte chunks; a label at certain byte positions can be
+missed), which surfaced here as “The system cannot find the batch label
+specified - fnFetchMarkdig”. Inlining the fetch logic eliminates the
+forward <code>call :label</code> and so eliminates the bug. .cmd files
+in this archive ship with CRLF line endings as additional
+defense-in-depth.</li>
+</ul>
+<p>The icon is now embedded in <code>2htm.exe</code> at build time via
+the <code>/win32icon</code> flag, and shortcuts inherit it
+automatically. A 2htm.ico file ships in the GitHub repo for the
+installer wizard’s own icon (compile-time use), but does not need to
+ship with the installed program.</p>
+<p>The installer (<code>2htm_setup.exe</code>):</p>
+<ul>
+<li>Prompts for the installation directory (default:
+<code>C:\Program Files\2htm</code>).</li>
+<li>Includes a brief MIT-license summary on the welcome page.</li>
+<li>Installs only HTML versions of the documentation
+(<code>ReadMe.htm</code>, <code>Announce.htm</code>,
+<code>License.htm</code>); the Markdown counterparts and the
+source/build/installer scripts live in the GitHub repository.</li>
+<li>The “Launch 2htm now” checkbox on the final page reminds the user
+that the desktop hotkey is Alt+Ctrl+2.</li>
+</ul>
+<h2 id="earlier-versions">Earlier versions</h2>
+<p>For the full revision history see the GitHub repository.</p>
 </body>
 </html>

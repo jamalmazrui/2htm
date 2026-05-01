@@ -46,7 +46,11 @@ namespace twoHtm
         public const int iExitPartial = 1;
         public const int iExitFatal = 2;
 
-        public const string sVersion = "1.18.3";
+        public const string sProgramName = "2htm";
+        public const string sProgramVersion = "1.18.3";
+        public const string sConfigDirName = "2htm";
+        public const string sConfigFileName = "2htm.ini";
+        public const string sLogFileName = "2htm.log";
 
         // Global flags set by command-line switches. All converters
         // read these directly rather than having them threaded
@@ -285,7 +289,7 @@ namespace twoHtm
                     return iExitOk;
                 }
                 if (sArg == "-v" || sArg == "--version") {
-                    Console.WriteLine("2htm " + sVersion);
+                    Console.WriteLine(program.sProgramName + " " + sProgramVersion);
                     return iExitOk;
                 }
                 if (sArg == "-s" || sArg == "--strip-images") {
@@ -440,22 +444,22 @@ namespace twoHtm
             // interrupting the user with on a successful run, but
             // errors must still be surfaced somehow since the user
             // has no visible console to read them from.
-            TextWriter oOriginalOut = Console.Out;
-            TextWriter oOriginalErr = Console.Error;
-            StringWriter oCapture = null;
-            StringWriter oErrCapture = null;
+            TextWriter writerOriginalOut = Console.Out;
+            TextWriter writerOriginalErr = Console.Error;
+            StringWriter stringWriterOut = null;
+            StringWriter stringWriterErr = null;
             if (bGuiMode) {
-                oCapture = new StringWriter();
-                Console.SetOut(oCapture);
-                Console.SetError(oCapture);
+                stringWriterOut = new StringWriter();
+                Console.SetOut(stringWriterOut);
+                Console.SetError(stringWriterOut);
             } else if (bHideConsoleMode) {
-                oErrCapture = new StringWriter();
-                Console.SetError(oErrCapture);
+                stringWriterErr = new StringWriter();
+                Console.SetError(stringWriterErr);
             }
 
             int iExitCode = iExitOk;
             try {
-                logger.info("2htm " + sVersion + " starting");
+                logger.info(program.sProgramName + " " + sProgramVersion + " starting");
                 logger.info("Command line: " + string.Join(" ", asArgs));
                 logger.info("Working directory: " + Directory.GetCurrentDirectory());
                 if (!string.IsNullOrEmpty(sOutputDir))
@@ -506,15 +510,15 @@ namespace twoHtm
             } finally {
                 logger.close();
                 if (bGuiMode) {
-                    Console.SetOut(oOriginalOut);
-                    Console.SetError(oOriginalErr);
-                    string sCaptured = oCapture != null ? oCapture.ToString() : "";
+                    Console.SetOut(writerOriginalOut);
+                    Console.SetError(writerOriginalErr);
+                    string sCaptured = stringWriterOut != null ? stringWriterOut.ToString() : "";
                     showFinalMessage(string.IsNullOrWhiteSpace(sCaptured)
                         ? "Done. No output."
                         : sCaptured);
                 } else if (bHideConsoleMode) {
-                    Console.SetError(oOriginalErr);
-                    string sErrText = oErrCapture != null ? oErrCapture.ToString() : "";
+                    Console.SetError(writerOriginalErr);
+                    string sErrText = stringWriterErr != null ? stringWriterErr.ToString() : "";
                     // Only interrupt the user if something actually
                     // went wrong. Silent success is the right UX
                     // for a right-click-to-convert action: the
@@ -628,18 +632,18 @@ namespace twoHtm
         // At runtime the CLR raises AssemblyResolve when it cannot
         // find a referenced assembly on disk; this handler reads the
         // bytes from the embedded resource and loads it in-memory.
-        private static Assembly resolveEmbeddedAssembly(object oSender, ResolveEventArgs oArgs)
+        private static Assembly resolveEmbeddedAssembly(object sender, ResolveEventArgs args)
         {
             try {
-                var oReqName = new AssemblyName(oArgs.Name);
-                string sResource = oReqName.Name + ".dll";
-                Assembly oThisAsm = Assembly.GetExecutingAssembly();
-                using (Stream oStream = oThisAsm.GetManifestResourceStream(sResource)) {
-                    if (oStream == null) return null;
-                    var binBytes = new byte[oStream.Length];
+                var assemblyName = new AssemblyName(args.Name);
+                string sResource = assemblyName.Name + ".dll";
+                Assembly assembly = Assembly.GetExecutingAssembly();
+                using (Stream stream = assembly.GetManifestResourceStream(sResource)) {
+                    if (stream == null) return null;
+                    var binBytes = new byte[stream.Length];
                     int iRead = 0;
                     while (iRead < binBytes.Length) {
-                        int iJust = oStream.Read(binBytes, iRead, binBytes.Length - iRead);
+                        int iJust = stream.Read(binBytes, iRead, binBytes.Length - iRead);
                         if (iJust <= 0) break;
                         iRead += iJust;
                     }
@@ -652,7 +656,7 @@ namespace twoHtm
 
         private static void printUsage()
         {
-            Console.WriteLine("2htm " + sVersion + " - convert documents to accessible HTML");
+            Console.WriteLine(program.sProgramName + " " + sProgramVersion + " - convert documents to accessible HTML");
             Console.WriteLine();
             Console.WriteLine("Usage: 2htm [options] <file-or-wildcard> [<file-or-wildcard> ...]");
             Console.WriteLine();
@@ -870,10 +874,10 @@ namespace twoHtm
             // directory to the folder containing the right-clicked
             // file, so "CWD" is already the right answer in that
             // case without any special logic here.
-            string sOutDir = string.IsNullOrEmpty(sOutputDir)
+            string sEffectiveOutputDir = string.IsNullOrEmpty(sOutputDir)
                 ? Directory.GetCurrentDirectory()
                 : sOutputDir;
-            string sOutPath = Path.Combine(sOutDir,
+            string sOutPath = Path.Combine(sEffectiveOutputDir,
                 Path.GetFileNameWithoutExtension(sInPath) + sOutExt);
             string sBase = Path.GetFileName(sInPath);
 
@@ -891,8 +895,11 @@ namespace twoHtm
 
             // Skip if the output file already exists in the current
             // directory — unless --force is active, in which case we
-            // overwrite. Silent on console; logged only.
+            // overwrite. Print the skip notice to the console so the
+            // user has visible feedback (matches extCheck's style).
             if (File.Exists(sOutPath) && !bForce) {
+                Console.WriteLine("Skipping (" + Path.GetFileName(sOutPath) +
+                    " exists, use -f to overwrite): " + sInPath);
                 logger.info("Skipped (" + Path.GetFileName(sOutPath) +
                     " already exists; use --force to overwrite): " + sInPath);
                 return false;
@@ -1068,13 +1075,13 @@ namespace twoHtm
     // -----------------------------------------------------------------
     public static class guiDialog
     {
-        public static bool show(ref string sSource, ref string sOutDir,
+        public static bool show(ref string sSource, ref string sOutputDir,
             ref bool bStrip, ref bool bPlain, ref bool bForce, ref bool bView,
             ref bool bLog, ref bool bUseCfg)
         {
             // Build the form.
             var frm = new System.Windows.Forms.Form();
-            frm.Text = "2htm";
+            frm.Text = program.sProgramName;
             frm.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             frm.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             frm.MaximizeBox = false;
@@ -1102,28 +1109,28 @@ namespace twoHtm
             // Layout constants in pixels. These deliberately reflect
             // Windows desktop conventions: ~7 px gutter, ~11 px row
             // spacing, button width ~120 px.
-            const int iDefaultLeft = 12;
-            const int iDefaultRight = 12;
-            const int iDefaultTop = 12;
-            const int iDefaultGap = 7;
-            const int iDefaultRowGap = 11;
-            const int iDefaultLabelWidth = 110;
-            const int iDefaultButtonWidth = 130;
-            const int iDefaultButtonHeight = 26;
-            const int iDefaultTextHeight = 23;
+            const int iLayoutLeft = 12;
+            const int iLayoutRight = 12;
+            const int iLayoutTop = 12;
+            const int iLayoutGap = 7;
+            const int iLayoutRowGap = 11;
+            const int iLayoutLabelWidth = 110;
+            const int iLayoutButtonWidth = 130;
+            const int iLayoutButtonHeight = 26;
+            const int iLayoutTextHeight = 23;
 
             int iFormW = frm.ClientSize.Width;
-            int iTextX = iDefaultLeft + iDefaultLabelWidth + iDefaultGap;
-            int iTextW = iFormW - iTextX - iDefaultGap - iDefaultButtonWidth - iDefaultRight;
-            int iBtnX = iFormW - iDefaultRight - iDefaultButtonWidth;
+            int iTextX = iLayoutLeft + iLayoutLabelWidth + iLayoutGap;
+            int iTextW = iFormW - iTextX - iLayoutGap - iLayoutButtonWidth - iLayoutRight;
+            int iBtnX = iFormW - iLayoutRight - iLayoutButtonWidth;
 
             // --- Row 1: Source files ---
-            int y = iDefaultTop;
+            int y = iLayoutTop;
             var lblSource = new System.Windows.Forms.Label();
             lblSource.Text = "&Source files:";
             lblSource.AutoSize = false;
-            lblSource.Location = new System.Drawing.Point(iDefaultLeft, y + 3);
-            lblSource.Size = new System.Drawing.Size(iDefaultLabelWidth, iDefaultTextHeight);
+            lblSource.Location = new System.Drawing.Point(iLayoutLeft, y + 3);
+            lblSource.Size = new System.Drawing.Size(iLayoutLabelWidth, iLayoutTextHeight);
             lblSource.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             frm.Controls.Add(lblSource);
 
@@ -1140,14 +1147,14 @@ namespace twoHtm
                 ? defaultSourceForGui()
                 : sSource;
             txtSource.Location = new System.Drawing.Point(iTextX, y);
-            txtSource.Size = new System.Drawing.Size(iTextW, iDefaultTextHeight);
+            txtSource.Size = new System.Drawing.Size(iTextW, iLayoutTextHeight);
             txtSource.TabIndex = 0;
             frm.Controls.Add(txtSource);
 
             var btnBrowseSource = new System.Windows.Forms.Button();
             btnBrowseSource.Text = "&Browse source...";
             btnBrowseSource.Location = new System.Drawing.Point(iBtnX, y - 1);
-            btnBrowseSource.Size = new System.Drawing.Size(iDefaultButtonWidth, iDefaultButtonHeight);
+            btnBrowseSource.Size = new System.Drawing.Size(iLayoutButtonWidth, iLayoutButtonHeight);
             btnBrowseSource.TabIndex = 1;
             btnBrowseSource.UseVisualStyleBackColor = true;
             // Click handler wired below, after txtOut is declared
@@ -1155,12 +1162,12 @@ namespace twoHtm
             frm.Controls.Add(btnBrowseSource);
 
             // --- Row 2: Output directory ---
-            y += iDefaultTextHeight + iDefaultRowGap;
+            y += iLayoutTextHeight + iLayoutRowGap;
             var lblOut = new System.Windows.Forms.Label();
             lblOut.Text = "&Output directory:";
             lblOut.AutoSize = false;
-            lblOut.Location = new System.Drawing.Point(iDefaultLeft, y + 3);
-            lblOut.Size = new System.Drawing.Size(iDefaultLabelWidth, iDefaultTextHeight);
+            lblOut.Location = new System.Drawing.Point(iLayoutLeft, y + 3);
+            lblOut.Size = new System.Drawing.Size(iLayoutLabelWidth, iLayoutTextHeight);
             lblOut.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             frm.Controls.Add(lblOut);
 
@@ -1173,20 +1180,20 @@ namespace twoHtm
             // a starting point to edit from. If the source can't
             // be resolved to a directory (multiple patterns, bad
             // path), leave the field blank.
-            if (!string.IsNullOrWhiteSpace(sOutDir)) {
-                txtOut.Text = sOutDir;
+            if (!string.IsNullOrWhiteSpace(sOutputDir)) {
+                txtOut.Text = sOutputDir;
             } else {
                 txtOut.Text = deriveOutputDirFromSource(txtSource.Text);
             }
             txtOut.Location = new System.Drawing.Point(iTextX, y);
-            txtOut.Size = new System.Drawing.Size(iTextW, iDefaultTextHeight);
+            txtOut.Size = new System.Drawing.Size(iTextW, iLayoutTextHeight);
             txtOut.TabIndex = 2;
             frm.Controls.Add(txtOut);
 
             var btnBrowseOut = new System.Windows.Forms.Button();
             btnBrowseOut.Text = "&Choose output...";
             btnBrowseOut.Location = new System.Drawing.Point(iBtnX, y - 1);
-            btnBrowseOut.Size = new System.Drawing.Size(iDefaultButtonWidth, iDefaultButtonHeight);
+            btnBrowseOut.Size = new System.Drawing.Size(iLayoutButtonWidth, iLayoutButtonHeight);
             btnBrowseOut.TabIndex = 3;
             btnBrowseOut.UseVisualStyleBackColor = true;
             btnBrowseOut.Click += (s, e) => {
@@ -1225,38 +1232,38 @@ namespace twoHtm
             // A 2x2 grid gives each label room to display fully and
             // aligns checkboxes predictably for screen-reader
             // traversal.
-            y += iDefaultTextHeight + iDefaultRowGap * 2;
-            int iChkW = (iFormW - iDefaultLeft - iDefaultRight) / 2;
+            y += iLayoutTextHeight + iLayoutRowGap * 2;
+            int iChkW = (iFormW - iLayoutLeft - iLayoutRight) / 2;
             var chkStrip = new System.Windows.Forms.CheckBox();
             chkStrip.Text = "Strip &images";
             chkStrip.Checked = bStrip;
-            chkStrip.Location = new System.Drawing.Point(iDefaultLeft, y);
-            chkStrip.Size = new System.Drawing.Size(iChkW, iDefaultTextHeight);
+            chkStrip.Location = new System.Drawing.Point(iLayoutLeft, y);
+            chkStrip.Size = new System.Drawing.Size(iChkW, iLayoutTextHeight);
             chkStrip.TabIndex = 4;
             frm.Controls.Add(chkStrip);
 
             var chkPlain = new System.Windows.Forms.CheckBox();
             chkPlain.Text = "&Plain text";
             chkPlain.Checked = bPlain;
-            chkPlain.Location = new System.Drawing.Point(iDefaultLeft + iChkW, y);
-            chkPlain.Size = new System.Drawing.Size(iChkW, iDefaultTextHeight);
+            chkPlain.Location = new System.Drawing.Point(iLayoutLeft + iChkW, y);
+            chkPlain.Size = new System.Drawing.Size(iChkW, iLayoutTextHeight);
             chkPlain.TabIndex = 5;
             frm.Controls.Add(chkPlain);
 
-            y += iDefaultTextHeight + iDefaultRowGap;
+            y += iLayoutTextHeight + iLayoutRowGap;
             var chkForce = new System.Windows.Forms.CheckBox();
             chkForce.Text = "&Force replacements";
             chkForce.Checked = bForce;
-            chkForce.Location = new System.Drawing.Point(iDefaultLeft, y);
-            chkForce.Size = new System.Drawing.Size(iChkW, iDefaultTextHeight);
+            chkForce.Location = new System.Drawing.Point(iLayoutLeft, y);
+            chkForce.Size = new System.Drawing.Size(iChkW, iLayoutTextHeight);
             chkForce.TabIndex = 6;
             frm.Controls.Add(chkForce);
 
             var chkView = new System.Windows.Forms.CheckBox();
             chkView.Text = "&View output";
             chkView.Checked = bView;
-            chkView.Location = new System.Drawing.Point(iDefaultLeft + iChkW, y);
-            chkView.Size = new System.Drawing.Size(iChkW, iDefaultTextHeight);
+            chkView.Location = new System.Drawing.Point(iLayoutLeft + iChkW, y);
+            chkView.Size = new System.Drawing.Size(iChkW, iLayoutTextHeight);
             chkView.TabIndex = 7;
             frm.Controls.Add(chkView);
 
@@ -1264,20 +1271,20 @@ namespace twoHtm
             // are "meta" options that affect persistence/diagnostics
             // rather than the conversion itself, so they sit
             // together below the conversion-control checkboxes.
-            y += iDefaultTextHeight + iDefaultRowGap;
+            y += iLayoutTextHeight + iLayoutRowGap;
             var chkLog = new System.Windows.Forms.CheckBox();
             chkLog.Text = "&Log session";
             chkLog.Checked = bLog;
-            chkLog.Location = new System.Drawing.Point(iDefaultLeft, y);
-            chkLog.Size = new System.Drawing.Size(iChkW, iDefaultTextHeight);
+            chkLog.Location = new System.Drawing.Point(iLayoutLeft, y);
+            chkLog.Size = new System.Drawing.Size(iChkW, iLayoutTextHeight);
             chkLog.TabIndex = 8;
             frm.Controls.Add(chkLog);
 
             var chkUseCfg = new System.Windows.Forms.CheckBox();
             chkUseCfg.Text = "&Use configuration";
             chkUseCfg.Checked = bUseCfg;
-            chkUseCfg.Location = new System.Drawing.Point(iDefaultLeft + iChkW, y);
-            chkUseCfg.Size = new System.Drawing.Size(iChkW, iDefaultTextHeight);
+            chkUseCfg.Location = new System.Drawing.Point(iLayoutLeft + iChkW, y);
+            chkUseCfg.Size = new System.Drawing.Size(iChkW, iLayoutTextHeight);
             chkUseCfg.TabIndex = 9;
             frm.Controls.Add(chkUseCfg);
 
@@ -1286,11 +1293,11 @@ namespace twoHtm
             // commit or cancel the dialog), OK and Cancel on the
             // right. This matches Microsoft's UX guidance for
             // secondary dialogs.
-            y += iDefaultTextHeight + iDefaultRowGap * 2;
+            y += iLayoutTextHeight + iLayoutRowGap * 2;
             var btnHelp = new System.Windows.Forms.Button();
             btnHelp.Text = "&Help";
-            btnHelp.Location = new System.Drawing.Point(iDefaultLeft, y);
-            btnHelp.Size = new System.Drawing.Size(iDefaultButtonWidth, iDefaultButtonHeight);
+            btnHelp.Location = new System.Drawing.Point(iLayoutLeft, y);
+            btnHelp.Size = new System.Drawing.Size(iLayoutButtonWidth, iLayoutButtonHeight);
             btnHelp.TabIndex = 10;
             btnHelp.UseVisualStyleBackColor = true;
             btnHelp.Click += (s, e) => showHelpMessage();
@@ -1299,8 +1306,8 @@ namespace twoHtm
             var btnDefaults = new System.Windows.Forms.Button();
             btnDefaults.Text = "&Default settings";
             btnDefaults.Location = new System.Drawing.Point(
-                iDefaultLeft + iDefaultButtonWidth + iDefaultGap, y);
-            btnDefaults.Size = new System.Drawing.Size(iDefaultButtonWidth, iDefaultButtonHeight);
+                iLayoutLeft + iLayoutButtonWidth + iLayoutGap, y);
+            btnDefaults.Size = new System.Drawing.Size(iLayoutButtonWidth, iLayoutButtonHeight);
             btnDefaults.TabIndex = 11;
             btnDefaults.UseVisualStyleBackColor = true;
             // Default settings: full reset. Resets the dialog's
@@ -1330,8 +1337,8 @@ namespace twoHtm
             btnOk.Text = "OK";
             btnOk.DialogResult = System.Windows.Forms.DialogResult.OK;
             btnOk.Location = new System.Drawing.Point(
-                iFormW - iDefaultRight - 2 * iDefaultButtonWidth - iDefaultGap, y);
-            btnOk.Size = new System.Drawing.Size(iDefaultButtonWidth, iDefaultButtonHeight);
+                iFormW - iLayoutRight - 2 * iLayoutButtonWidth - iLayoutGap, y);
+            btnOk.Size = new System.Drawing.Size(iLayoutButtonWidth, iLayoutButtonHeight);
             btnOk.TabIndex = 12;
             btnOk.UseVisualStyleBackColor = true;
             frm.Controls.Add(btnOk);
@@ -1340,7 +1347,7 @@ namespace twoHtm
             btnCancel.Text = "Cancel";
             btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             btnCancel.Location = new System.Drawing.Point(iBtnX, y);
-            btnCancel.Size = new System.Drawing.Size(iDefaultButtonWidth, iDefaultButtonHeight);
+            btnCancel.Size = new System.Drawing.Size(iLayoutButtonWidth, iLayoutButtonHeight);
             btnCancel.TabIndex = 13;
             btnCancel.UseVisualStyleBackColor = true;
             frm.Controls.Add(btnCancel);
@@ -1351,23 +1358,23 @@ namespace twoHtm
 
             // Adjust form height to the last control's bottom + margin.
             frm.ClientSize = new System.Drawing.Size(iFormW,
-                y + iDefaultButtonHeight + iDefaultTop);
+                y + iLayoutButtonHeight + iLayoutTop);
 
             // Show it.
-            var oResult = frm.ShowDialog();
-            if (oResult != System.Windows.Forms.DialogResult.OK) return false;
+            var dialogResult = frm.ShowDialog();
+            if (dialogResult != System.Windows.Forms.DialogResult.OK) return false;
 
             // Hand values back.
             sSource = txtSource.Text.Trim();
-            sOutDir = txtOut.Text.Trim();
+            sOutputDir = txtOut.Text.Trim();
             // If the output directory is still blank at submission
             // time, derive a sensible default from the source field.
             // For a single entry that is a folder or a
             // wildcard/file, use the containing folder; for multiple
             // entries, leave blank (caller falls back to the current
             // working directory).
-            if (string.IsNullOrEmpty(sOutDir))
-                sOutDir = deriveOutputDirFromSource(sSource);
+            if (string.IsNullOrEmpty(sOutputDir))
+                sOutputDir = deriveOutputDirFromSource(sSource);
             bStrip = chkStrip.Checked;
             bPlain = chkPlain.Checked;
             bForce = chkForce.Checked;
@@ -1433,20 +1440,55 @@ namespace twoHtm
         // Returns null if the user cancels.
         private static string pickFolder(string sDesc, string sSeed)
         {
-            // If sSeed is a path that includes a wildcard (e.g.
-            // "C:\docs\*.xlsx"), trim down to the directory. Also
-            // handle the case where sSeed is a nonexistent path.
-            string sInitial = sSeed ?? "";
+            // Pick a sensible initial folder. The strategy follows
+            // Microsoft's guidance: start at the user's most recent
+            // intent (the seed -- typically the current text in the
+            // Source files or Output directory field) when one is
+            // usable, otherwise fall back to the user's Documents
+            // folder.
+            //
+            // The seed may be:
+            //   - empty
+            //   - a folder path
+            //   - a wildcard pattern (e.g. C:\docs\*.xlsx)
+            //   - a single file path
+            //   - a space-separated list of any of the above
+            //   - a quoted path containing spaces
+            //   - a non-existent path the user typed manually
+            string sInitial = "";
             try {
-                if (!string.IsNullOrEmpty(sInitial)) {
-                    string sMaybeDir = sInitial;
-                    if (sInitial.IndexOfAny(new[] { '*', '?' }) >= 0)
-                        sMaybeDir = System.IO.Path.GetDirectoryName(sInitial) ?? "";
-                    if (!System.IO.Directory.Exists(sMaybeDir))
-                        sMaybeDir = "";
-                    sInitial = sMaybeDir;
+                string sCandidate = (sSeed ?? "").Trim();
+                if (!string.IsNullOrEmpty(sCandidate)) {
+                    // Inspect the first space-separated token only.
+                    int iSpace = sCandidate.IndexOf(' ');
+                    if (iSpace >= 0) sCandidate = sCandidate.Substring(0, iSpace);
+                    sCandidate = sCandidate.Trim('"');
+                    // Wildcards: strip the basename and inspect the parent.
+                    if (sCandidate.IndexOfAny(new[] { '*', '?' }) >= 0)
+                        sCandidate = System.IO.Path.GetDirectoryName(sCandidate) ?? "";
+                    if (!string.IsNullOrEmpty(sCandidate)) {
+                        if (System.IO.Directory.Exists(sCandidate)) {
+                            sInitial = System.IO.Path.GetFullPath(sCandidate);
+                        } else if (System.IO.File.Exists(sCandidate)) {
+                            sInitial = System.IO.Path.GetDirectoryName(
+                                System.IO.Path.GetFullPath(sCandidate));
+                        } else {
+                            string sParent = System.IO.Path.GetDirectoryName(sCandidate);
+                            if (!string.IsNullOrEmpty(sParent) &&
+                                System.IO.Directory.Exists(sParent))
+                                sInitial = System.IO.Path.GetFullPath(sParent);
+                        }
+                    }
                 }
             } catch { sInitial = ""; }
+
+            // Documents fallback when no usable seed.
+            if (string.IsNullOrEmpty(sInitial)) {
+                try {
+                    sInitial = Environment.GetFolderPath(
+                        Environment.SpecialFolder.MyDocuments);
+                } catch { sInitial = ""; }
+            }
 
             using (var dlg = new System.Windows.Forms.FolderBrowserDialog()) {
                 dlg.Description = sDesc;
@@ -1478,12 +1520,12 @@ namespace twoHtm
                 "in %LOCALAPPDATA%\\2htm\\2htm.ini\r\n\r\n" +
                 "Press Cancel to exit without converting.\r\n\r\n" +
                 "Open the full documentation in your browser?";
-            var oResult = System.Windows.Forms.MessageBox.Show(sMsg,
+            var dialogResult = System.Windows.Forms.MessageBox.Show(sMsg,
                 "2htm — Help",
                 System.Windows.Forms.MessageBoxButtons.YesNo,
                 System.Windows.Forms.MessageBoxIcon.Information,
                 System.Windows.Forms.MessageBoxDefaultButton.Button2);
-            if (oResult == System.Windows.Forms.DialogResult.Yes) {
+            if (dialogResult == System.Windows.Forms.DialogResult.Yes) {
                 launchReadMe();
             }
         }
@@ -1516,10 +1558,10 @@ namespace twoHtm
                 return;
             }
             try {
-                var oPsi = new System.Diagnostics.ProcessStartInfo(sTarget) {
+                var processStartInfo = new System.Diagnostics.ProcessStartInfo(sTarget) {
                     UseShellExecute = true
                 };
-                System.Diagnostics.Process.Start(oPsi);
+                System.Diagnostics.Process.Start(processStartInfo);
             } catch (Exception ex) {
                 System.Windows.Forms.MessageBox.Show(
                     "Could not open the documentation:\r\n\r\n" + ex.Message,
@@ -1638,11 +1680,11 @@ namespace twoHtm
     // -----------------------------------------------------------------
     public static class logger
     {
-        private static StreamWriter oWriter = null;
+        private static StreamWriter writer = null;
 
         public static void open(string sDir = "")
         {
-            if (oWriter != null) return;
+            if (writer != null) return;
             // Resolve the directory: use sDir if non-empty and it is
             // (or can be) an existing directory; otherwise fall back
             // to the current directory. We deliberately do NOT create
@@ -1659,30 +1701,30 @@ namespace twoHtm
             } catch {
                 sLogDir = Directory.GetCurrentDirectory();
             }
-            string sPath = Path.Combine(sLogDir, "2htm.log");
+            string sPath = Path.Combine(sLogDir, program.sLogFileName);
             try {
                 // UTF-8 WITH BOM so the user's editor/screen reader
                 // knows the encoding without guessing. append:false
                 // truncates any prior log so the file reflects only
                 // the current session.
-                oWriter = new StreamWriter(sPath, append: false, encoding: new UTF8Encoding(true));
-                oWriter.AutoFlush = true;
+                writer = new StreamWriter(sPath, append: false, encoding: new UTF8Encoding(true));
+                writer.AutoFlush = true;
             } catch (Exception ex) {
                 Console.Error.WriteLine("[WARN] Could not open log file '" + sPath + "': " +
                     ex.Message + ". Continuing without a log.");
-                oWriter = null;
+                writer = null;
             }
         }
 
         public static void close()
         {
-            if (oWriter == null) return;
+            if (writer == null) return;
             try {
-                oWriter.WriteLine(stamp("INFO") + " Log closed.");
-                oWriter.Flush();
-                oWriter.Close();
+                writer.WriteLine(stamp("INFO") + " Log closed.");
+                writer.Flush();
+                writer.Close();
             } catch { }
-            oWriter = null;
+            writer = null;
         }
 
         public static void info(string sMsg)  { write("INFO", sMsg); }
@@ -1692,9 +1734,9 @@ namespace twoHtm
 
         private static void write(string sLevel, string sMsg)
         {
-            if (oWriter == null) return;
+            if (writer == null) return;
             try {
-                oWriter.WriteLine(stamp(sLevel) + " " + sMsg);
+                writer.WriteLine(stamp(sLevel) + " " + sMsg);
             } catch { }
         }
 
@@ -1720,9 +1762,9 @@ namespace twoHtm
         public static string check(string sPath, string sExtLower)
         {
             try {
-                var oInfo = new FileInfo(sPath);
-                if (!oInfo.Exists) return "File does not exist.";
-                if (oInfo.Length == 0) return "File is empty (zero bytes).";
+                var fileInfo = new FileInfo(sPath);
+                if (!fileInfo.Exists) return "File does not exist.";
+                if (fileInfo.Length == 0) return "File is empty (zero bytes).";
 
                 switch (sExtLower) {
                     case ".docx": case ".xlsx": case ".pptx":
@@ -1740,11 +1782,11 @@ namespace twoHtm
         private static string checkOpenXml(string sPath, string sExtLower)
         {
             try {
-                using (var oZip = ZipFile.OpenRead(sPath)) {
+                using (var zipArchive = ZipFile.OpenRead(sPath)) {
                     // All OOXML files must contain [Content_Types].xml.
                     bool bHasContentTypes = false;
-                    foreach (var oEntry in oZip.Entries) {
-                        if (string.Equals(oEntry.FullName, "[Content_Types].xml",
+                    foreach (var zipEntry in zipArchive.Entries) {
+                        if (string.Equals(zipEntry.FullName, "[Content_Types].xml",
                             StringComparison.OrdinalIgnoreCase)) {
                             bHasContentTypes = true;
                             break;
@@ -1765,8 +1807,8 @@ namespace twoHtm
         {
             try {
                 byte[] binHead = new byte[8];
-                using (var oFs = File.OpenRead(sPath)) {
-                    int iRead = oFs.Read(binHead, 0, 8);
+                using (var fileStream = File.OpenRead(sPath)) {
+                    int iRead = fileStream.Read(binHead, 0, 8);
                     if (iRead < 8)
                         return "File appears corrupted: too short to be a valid Office document.";
                 }
@@ -1789,7 +1831,7 @@ namespace twoHtm
     {
         public const string sTempPrefix = "2htm_";
         public const string sProcessName = "2htm";
-        private static readonly Regex oDirRegex =
+        private static readonly Regex regexDir =
             new Regex(@"^2htm_(?<pid>\d+)_[0-9a-fA-F]{32}$", RegexOptions.Compiled);
 
         public static string newRunDir()
@@ -1815,10 +1857,10 @@ namespace twoHtm
                 if (!Directory.Exists(sTemp)) return;
                 foreach (string sDir in Directory.GetDirectories(sTemp, sTempPrefix + "*")) {
                     try {
-                        Match oMatch = oDirRegex.Match(Path.GetFileName(sDir));
-                        if (!oMatch.Success) continue;
+                        Match match = regexDir.Match(Path.GetFileName(sDir));
+                        if (!match.Success) continue;
                         int iPid;
-                        if (!int.TryParse(oMatch.Groups["pid"].Value, out iPid)) continue;
+                        if (!int.TryParse(match.Groups["pid"].Value, out iPid)) continue;
                         if (isOurProcessAlive(iPid)) continue;
                         Directory.Delete(sDir, true);
                     } catch { }
@@ -1829,11 +1871,11 @@ namespace twoHtm
         private static bool isOurProcessAlive(int iPid)
         {
             try {
-                Process oProc = Process.GetProcessById(iPid);
+                Process process = Process.GetProcessById(iPid);
                 try {
-                    return string.Equals(oProc.ProcessName, sProcessName,
+                    return string.Equals(process.ProcessName, sProcessName,
                         StringComparison.OrdinalIgnoreCase);
-                } finally { oProc.Dispose(); }
+                } finally { process.Dispose(); }
             } catch (ArgumentException) { return false; }
             catch { return true; }
         }
@@ -1898,7 +1940,7 @@ namespace twoHtm
             return sb.ToString();
         }
 
-        public static void writeHead(TextWriter oOut, Dictionary<string, string> dMeta,
+        public static void writeHead(TextWriter writer, Dictionary<string, string> dMeta,
             string sDocTitle = null)
         {
             string sLang = dMeta.TryGetValue("language", out var sL) && !string.IsNullOrWhiteSpace(sL)
@@ -1917,35 +1959,35 @@ namespace twoHtm
             }
             if (string.IsNullOrWhiteSpace(sDocTitle)) sDocTitle = sMetaTitle;
 
-            oOut.WriteLine(sDefaultDocType);
-            oOut.WriteLine("<html lang=\"" + escape(sLang) + "\">");
-            oOut.WriteLine("<head>");
-            oOut.WriteLine("<meta charset=\"" + sDefaultCharset + "\">");
-            oOut.WriteLine("<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">");
-            oOut.WriteLine("<meta name=\"generator\" content=\"" + escape(sGeneratorName) + "\">");
-            oOut.WriteLine("<title>" + escape(sMetaTitle) + "</title>");
+            writer.WriteLine(sDefaultDocType);
+            writer.WriteLine("<html lang=\"" + escape(sLang) + "\">");
+            writer.WriteLine("<head>");
+            writer.WriteLine("<meta charset=\"" + sDefaultCharset + "\">");
+            writer.WriteLine("<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">");
+            writer.WriteLine("<meta name=\"generator\" content=\"" + escape(sGeneratorName) + "\">");
+            writer.WriteLine("<title>" + escape(sMetaTitle) + "</title>");
 
-            writeMetaTag(oOut, "author", dMeta);
-            writeMetaTag(oOut, "description", dMeta);
-            writeMetaTag(oOut, "keywords", dMeta);
+            writeMetaTag(writer, "author", dMeta);
+            writeMetaTag(writer, "description", dMeta);
+            writeMetaTag(writer, "keywords", dMeta);
 
-            writeDc(oOut, "DC.title", dMeta, "title");
-            writeDc(oOut, "DC.creator", dMeta, "author");
-            writeDc(oOut, "DC.subject", dMeta, "subject");
-            writeDc(oOut, "DC.description", dMeta, "description");
-            writeDc(oOut, "DC.date.created", dMeta, "created");
-            writeDc(oOut, "DC.date.modified", dMeta, "modified");
-            writeDc(oOut, "DC.language", dMeta, "language");
+            writeDc(writer, "DC.title", dMeta, "title");
+            writeDc(writer, "DC.creator", dMeta, "author");
+            writeDc(writer, "DC.subject", dMeta, "subject");
+            writeDc(writer, "DC.description", dMeta, "description");
+            writeDc(writer, "DC.date.created", dMeta, "created");
+            writeDc(writer, "DC.date.modified", dMeta, "modified");
+            writeDc(writer, "DC.language", dMeta, "language");
 
-            oOut.WriteLine("<style>" + sBaseCss + "</style>");
-            oOut.WriteLine("</head>");
-            oOut.WriteLine("<body>");
+            writer.WriteLine("<style>" + sBaseCss + "</style>");
+            writer.WriteLine("</head>");
+            writer.WriteLine("<body>");
 
-            oOut.WriteLine("<h1 id=\"doc-title\">" + escape(sDocTitle) + "</h1>");
-            writeMetaHeader(oOut, dMeta);
+            writer.WriteLine("<h1 id=\"doc-title\">" + escape(sDocTitle) + "</h1>");
+            writeMetaHeader(writer, dMeta);
         }
 
-        private static void writeMetaHeader(TextWriter oOut, Dictionary<string, string> dMeta)
+        private static void writeMetaHeader(TextWriter writer, Dictionary<string, string> dMeta)
         {
             // Author and Created date render as a visible byline
             // paragraph ("By Author \u2014 Date"). This reads naturally
@@ -1956,7 +1998,7 @@ namespace twoHtm
             bool bCreated = hasVal(dMeta, "created");
             bool bByline  = bAuthor || bCreated;
 
-            if (bByline) writeByline(oOut, dMeta, bAuthor, bCreated);
+            if (bByline) writeByline(writer, dMeta, bAuthor, bCreated);
 
             // The remaining document properties (subject, keywords,
             // description, last-modified date) are rendered as plain
@@ -1965,26 +2007,26 @@ namespace twoHtm
             // A reader will see "Subject: ...", "Last modified: ...",
             // etc., which is readable by itself and does not require
             // the extra structural chrome.
-            writeMetaParagraph(oOut, dMeta, "subject",     "Subject");
-            writeMetaParagraph(oOut, dMeta, "description", "Description");
-            writeMetaParagraph(oOut, dMeta, "keywords",    "Keywords");
-            writeMetaDateParagraph(oOut, dMeta, "modified", "Last modified");
+            writeMetaParagraph(writer, dMeta, "subject",     "Subject");
+            writeMetaParagraph(writer, dMeta, "description", "Description");
+            writeMetaParagraph(writer, dMeta, "keywords",    "Keywords");
+            writeMetaDateParagraph(writer, dMeta, "modified", "Last modified");
         }
 
-        private static void writeMetaParagraph(TextWriter oOut, Dictionary<string, string> d,
+        private static void writeMetaParagraph(TextWriter writer, Dictionary<string, string> d,
             string sKey, string sLabel)
         {
             if (!hasVal(d, sKey)) return;
-            oOut.WriteLine("<p>" + escape(sLabel) + ": " + escape(d[sKey]) + ".</p>");
+            writer.WriteLine("<p>" + escape(sLabel) + ": " + escape(d[sKey]) + ".</p>");
         }
 
-        private static void writeMetaDateParagraph(TextWriter oOut, Dictionary<string, string> d,
+        private static void writeMetaDateParagraph(TextWriter writer, Dictionary<string, string> d,
             string sKey, string sLabel)
         {
             if (!hasVal(d, sKey)) return;
             string sIso = d[sKey];
             string sDisplay = formatIsoDateForDisplay(sIso);
-            oOut.WriteLine("<p>" + escape(sLabel) + ": " +
+            writer.WriteLine("<p>" + escape(sLabel) + ": " +
                 "<time datetime=\"" + escape(sIso) + "\">" + escape(sDisplay) + "</time>.</p>");
         }
 
@@ -2004,7 +2046,7 @@ namespace twoHtm
         }
 
         // Emits a byline paragraph combining author and date.
-        private static void writeByline(TextWriter oOut, Dictionary<string, string> dMeta,
+        private static void writeByline(TextWriter writer, Dictionary<string, string> dMeta,
             bool bAuthor, bool bCreated)
         {
             var sb = new StringBuilder();
@@ -2022,49 +2064,49 @@ namespace twoHtm
                 sb.Append("</time>");
             }
             sb.Append("</p>");
-            oOut.WriteLine(sb.ToString());
+            writer.WriteLine(sb.ToString());
         }
 
         private static bool hasVal(Dictionary<string, string> d, string sKey) =>
             d.TryGetValue(sKey, out var sV) && !string.IsNullOrWhiteSpace(sV);
 
-        public static void writeFoot(TextWriter oOut)
+        public static void writeFoot(TextWriter writer)
         {
-            oOut.WriteLine("</body>");
-            oOut.WriteLine("</html>");
+            writer.WriteLine("</body>");
+            writer.WriteLine("</html>");
         }
 
-        private static void writeMetaTag(TextWriter oOut, string sName, Dictionary<string, string> dMeta)
+        private static void writeMetaTag(TextWriter writer, string sName, Dictionary<string, string> dMeta)
         {
             if (dMeta.TryGetValue(sName, out var sVal) && !string.IsNullOrWhiteSpace(sVal))
-                oOut.WriteLine("<meta name=\"" + sName + "\" content=\"" + escape(sVal) + "\">");
+                writer.WriteLine("<meta name=\"" + sName + "\" content=\"" + escape(sVal) + "\">");
         }
 
-        private static void writeDc(TextWriter oOut, string sDcName, Dictionary<string, string> dMeta,
+        private static void writeDc(TextWriter writer, string sDcName, Dictionary<string, string> dMeta,
             string sKey)
         {
             if (dMeta.TryGetValue(sKey, out var sVal) && !string.IsNullOrWhiteSpace(sVal))
-                oOut.WriteLine("<meta name=\"" + sDcName + "\" content=\"" + escape(sVal) + "\">");
+                writer.WriteLine("<meta name=\"" + sDcName + "\" content=\"" + escape(sVal) + "\">");
         }
 
         public static string shiftAndClampHeadings(string sHtmlFragment, int iTargetMin)
         {
             if (string.IsNullOrEmpty(sHtmlFragment)) return sHtmlFragment;
 
-            var oHeadRe = new Regex(@"<(?<slash>/?)h(?<level>[1-6])(?<rest>[^>]*)>",
+            var regexHead = new Regex(@"<(?<slash>/?)h(?<level>[1-6])(?<rest>[^>]*)>",
                 RegexOptions.IgnoreCase);
-            var oMatches = oHeadRe.Matches(sHtmlFragment);
-            if (oMatches.Count == 0) return sHtmlFragment;
+            var matches = regexHead.Matches(sHtmlFragment);
+            if (matches.Count == 0) return sHtmlFragment;
 
             int iMin = 6;
-            foreach (Match m in oMatches) {
+            foreach (Match m in matches) {
                 int iLvl = int.Parse(m.Groups["level"].Value);
                 if (iLvl < iMin) iMin = iLvl;
             }
 
             int iShift = iTargetMin - iMin;
 
-            return oHeadRe.Replace(sHtmlFragment, m => {
+            return regexHead.Replace(sHtmlFragment, m => {
                 int iLvl = int.Parse(m.Groups["level"].Value);
                 int iNew = iLvl + iShift;
                 if (iNew < iTargetMin) iNew = iTargetMin;
@@ -2089,22 +2131,22 @@ namespace twoHtm
         {
             if (string.IsNullOrEmpty(sHtmlFragment)) return sHtmlFragment;
 
-            var oImgRe = new Regex(@"<img\b[^>]*>", RegexOptions.IgnoreCase);
-            var oSrcRe = new Regex(@"\bsrc\s*=\s*(?:""([^""]*)""|'([^']*)')",
+            var regexImg = new Regex(@"<img\b[^>]*>", RegexOptions.IgnoreCase);
+            var regexSrc = new Regex(@"\bsrc\s*=\s*(?:""([^""]*)""|'([^']*)')",
                 RegexOptions.IgnoreCase);
 
-            return oImgRe.Replace(sHtmlFragment, m => {
+            return regexImg.Replace(sHtmlFragment, m => {
                 string sTag = m.Value;
 
                 // When --strip-images is active, strip every <img> tag
                 // regardless of whether its file exists.
                 if (program.bStripImages) return "";
 
-                var oSrc = oSrcRe.Match(sTag);
-                if (!oSrc.Success) return ""; // no src at all
-                string sRel = oSrc.Groups[1].Success
-                    ? oSrc.Groups[1].Value
-                    : oSrc.Groups[2].Value;
+                var matchSrc = regexSrc.Match(sTag);
+                if (!matchSrc.Success) return ""; // no src at all
+                string sRel = matchSrc.Groups[1].Success
+                    ? matchSrc.Groups[1].Value
+                    : matchSrc.Groups[2].Value;
                 if (string.IsNullOrWhiteSpace(sRel)) return "";
 
                 // If the src is already a data URL, keep the tag as-is.
@@ -2139,7 +2181,7 @@ namespace twoHtm
 
                 // Replace just the src attribute value; preserve
                 // everything else (alt, width, height, etc.).
-                string sResult = oSrcRe.Replace(sTag,
+                string sResult = regexSrc.Replace(sTag,
                     mm => {
                         string sQuote = mm.Value.Contains("\"") ? "\"" : "'";
                         return "src=" + sQuote + sNewSrc + sQuote;
@@ -2185,7 +2227,7 @@ namespace twoHtm
         // callers should emit paragraphs instead. We still produce a
         // valid table in that case (role="presentation" so screen
         // readers do not apply tabular semantics to it).
-        public static void writeTable(TextWriter oOut, object[,] aValues,
+        public static void writeTable(TextWriter writer, object[,] aValues,
             string sCaption, string sSummaryId, string sSummaryText,
             bool bColHeaders, bool bRowHeaders)
         {
@@ -2200,7 +2242,7 @@ namespace twoHtm
                 abColIsNumeric[c] = isColumnNumeric(aValues, iRows, iR0, iC0, c, iBodyStart);
 
             if (!string.IsNullOrEmpty(sSummaryId)) {
-                oOut.WriteLine("<p id=\"" + sSummaryId + "\" class=\"visually-hidden\">" +
+                writer.WriteLine("<p id=\"" + sSummaryId + "\" class=\"visually-hidden\">" +
                     escape(sSummaryText) + "</p>");
             }
 
@@ -2208,12 +2250,12 @@ namespace twoHtm
                 " aria-describedby=\"" + sSummaryId + "\"";
             if (!bColHeaders && !bRowHeaders)
                 sTableAttrs += " role=\"presentation\"";
-            oOut.WriteLine("<table" + sTableAttrs + ">");
+            writer.WriteLine("<table" + sTableAttrs + ">");
             if (!string.IsNullOrEmpty(sCaption))
-                oOut.WriteLine("<caption>" + escape(sCaption) + "</caption>");
+                writer.WriteLine("<caption>" + escape(sCaption) + "</caption>");
 
             if (bColHeaders) {
-                oOut.WriteLine("<thead><tr>");
+                writer.WriteLine("<thead><tr>");
                 for (int c = 0; c < iCols; c++) {
                     object oVal = aValues[iR0, iC0 + c];
                     string sCls = abColIsNumeric[c] ? " class=\"num\"" : "";
@@ -2221,29 +2263,29 @@ namespace twoHtm
                     // a corner between them; WCAG recommends emitting
                     // it as a bare <th> with no scope.
                     if (c == 0 && bRowHeaders)
-                        oOut.WriteLine("<th" + sCls + ">" + cellToHtml(oVal) + "</th>");
+                        writer.WriteLine("<th" + sCls + ">" + cellToHtml(oVal) + "</th>");
                     else
-                        oOut.WriteLine("<th scope=\"col\"" + sCls + ">" + cellToHtml(oVal) + "</th>");
+                        writer.WriteLine("<th scope=\"col\"" + sCls + ">" + cellToHtml(oVal) + "</th>");
                 }
-                oOut.WriteLine("</tr></thead>");
+                writer.WriteLine("</tr></thead>");
             }
 
-            oOut.WriteLine("<tbody>");
+            writer.WriteLine("<tbody>");
             for (int r = iBodyStart; r < iRows; r++) {
-                oOut.WriteLine("<tr>");
+                writer.WriteLine("<tr>");
                 for (int c = 0; c < iCols; c++) {
                     object oVal = aValues[iR0 + r, iC0 + c];
                     bool bNum = abColIsNumeric[c] && isNumeric(oVal);
                     string sCls = bNum ? " class=\"num\"" : "";
                     if (c == 0 && bRowHeaders)
-                        oOut.WriteLine("<th scope=\"row\"" + sCls + ">" + cellToHtml(oVal) + "</th>");
+                        writer.WriteLine("<th scope=\"row\"" + sCls + ">" + cellToHtml(oVal) + "</th>");
                     else
-                        oOut.WriteLine("<td" + sCls + ">" + cellToHtml(oVal) + "</td>");
+                        writer.WriteLine("<td" + sCls + ">" + cellToHtml(oVal) + "</td>");
                 }
-                oOut.WriteLine("</tr>");
+                writer.WriteLine("</tr>");
             }
-            oOut.WriteLine("</tbody>");
-            oOut.WriteLine("</table>");
+            writer.WriteLine("</tbody>");
+            writer.WriteLine("</table>");
         }
 
         private static bool isColumnNumeric(object[,] aValues, int iRows, int iR0, int iC0,
@@ -2330,12 +2372,12 @@ namespace twoHtm
 
         public static dynamic createApp(string sProgId)
         {
-            Type oType = Type.GetTypeFromProgID(sProgId);
-            if (oType == null)
+            Type type = Type.GetTypeFromProgID(sProgId);
+            if (type == null)
                 throw new InvalidOperationException(
                     "Office component '" + sProgId + "' is not installed or not registered. " +
                     "This file cannot be converted without it.");
-            return Activator.CreateInstance(oType);
+            return Activator.CreateInstance(type);
         }
 
         public static void release(object oObj)
@@ -2348,14 +2390,14 @@ namespace twoHtm
         public static void killOrphanOfficeProcesses(string sProcessName)
         {
             try {
-                foreach (Process oProc in Process.GetProcessesByName(sProcessName)) {
+                foreach (Process process in Process.GetProcessesByName(sProcessName)) {
                     try {
-                        if (oProc.MainWindowHandle == IntPtr.Zero) {
-                            oProc.Kill();
-                            oProc.WaitForExit(3000);
+                        if (process.MainWindowHandle == IntPtr.Zero) {
+                            process.Kill();
+                            process.WaitForExit(3000);
                         }
                     } catch { }
-                    finally { oProc.Dispose(); }
+                    finally { process.Dispose(); }
                 }
             } catch { }
         }
@@ -2407,13 +2449,13 @@ namespace twoHtm
         // Retry only for transient RPC failures. Deterministic failures
         // propagate after the first attempt. Returns the 1-based attempt
         // number that succeeded, so the caller can log it.
-        public static int retryOfficeOp(Action oAction, string sProcessName, int iMaxAttempts = 3)
+        public static int retryOfficeOp(Action action, string sProcessName, int iMaxAttempts = 3)
         {
             int iAttempt = 0;
             int iWaitMs = 1500;
             while (true) {
                 iAttempt++;
-                try { oAction(); return iAttempt; }
+                try { action(); return iAttempt; }
                 catch (Exception ex) when (isRpcFailure(ex) && iAttempt < iMaxAttempts) {
                     // Retry is normal recovery; log only, no console
                     // chatter to keep per-file output concise.
@@ -2534,9 +2576,9 @@ namespace twoHtm
 
         private static string extractBody(string sHtm)
         {
-            var oMatch = Regex.Match(sHtm, @"<body[^>]*>(?<b>.*?)</body>",
+            var match = Regex.Match(sHtm, @"<body[^>]*>(?<b>.*?)</body>",
                 RegexOptions.Singleline | RegexOptions.IgnoreCase);
-            string sBody = oMatch.Success ? oMatch.Groups["b"].Value : sHtm;
+            string sBody = match.Success ? match.Groups["b"].Value : sHtm;
             sBody = Regex.Replace(sBody, @"<style.*?</style>", "", RegexOptions.Singleline | RegexOptions.IgnoreCase);
             sBody = Regex.Replace(sBody, @"<script.*?</script>", "", RegexOptions.Singleline | RegexOptions.IgnoreCase);
             sBody = Regex.Replace(sBody, @"<o:p>.*?</o:p>", "", RegexOptions.Singleline | RegexOptions.IgnoreCase);
@@ -2548,12 +2590,12 @@ namespace twoHtm
         private static void writeFinal(string sOutPath, Dictionary<string, string> dMeta,
             string sDocTitle, string sBody)
         {
-            using (var oOut = new StreamWriter(sOutPath, false, new UTF8Encoding(false))) {
-                htmlWriter.writeHead(oOut, dMeta, sDocTitle);
-                oOut.WriteLine("<main aria-labelledby=\"doc-title\">");
-                oOut.WriteLine(sBody);
-                oOut.WriteLine("</main>");
-                htmlWriter.writeFoot(oOut);
+            using (var writer = new StreamWriter(sOutPath, false, new UTF8Encoding(false))) {
+                htmlWriter.writeHead(writer, dMeta, sDocTitle);
+                writer.WriteLine("<main aria-labelledby=\"doc-title\">");
+                writer.WriteLine(sBody);
+                writer.WriteLine("</main>");
+                htmlWriter.writeFoot(writer);
             }
         }
 
@@ -2654,14 +2696,14 @@ namespace twoHtm
                 var dMeta = comHelper.readBuiltInDocProps(oWb);
                 string sDocTitle = pickTitle(dMeta, sInPath);
 
-                using (var oOut = new StreamWriter(sOutPath, false, new UTF8Encoding(false))) {
-                    htmlWriter.writeHead(oOut, dMeta, sDocTitle);
+                using (var writer = new StreamWriter(sOutPath, false, new UTF8Encoding(false))) {
+                    htmlWriter.writeHead(writer, dMeta, sDocTitle);
                     // No synthetic navigation: Excel workbooks have
                     // no notion of a table-of-contents in the source.
                     // Sheets are accessed naturally via the <h2>
                     // section headings below.
 
-                    oOut.WriteLine("<main aria-labelledby=\"doc-title\">");
+                    writer.WriteLine("<main aria-labelledby=\"doc-title\">");
                     int iCount = comHelper.op("Excel: Worksheets.Count",
                         () => (int)oWb.Worksheets.Count);
                     for (int i = 1; i <= iCount; i++) {
@@ -2670,14 +2712,14 @@ namespace twoHtm
                             int iLocal = i;
                             oSheet = comHelper.op("Excel: Worksheets[" + iLocal + "]",
                                 () => (object)oWb.Worksheets[iLocal]);
-                            writeSheet(oOut, oSheet, i);
+                            writeSheet(writer, oSheet, i);
                         } finally {
                             comHelper.release(oSheet);
                         }
                     }
-                    oOut.WriteLine("</main>");
+                    writer.WriteLine("</main>");
 
-                    htmlWriter.writeFoot(oOut);
+                    htmlWriter.writeFoot(writer);
                 }
                 bWritten = true;
             } finally {
@@ -2710,7 +2752,7 @@ namespace twoHtm
             public bool bRowHeaders;    // col 1 qualifies as row headers
         }
 
-        private static void writeSheet(TextWriter oOut, dynamic oSheet, int iNum)
+        private static void writeSheet(TextWriter writer, dynamic oSheet, int iNum)
         {
             string sName = comHelper.op("Excel: Sheet[" + iNum + "].Name",
                 () => Convert.ToString(oSheet.Name, CultureInfo.InvariantCulture));
@@ -2719,15 +2761,15 @@ namespace twoHtm
                 ? "<span class=\"visually-hidden\">Sheet </span>" + iNum +
                   ": " + htmlWriter.escape(sName.Trim())
                 : "Sheet " + iNum;
-            oOut.WriteLine("<section id=\"sheet-" + iNum + "\" aria-labelledby=\"sheet-" + iNum + "-h\">");
-            oOut.WriteLine("<h2 id=\"sheet-" + iNum + "-h\">" + sHeading + "</h2>");
+            writer.WriteLine("<section id=\"sheet-" + iNum + "\" aria-labelledby=\"sheet-" + iNum + "-h\">");
+            writer.WriteLine("<h2 id=\"sheet-" + iNum + "-h\">" + sHeading + "</h2>");
 
             logger.info("Sheet " + iNum + " (" + (bHasName ? sName : "unnamed") + "): discovering regions");
             var lsRegions = discoverRegions(oSheet);
             logger.info("Sheet " + iNum + ": found " + lsRegions.Count + " region(s)");
             if (lsRegions.Count == 0) {
-                oOut.WriteLine("<p><em>(empty sheet)</em></p>");
-                oOut.WriteLine("</section>");
+                writer.WriteLine("<p><em>(empty sheet)</em></p>");
+                writer.WriteLine("</section>");
                 return;
             }
 
@@ -2739,9 +2781,9 @@ namespace twoHtm
                     " at row " + oRegion.iRow + ", col " + oRegion.iCol +
                     " (colHeaders=" + oRegion.bColHeaders +
                     ", rowHeaders=" + oRegion.bRowHeaders + ")");
-                writeRegion(oOut, oRegion, sName, iNum, iIdx, lsRegions.Count);
+                writeRegion(writer, oRegion, sName, iNum, iIdx, lsRegions.Count);
             }
-            oOut.WriteLine("</section>");
+            writer.WriteLine("</section>");
         }
 
         // Discovers disjoint rectangular regions on the sheet, using
@@ -2856,8 +2898,8 @@ namespace twoHtm
                 var lsBuilt = new List<sheetRegion>();
                 foreach (var sAddr in lsKept) {
                     var oRegion = dRegions[sAddr];
-                    var oBuilt = buildRegion(oRegion);
-                    if (oBuilt != null) lsBuilt.Add(oBuilt);
+                    var regionBuilt = buildRegion(oRegion);
+                    if (regionBuilt != null) lsBuilt.Add(regionBuilt);
                 }
                 lsBuilt.Sort((a, b) => {
                     int d = a.iRow.CompareTo(b.iRow);
@@ -3232,47 +3274,47 @@ namespace twoHtm
         //     iMinDataRows / iMinDataCols floor → paragraphs.
         //     (The "table" would be almost all header.)
         //   - Otherwise → <table> with appropriate scope markup.
-        private static void writeRegion(TextWriter oOut, sheetRegion oReg,
+        private static void writeRegion(TextWriter writer, sheetRegion region,
             string sSheetName, int iSheetNum, int iRegionIdx, int iRegionTotal)
         {
-            if (!oReg.bColHeaders && !oReg.bRowHeaders) {
-                writeRegionAsParagraphs(oOut, oReg);
+            if (!region.bColHeaders && !region.bRowHeaders) {
+                writeRegionAsParagraphs(writer, region);
                 return;
             }
 
             // Compute required total dimensions based on which
             // axes got classified. Every header row or column
             // consumes one unit from the corresponding total.
-            int iReqRows = iMinDataRows + (oReg.bColHeaders ? 1 : 0);
-            int iReqCols = iMinDataCols + (oReg.bRowHeaders ? 1 : 0);
-            if (oReg.iRows < iReqRows || oReg.iCols < iReqCols) {
+            int iReqRows = iMinDataRows + (region.bColHeaders ? 1 : 0);
+            int iReqCols = iMinDataCols + (region.bRowHeaders ? 1 : 0);
+            if (region.iRows < iReqRows || region.iCols < iReqCols) {
                 // Not enough data behind the classified headers.
                 // Demote: clear the flags and render the whole
                 // region as paragraphs.
-                oReg.bColHeaders = false;
-                oReg.bRowHeaders = false;
-                writeRegionAsParagraphs(oOut, oReg);
+                region.bColHeaders = false;
+                region.bRowHeaders = false;
+                writeRegionAsParagraphs(writer, region);
                 return;
             }
 
             string sSummaryId = "sheet-" + iSheetNum + "-region-" + iRegionIdx + "-summary";
-            string sSummaryText = buildRegionSummary(oReg);
-            string sCaption = buildRegionCaption(sSheetName, oReg, iRegionIdx, iRegionTotal);
-            htmlWriter.writeTable(oOut, oReg.aValues, sCaption, sSummaryId, sSummaryText,
-                oReg.bColHeaders, oReg.bRowHeaders);
+            string sSummaryText = buildRegionSummary(region);
+            string sCaption = buildRegionCaption(sSheetName, region, iRegionIdx, iRegionTotal);
+            htmlWriter.writeTable(writer, region.aValues, sCaption, sSummaryId, sSummaryText,
+                region.bColHeaders, region.bRowHeaders);
         }
 
-        private static string buildRegionSummary(sheetRegion oReg)
+        private static string buildRegionSummary(sheetRegion region)
         {
             var sb = new StringBuilder();
-            sb.Append("Table with ").Append(oReg.iRows).Append(" rows and ");
-            sb.Append(oReg.iCols).Append(" columns.");
-            if (oReg.bColHeaders) sb.Append(" First row contains column headers.");
-            if (oReg.bRowHeaders) sb.Append(" First column contains row headers.");
+            sb.Append("Table with ").Append(region.iRows).Append(" rows and ");
+            sb.Append(region.iCols).Append(" columns.");
+            if (region.bColHeaders) sb.Append(" First row contains column headers.");
+            if (region.bRowHeaders) sb.Append(" First column contains row headers.");
             return sb.ToString();
         }
 
-        private static string buildRegionCaption(string sSheetName, sheetRegion oReg,
+        private static string buildRegionCaption(string sSheetName, sheetRegion region,
             int iRegionIdx, int iRegionTotal)
         {
             // If the sheet has only one region, omit the region
@@ -3282,8 +3324,8 @@ namespace twoHtm
             sb.Append(sSheetName);
             if (iRegionTotal > 1)
                 sb.Append(" \u2014 region ").Append(iRegionIdx);
-            sb.Append(" \u2014 ").Append(oReg.iRows).Append(" rows \u00d7 ")
-              .Append(oReg.iCols).Append(" columns");
+            sb.Append(" \u2014 ").Append(region.iRows).Append(" rows \u00d7 ")
+              .Append(region.iCols).Append(" columns");
             return sb.ToString();
         }
 
@@ -3291,14 +3333,14 @@ namespace twoHtm
         // non-empty row with cells joined by spaces. Used when the
         // region has neither column nor row headers (e.g., a single
         // column of prose or a loose block of text).
-        private static void writeRegionAsParagraphs(TextWriter oOut, sheetRegion oReg)
+        private static void writeRegionAsParagraphs(TextWriter writer, sheetRegion region)
         {
-            int iR0 = oReg.aValues.GetLowerBound(0);
-            int iC0 = oReg.aValues.GetLowerBound(1);
-            for (int r = 0; r < oReg.iRows; r++) {
+            int iR0 = region.aValues.GetLowerBound(0);
+            int iC0 = region.aValues.GetLowerBound(1);
+            for (int r = 0; r < region.iRows; r++) {
                 var sb = new StringBuilder();
-                for (int c = 0; c < oReg.iCols; c++) {
-                    object oVal = oReg.aValues[iR0 + r, iC0 + c];
+                for (int c = 0; c < region.iCols; c++) {
+                    object oVal = region.aValues[iR0 + r, iC0 + c];
                     if (oVal == null) continue;
                     string sCell = Convert.ToString(oVal, CultureInfo.InvariantCulture);
                     if (string.IsNullOrWhiteSpace(sCell)) continue;
@@ -3306,7 +3348,7 @@ namespace twoHtm
                     sb.Append(sCell.Trim());
                 }
                 if (sb.Length > 0)
-                    oOut.WriteLine("<p>" + htmlWriter.escape(sb.ToString()) + "</p>");
+                    writer.WriteLine("<p>" + htmlWriter.escape(sb.ToString()) + "</p>");
             }
         }
 
@@ -3348,7 +3390,7 @@ namespace twoHtm
                         UpdateLinks: 0,
                         AddToMru: false));
 
-                using (var oOut = new StreamWriter(sOutPath, false, new UTF8Encoding(true))) {
+                using (var writer = new StreamWriter(sOutPath, false, new UTF8Encoding(true))) {
                     int iCount = comHelper.op("Excel: Worksheets.Count",
                         () => (int)oWb.Worksheets.Count);
                     for (int i = 1; i <= iCount; i++) {
@@ -3357,7 +3399,7 @@ namespace twoHtm
                             int iLocal = i;
                             oSheet = comHelper.op("Excel: Worksheets[" + iLocal + "]",
                                 () => (object)oWb.Worksheets[iLocal]);
-                            writeSheetAsText(oOut, oSheet, i);
+                            writeSheetAsText(writer, oSheet, i);
                         } finally {
                             comHelper.release(oSheet);
                         }
@@ -3374,14 +3416,14 @@ namespace twoHtm
             }
         }
 
-        private static void writeSheetAsText(TextWriter oOut, dynamic oSheet, int iNum)
+        private static void writeSheetAsText(TextWriter writer, dynamic oSheet, int iNum)
         {
             string sName = "";
             try { sName = Convert.ToString(oSheet.Name, CultureInfo.InvariantCulture); } catch { }
             string sHeader = string.IsNullOrWhiteSpace(sName)
                 ? "=== Sheet " + iNum + " ==="
                 : "=== Sheet " + iNum + ": " + sName.Trim() + " ===";
-            oOut.WriteLine(sHeader);
+            writer.WriteLine(sHeader);
 
             // Text mode uses the same region-discovery infrastructure
             // as HTML mode. This ensures consistent behaviour between
@@ -3394,37 +3436,37 @@ namespace twoHtm
                 "): discovering regions");
             var lsRegions = discoverRegions(oSheet);
             logger.info("Sheet " + iNum + ": found " + lsRegions.Count + " region(s)");
-            if (lsRegions.Count == 0) { oOut.WriteLine(); return; }
+            if (lsRegions.Count == 0) { writer.WriteLine(); return; }
 
             bool bFirst = true;
             foreach (var oRegion in lsRegions) {
-                if (!bFirst) oOut.WriteLine();
+                if (!bFirst) writer.WriteLine();
                 bFirst = false;
-                writeRegionAsText(oOut, oRegion);
+                writeRegionAsText(writer, oRegion);
             }
-            oOut.WriteLine();
+            writer.WriteLine();
         }
 
         // Emits one region as tab-separated text, one row per line.
         // Tabs and newlines inside cell values are replaced with
         // spaces so each spreadsheet row is exactly one line in the
         // output.
-        private static void writeRegionAsText(TextWriter oOut, sheetRegion oReg)
+        private static void writeRegionAsText(TextWriter writer, sheetRegion region)
         {
-            int iR0 = oReg.aValues.GetLowerBound(0);
-            int iC0 = oReg.aValues.GetLowerBound(1);
-            for (int r = 0; r < oReg.iRows; r++) {
+            int iR0 = region.aValues.GetLowerBound(0);
+            int iC0 = region.aValues.GetLowerBound(1);
+            for (int r = 0; r < region.iRows; r++) {
                 var sb = new StringBuilder();
-                for (int c = 0; c < oReg.iCols; c++) {
+                for (int c = 0; c < region.iCols; c++) {
                     if (c > 0) sb.Append('\t');
-                    object oCell = oReg.aValues[iR0 + r, iC0 + c];
+                    object oCell = region.aValues[iR0 + r, iC0 + c];
                     if (oCell != null) {
                         string sCell = Convert.ToString(oCell, CultureInfo.InvariantCulture);
                         sCell = sCell.Replace('\t', ' ').Replace('\r', ' ').Replace('\n', ' ');
                         sb.Append(sCell);
                     }
                 }
-                oOut.WriteLine(sb.ToString());
+                writer.WriteLine(sb.ToString());
             }
         }
     }
@@ -3442,12 +3484,12 @@ namespace twoHtm
 
             List<string[]> lsRows = parseCsv(File.ReadAllText(sInPath, Encoding.UTF8));
             if (lsRows.Count == 0) {
-                using (var oOut = new StreamWriter(sOutPath, false, new UTF8Encoding(false))) {
-                    htmlWriter.writeHead(oOut, dMeta);
-                    oOut.WriteLine("<main aria-labelledby=\"doc-title\">");
-                    oOut.WriteLine("<p><em>(empty CSV)</em></p>");
-                    oOut.WriteLine("</main>");
-                    htmlWriter.writeFoot(oOut);
+                using (var writer = new StreamWriter(sOutPath, false, new UTF8Encoding(false))) {
+                    htmlWriter.writeHead(writer, dMeta);
+                    writer.WriteLine("<main aria-labelledby=\"doc-title\">");
+                    writer.WriteLine("<p><em>(empty CSV)</em></p>");
+                    writer.WriteLine("</main>");
+                    htmlWriter.writeFoot(writer);
                 }
                 return;
             }
@@ -3463,18 +3505,18 @@ namespace twoHtm
                     aValues[r, c] = c < asRow.Length ? (object)asRow[c] : null;
             }
 
-            using (var oOut = new StreamWriter(sOutPath, false, new UTF8Encoding(false))) {
-                htmlWriter.writeHead(oOut, dMeta);
-                oOut.WriteLine("<main aria-labelledby=\"doc-title\">");
+            using (var writer = new StreamWriter(sOutPath, false, new UTF8Encoding(false))) {
+                htmlWriter.writeHead(writer, dMeta);
+                writer.WriteLine("<main aria-labelledby=\"doc-title\">");
                 string sSummaryId = "csv-summary";
                 string sSummaryText = "Table with " + iRows + " rows and " + iCols + " columns. " +
                     "First row contains column headers.";
                 string sCaption = Path.GetFileName(sInPath) + " \u2014 " +
                     iRows + " rows \u00d7 " + iCols + " columns";
-                htmlWriter.writeTable(oOut, aValues, sCaption, sSummaryId, sSummaryText,
+                htmlWriter.writeTable(writer, aValues, sCaption, sSummaryId, sSummaryText,
                     bColHeaders: true, bRowHeaders: false);
-                oOut.WriteLine("</main>");
-                htmlWriter.writeFoot(oOut);
+                writer.WriteLine("</main>");
+                htmlWriter.writeFoot(writer);
             }
         }
 
@@ -3580,13 +3622,13 @@ namespace twoHtm
                 var dMeta = comHelper.readBuiltInDocProps(oPres);
                 string sDocTitle = pickTitle(dMeta, sInPath);
 
-                using (var oOut = new StreamWriter(sOutPath, false, new UTF8Encoding(false))) {
-                    htmlWriter.writeHead(oOut, dMeta, sDocTitle);
+                using (var writer = new StreamWriter(sOutPath, false, new UTF8Encoding(false))) {
+                    htmlWriter.writeHead(writer, dMeta, sDocTitle);
                     // No synthetic navigation: PowerPoint decks have
                     // no notion of a table-of-contents in the source.
                     // Slides are accessed naturally via the <h2>
                     // section headings below.
-                    oOut.WriteLine("<main aria-labelledby=\"doc-title\">");
+                    writer.WriteLine("<main aria-labelledby=\"doc-title\">");
 
                     int iCount = comHelper.op("PowerPoint: Slides.Count",
                         () => (int)oPres.Slides.Count);
@@ -3596,12 +3638,12 @@ namespace twoHtm
                             int iLocal = i;
                             oSlide = comHelper.op("PowerPoint: Slides[" + iLocal + "]",
                                 () => (object)oPres.Slides[iLocal]);
-                            writeSlide(oOut, oSlide, i, sTempDir);
+                            writeSlide(writer, oSlide, i, sTempDir);
                         } finally { comHelper.release(oSlide); }
                     }
 
-                    oOut.WriteLine("</main>");
-                    htmlWriter.writeFoot(oOut);
+                    writer.WriteLine("</main>");
+                    htmlWriter.writeFoot(writer);
                 }
 
                 // Reaching here means the output stream closed cleanly
@@ -3635,7 +3677,7 @@ namespace twoHtm
             return Path.GetFileNameWithoutExtension(sInPath);
         }
 
-        private static void writeSlide(TextWriter oOut, dynamic oSlide, int iIdx, string sTempDir)
+        private static void writeSlide(TextWriter writer, dynamic oSlide, int iIdx, string sTempDir)
         {
             string sTitle = getSlideTitle(oSlide);
             bool bHasTitle = !string.IsNullOrWhiteSpace(sTitle);
@@ -3650,8 +3692,8 @@ namespace twoHtm
                 (bHasTitle ? sTitle.Trim() : "untitled") +
                 "): " + iShapeCount + " shape(s)");
 
-            oOut.WriteLine("<section id=\"slide-" + iIdx + "\" aria-labelledby=\"slide-" + iIdx + "-h\">");
-            oOut.WriteLine("<h2 id=\"slide-" + iIdx + "-h\">" + sHeading + "</h2>");
+            writer.WriteLine("<section id=\"slide-" + iIdx + "\" aria-labelledby=\"slide-" + iIdx + "-h\">");
+            writer.WriteLine("<h2 id=\"slide-" + iIdx + "-h\">" + sHeading + "</h2>");
 
             // Emit the shape content: text from text-bearing shapes
             // AND any picture shapes embedded in the slide (unless
@@ -3660,20 +3702,20 @@ namespace twoHtm
             // from screen readers. The slide's text is rendered
             // semantically; embedded pictures are embedded as
             // individual images.
-            oOut.WriteLine("<div class=\"slide-text\">");
-            writeShapeContent(oOut, oSlide, iIdx, sTempDir);
-            oOut.WriteLine("</div>");
+            writer.WriteLine("<div class=\"slide-text\">");
+            writeShapeContent(writer, oSlide, iIdx, sTempDir);
+            writer.WriteLine("</div>");
 
             string sNotes = getSpeakerNotes(oSlide);
             if (!string.IsNullOrWhiteSpace(sNotes)) {
-                oOut.WriteLine("<aside class=\"slide-notes\" aria-label=\"Speaker notes for slide " + iIdx + "\">");
-                oOut.WriteLine("<p><strong>Speaker notes:</strong></p>");
+                writer.WriteLine("<aside class=\"slide-notes\" aria-label=\"Speaker notes for slide " + iIdx + "\">");
+                writer.WriteLine("<p><strong>Speaker notes:</strong></p>");
                 foreach (var sLine in sNotes.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
-                    oOut.WriteLine("<p>" + htmlWriter.escape(sLine.Trim()) + "</p>");
-                oOut.WriteLine("</aside>");
+                    writer.WriteLine("<p>" + htmlWriter.escape(sLine.Trim()) + "</p>");
+                writer.WriteLine("</aside>");
             }
 
-            oOut.WriteLine("</section>");
+            writer.WriteLine("</section>");
         }
 
         // All interior lookups are wrapped in try/catch so that a
@@ -3716,7 +3758,7 @@ namespace twoHtm
         //   * group shapes are walked recursively
         //   * everything else with text renders as <p> or <ul> based
         //     on its ParagraphFormat.Bullet.Type
-        private static void writeShapeContent(TextWriter oOut, dynamic oSlide, int iSlideIdx,
+        private static void writeShapeContent(TextWriter writer, dynamic oSlide, int iSlideIdx,
             string sTempDir)
         {
             dynamic oShapes = null;
@@ -3730,7 +3772,7 @@ namespace twoHtm
                     dynamic oShape = null;
                     try {
                         oShape = oShapes[i];
-                        writeOneShape(oOut, oShape, iSlideIdx, sTempDir, ref iPicSeq, true);
+                        writeOneShape(writer, oShape, iSlideIdx, sTempDir, ref iPicSeq, true);
                     } catch {
                         // Skip any shape that refuses to cooperate.
                     } finally { comHelper.release(oShape); }
@@ -3744,7 +3786,7 @@ namespace twoHtm
         // where the title is emitted as the <h2>). For nested group
         // shapes bSkipTitle is still true — a title placeholder
         // inside a group is still redundant with the slide heading.
-        private static void writeOneShape(TextWriter oOut, dynamic oShape, int iSlideIdx,
+        private static void writeOneShape(TextWriter writer, dynamic oShape, int iSlideIdx,
             string sTempDir, ref int iPicSeq, bool bSkipTitle)
         {
             if (bSkipTitle && isTitleShape(oShape)) return;
@@ -3763,7 +3805,7 @@ namespace twoHtm
                         dynamic oChild = null;
                         try {
                             oChild = oInner[j];
-                            writeOneShape(oOut, oChild, iSlideIdx, sTempDir, ref iPicSeq, bSkipTitle);
+                            writeOneShape(writer, oChild, iSlideIdx, sTempDir, ref iPicSeq, bSkipTitle);
                         } catch { }
                         finally { comHelper.release(oChild); }
                     }
@@ -3775,13 +3817,13 @@ namespace twoHtm
             // Picture shapes: export and embed.
             if (isPictureShape(oShape)) {
                 iPicSeq++;
-                writePictureShape(oOut, oShape, iSlideIdx, iPicSeq, sTempDir);
+                writePictureShape(writer, oShape, iSlideIdx, iPicSeq, sTempDir);
                 return;
             }
 
             // Table shapes: render as <table>.
             if (iType == iMsoTable || hasTable(oShape)) {
-                writeTableShape(oOut, oShape);
+                writeTableShape(writer, oShape);
                 return;
             }
 
@@ -3790,19 +3832,19 @@ namespace twoHtm
             // picture in the slide; we surface the title so that
             // readers know what the chart is about.
             if (hasChart(oShape)) {
-                writeChartTitle(oOut, oShape);
+                writeChartTitle(writer, oShape);
                 // fall through — a chart shape may also have a
                 // text frame with additional text on some layouts
             }
 
             // Text-effect (WordArt) shapes: emit the effect text.
             if (iType == iMsoTextEffect) {
-                writeTextEffectShape(oOut, oShape);
+                writeTextEffectShape(writer, oShape);
                 return;
             }
 
             // Everything else: emit text content if present.
-            if (hasNonEmptyText(oShape)) writeTextShape(oOut, oShape);
+            if (hasNonEmptyText(oShape)) writeTextShape(writer, oShape);
         }
 
         // True if this shape exposes a Chart child object.
@@ -3819,7 +3861,7 @@ namespace twoHtm
             catch { return false; }
         }
 
-        private static void writeChartTitle(TextWriter oOut, dynamic oShape)
+        private static void writeChartTitle(TextWriter writer, dynamic oShape)
         {
             string sTitle = "";
             try {
@@ -3833,11 +3875,11 @@ namespace twoHtm
                 comHelper.release(oChart);
             } catch { }
             if (!string.IsNullOrWhiteSpace(sTitle))
-                oOut.WriteLine("<p><strong>Chart: </strong>" +
+                writer.WriteLine("<p><strong>Chart: </strong>" +
                     htmlWriter.escape(sTitle.Trim()) + "</p>");
         }
 
-        private static void writeTextEffectShape(TextWriter oOut, dynamic oShape)
+        private static void writeTextEffectShape(TextWriter writer, dynamic oShape)
         {
             string sText = "";
             try {
@@ -3847,13 +3889,13 @@ namespace twoHtm
                 comHelper.release(oFx);
             } catch { }
             if (!string.IsNullOrWhiteSpace(sText))
-                oOut.WriteLine("<p>" + htmlWriter.escape(sText.Trim()) + "</p>");
+                writer.WriteLine("<p>" + htmlWriter.escape(sText.Trim()) + "</p>");
         }
 
         // Emits a table-shape as an HTML table. First row becomes the
         // <thead>, remaining rows are <tbody>. Cells are accessed via
         // oTable.Cell(row, col), 1-indexed.
-        private static void writeTableShape(TextWriter oOut, dynamic oShape)
+        private static void writeTableShape(TextWriter writer, dynamic oShape)
         {
             dynamic oTable = null;
             try {
@@ -3863,12 +3905,12 @@ namespace twoHtm
                 try { iCols = (int)oTable.Columns.Count; } catch { return; }
                 if (iRows == 0 || iCols == 0) return;
 
-                oOut.WriteLine("<table>");
+                writer.WriteLine("<table>");
                 for (int r = 1; r <= iRows; r++) {
                     bool bIsHeader = (r == 1);
-                    if (bIsHeader) oOut.WriteLine("<thead>");
-                    if (r == 2)    oOut.WriteLine("<tbody>");
-                    oOut.WriteLine("<tr>");
+                    if (bIsHeader) writer.WriteLine("<thead>");
+                    if (r == 2)    writer.WriteLine("<tbody>");
+                    writer.WriteLine("<tr>");
                     for (int c = 1; c <= iCols; c++) {
                         string sCell = "";
                         dynamic oCell = null;
@@ -3882,14 +3924,14 @@ namespace twoHtm
                         } catch { }
                         finally { comHelper.release(oCell); }
                         string sTag = bIsHeader ? "th" : "td";
-                        oOut.WriteLine("<" + sTag + ">" +
+                        writer.WriteLine("<" + sTag + ">" +
                             htmlWriter.escape((sCell ?? "").Trim()) + "</" + sTag + ">");
                     }
-                    oOut.WriteLine("</tr>");
-                    if (bIsHeader) oOut.WriteLine("</thead>");
-                    if (r == iRows && iRows > 1) oOut.WriteLine("</tbody>");
+                    writer.WriteLine("</tr>");
+                    if (bIsHeader) writer.WriteLine("</thead>");
+                    if (r == iRows && iRows > 1) writer.WriteLine("</tbody>");
                 }
-                oOut.WriteLine("</table>");
+                writer.WriteLine("</table>");
             } catch { }
             finally { comHelper.release(oTable); }
         }
@@ -3899,7 +3941,7 @@ namespace twoHtm
         // ordered list. Also handles subtitle placeholders by rendering
         // their content as a byline-style paragraph rather than a
         // heading.
-        private static void writeTextShape(TextWriter oOut, dynamic oShape)
+        private static void writeTextShape(TextWriter writer, dynamic oShape)
         {
             dynamic oTr = null;
             try {
@@ -3926,21 +3968,21 @@ namespace twoHtm
                 bool bIsSubtitle = isSubtitleShape(oShape);
 
                 if (iBulletType == iPpBulletUnnumbered) {
-                    oOut.WriteLine("<ul>");
+                    writer.WriteLine("<ul>");
                     foreach (var s in lsParas)
-                        oOut.WriteLine("<li>" + htmlWriter.escape(s) + "</li>");
-                    oOut.WriteLine("</ul>");
+                        writer.WriteLine("<li>" + htmlWriter.escape(s) + "</li>");
+                    writer.WriteLine("</ul>");
                 } else if (iBulletType == iPpBulletNumbered) {
-                    oOut.WriteLine("<ol>");
+                    writer.WriteLine("<ol>");
                     foreach (var s in lsParas)
-                        oOut.WriteLine("<li>" + htmlWriter.escape(s) + "</li>");
-                    oOut.WriteLine("</ol>");
+                        writer.WriteLine("<li>" + htmlWriter.escape(s) + "</li>");
+                    writer.WriteLine("</ol>");
                 } else {
                     // Plain paragraphs. Subtitle placeholders get a
                     // special class so they can be styled as a byline.
                     string sClass = bIsSubtitle ? " class=\"subtitle\"" : "";
                     foreach (var s in lsParas)
-                        oOut.WriteLine("<p" + sClass + ">" + htmlWriter.escape(s) + "</p>");
+                        writer.WriteLine("<p" + sClass + ">" + htmlWriter.escape(s) + "</p>");
                 }
             } finally { comHelper.release(oTr); }
         }
@@ -3978,7 +4020,7 @@ namespace twoHtm
         // (set by the slide author) as the alt attribute. When
         // --strip-images is set, the shape is skipped entirely (no <img>
         // tag, no alt-text-only placeholder).
-        private static void writePictureShape(TextWriter oOut, dynamic oShape,
+        private static void writePictureShape(TextWriter writer, dynamic oShape,
             int iSlideIdx, int iPicSeq, string sTempDir)
         {
             if (program.bStripImages) return;
@@ -3999,10 +4041,10 @@ namespace twoHtm
 
                 byte[] binPng = File.ReadAllBytes(sPng);
                 string sB64 = Convert.ToBase64String(binPng);
-                oOut.WriteLine("<figure>");
-                oOut.WriteLine("<img src=\"data:image/png;base64," + sB64 +
+                writer.WriteLine("<figure>");
+                writer.WriteLine("<img src=\"data:image/png;base64," + sB64 +
                     "\" alt=\"" + htmlWriter.escape(sAlt) + "\">");
-                oOut.WriteLine("</figure>");
+                writer.WriteLine("</figure>");
                 try { File.Delete(sPng); } catch { }
             } catch {
                 // If the export fails, skip the picture silently.
@@ -4087,7 +4129,7 @@ namespace twoHtm
                         Untitled: iMsoFalse,
                         WithWindow: iMsoFalse));
 
-                using (var oOut = new StreamWriter(sOutPath, false, new UTF8Encoding(true))) {
+                using (var writer = new StreamWriter(sOutPath, false, new UTF8Encoding(true))) {
                     int iCount = comHelper.op("PowerPoint: Slides.Count",
                         () => (int)oPres.Slides.Count);
                     for (int i = 1; i <= iCount; i++) {
@@ -4096,7 +4138,7 @@ namespace twoHtm
                             int iLocal = i;
                             oSlide = comHelper.op("PowerPoint: Slides[" + iLocal + "]",
                                 () => (object)oPres.Slides[iLocal]);
-                            writeSlideAsText(oOut, oSlide, i);
+                            writeSlideAsText(writer, oSlide, i);
                         } finally { comHelper.release(oSlide); }
                     }
                 }
@@ -4111,7 +4153,7 @@ namespace twoHtm
             }
         }
 
-        private static void writeSlideAsText(TextWriter oOut, dynamic oSlide, int iIdx)
+        private static void writeSlideAsText(TextWriter writer, dynamic oSlide, int iIdx)
         {
             string sTitle = getSlideTitle(oSlide);
             bool bHasTitle = !string.IsNullOrWhiteSpace(sTitle);
@@ -4124,7 +4166,7 @@ namespace twoHtm
             string sHeader = bHasTitle
                 ? "=== Slide " + iIdx + ": " + sTitle.Trim() + " ==="
                 : "=== Slide " + iIdx + " ===";
-            oOut.WriteLine(sHeader);
+            writer.WriteLine(sHeader);
 
             // Iterate text-bearing shapes (skipping title, which we
             // already wrote). Picture shapes are ignored in plain-
@@ -4139,7 +4181,7 @@ namespace twoHtm
                     dynamic oShape = null;
                     try {
                         oShape = oShapes[i];
-                        writeOneShapeAsText(oOut, oShape, true);
+                        writeOneShapeAsText(writer, oShape, true);
                     } catch { }
                     finally { comHelper.release(oShape); }
                 }
@@ -4148,21 +4190,21 @@ namespace twoHtm
 
             string sNotes = getSpeakerNotes(oSlide);
             if (!string.IsNullOrWhiteSpace(sNotes)) {
-                oOut.WriteLine();
-                oOut.WriteLine("Speaker notes:");
+                writer.WriteLine();
+                writer.WriteLine("Speaker notes:");
                 foreach (var sLine in sNotes.Split(new[] { '\r', '\n' },
                     StringSplitOptions.RemoveEmptyEntries)) {
                     string s = sLine.Trim();
-                    if (s.Length > 0) oOut.WriteLine(s);
+                    if (s.Length > 0) writer.WriteLine(s);
                 }
             }
-            oOut.WriteLine();
+            writer.WriteLine();
         }
 
         // Text-mode analogue of writeOneShape. Skips pictures (no
         // text to extract) but handles groups, tables, text effects,
         // charts, and text-bearing shapes.
-        private static void writeOneShapeAsText(TextWriter oOut, dynamic oShape, bool bSkipTitle)
+        private static void writeOneShapeAsText(TextWriter writer, dynamic oShape, bool bSkipTitle)
         {
             if (bSkipTitle && isTitleShape(oShape)) return;
 
@@ -4179,7 +4221,7 @@ namespace twoHtm
                         dynamic oChild = null;
                         try {
                             oChild = oInner[j];
-                            writeOneShapeAsText(oOut, oChild, bSkipTitle);
+                            writeOneShapeAsText(writer, oChild, bSkipTitle);
                         } catch { }
                         finally { comHelper.release(oChild); }
                     }
@@ -4191,24 +4233,24 @@ namespace twoHtm
             if (isPictureShape(oShape)) return;  // nothing to emit in text mode
 
             if (iType == iMsoTable || hasTable(oShape)) {
-                writeTableShapeAsText(oOut, oShape);
+                writeTableShapeAsText(writer, oShape);
                 return;
             }
 
             if (hasChart(oShape)) {
-                writeChartTitleAsText(oOut, oShape);
+                writeChartTitleAsText(writer, oShape);
                 // fall through
             }
 
             if (iType == iMsoTextEffect) {
-                writeTextEffectAsText(oOut, oShape);
+                writeTextEffectAsText(writer, oShape);
                 return;
             }
 
-            if (hasNonEmptyText(oShape)) writeTextShapeAsText(oOut, oShape);
+            if (hasNonEmptyText(oShape)) writeTextShapeAsText(writer, oShape);
         }
 
-        private static void writeChartTitleAsText(TextWriter oOut, dynamic oShape)
+        private static void writeChartTitleAsText(TextWriter writer, dynamic oShape)
         {
             string sTitle = "";
             try {
@@ -4221,10 +4263,10 @@ namespace twoHtm
                 comHelper.release(oChart);
             } catch { }
             if (!string.IsNullOrWhiteSpace(sTitle))
-                oOut.WriteLine("Chart: " + sTitle.Trim());
+                writer.WriteLine("Chart: " + sTitle.Trim());
         }
 
-        private static void writeTextEffectAsText(TextWriter oOut, dynamic oShape)
+        private static void writeTextEffectAsText(TextWriter writer, dynamic oShape)
         {
             string sText = "";
             try {
@@ -4234,10 +4276,10 @@ namespace twoHtm
                 comHelper.release(oFx);
             } catch { }
             if (!string.IsNullOrWhiteSpace(sText))
-                oOut.WriteLine(sText.Trim());
+                writer.WriteLine(sText.Trim());
         }
 
-        private static void writeTableShapeAsText(TextWriter oOut, dynamic oShape)
+        private static void writeTableShapeAsText(TextWriter writer, dynamic oShape)
         {
             dynamic oTable = null;
             try {
@@ -4266,13 +4308,13 @@ namespace twoHtm
                             .Replace('\r', ' ').Replace('\n', ' ').Replace('\v', ' ').Trim();
                         sb.Append(sCell);
                     }
-                    oOut.WriteLine(sb.ToString());
+                    writer.WriteLine(sb.ToString());
                 }
             } catch { }
             finally { comHelper.release(oTable); }
         }
 
-        private static void writeTextShapeAsText(TextWriter oOut, dynamic oShape)
+        private static void writeTextShapeAsText(TextWriter writer, dynamic oShape)
         {
             dynamic oTr = null;
             try {
@@ -4285,7 +4327,7 @@ namespace twoHtm
                 // line in the output.
                 foreach (var sPara in sText.Split('\r')) {
                     string s = sPara.Replace('\v', ' ').Trim();
-                    if (s.Length > 0) oOut.WriteLine(s);
+                    if (s.Length > 0) writer.WriteLine(s);
                 }
             } finally { comHelper.release(oTr); }
         }
@@ -4311,12 +4353,12 @@ namespace twoHtm
             sBody = htmlWriter.inlineOrStripImages(sBody, Path.GetDirectoryName(sInPath) ?? "");
             sBody = htmlWriter.shiftAndClampHeadings(sBody, 2);
 
-            using (var oOut = new StreamWriter(sOutPath, false, new UTF8Encoding(false))) {
-                htmlWriter.writeHead(oOut, dMeta);
-                oOut.WriteLine("<main aria-labelledby=\"doc-title\">");
-                oOut.WriteLine(sBody);
-                oOut.WriteLine("</main>");
-                htmlWriter.writeFoot(oOut);
+            using (var writer = new StreamWriter(sOutPath, false, new UTF8Encoding(false))) {
+                htmlWriter.writeHead(writer, dMeta);
+                writer.WriteLine("<main aria-labelledby=\"doc-title\">");
+                writer.WriteLine(sBody);
+                writer.WriteLine("</main>");
+                htmlWriter.writeFoot(writer);
             }
         }
 
@@ -4324,7 +4366,7 @@ namespace twoHtm
         {
             try {
                 byte[] binHead = new byte[Math.Min(2048, (int)new FileInfo(sPath).Length)];
-                using (var oFs = File.OpenRead(sPath)) oFs.Read(binHead, 0, binHead.Length);
+                using (var fileStream = File.OpenRead(sPath)) fileStream.Read(binHead, 0, binHead.Length);
                 if (binHead.Length >= 3 && binHead[0] == 0xEF && binHead[1] == 0xBB && binHead[2] == 0xBF)
                     return Encoding.UTF8;
                 if (binHead.Length >= 2 && binHead[0] == 0xFF && binHead[1] == 0xFE)
@@ -4353,9 +4395,9 @@ namespace twoHtm
                 if (!string.IsNullOrWhiteSpace(sT)) d["title"] = sT;
             }
 
-            Match oLang = Regex.Match(sHtml, @"<html[^>]+lang\s*=\s*['""]?(?<l>[A-Za-z\-]+)",
+            Match matchLang = Regex.Match(sHtml, @"<html[^>]+lang\s*=\s*['""]?(?<l>[A-Za-z\-]+)",
                 RegexOptions.IgnoreCase);
-            if (oLang.Success) d["language"] = oLang.Groups["l"].Value;
+            if (matchLang.Success) d["language"] = matchLang.Groups["l"].Value;
 
             foreach (Match m in Regex.Matches(sHtml, @"<meta\s+(?<attrs>[^>]*)>",
                 RegexOptions.IgnoreCase)) {
@@ -4545,12 +4587,12 @@ namespace twoHtm
             sBody = htmlWriter.inlineOrStripImages(sBody, Path.GetDirectoryName(sInPath) ?? "");
             sBody = htmlWriter.shiftAndClampHeadings(sBody, 2);
 
-            using (var oOut = new StreamWriter(sOutPath, false, new UTF8Encoding(false))) {
-                htmlWriter.writeHead(oOut, dMeta);
-                oOut.WriteLine("<main aria-labelledby=\"doc-title\">");
-                oOut.WriteLine(sBody);
-                oOut.WriteLine("</main>");
-                htmlWriter.writeFoot(oOut);
+            using (var writer = new StreamWriter(sOutPath, false, new UTF8Encoding(false))) {
+                htmlWriter.writeHead(writer, dMeta);
+                writer.WriteLine("<main aria-labelledby=\"doc-title\">");
+                writer.WriteLine(sBody);
+                writer.WriteLine("</main>");
+                htmlWriter.writeFoot(writer);
             }
         }
 
@@ -4654,11 +4696,11 @@ namespace twoHtm
         // registered at the top of Main.
         private static string renderMarkdown(string sMd)
         {
-            var oPipeline = new MarkdownPipelineBuilder()
+            var pipeline = new MarkdownPipelineBuilder()
                 .UseAdvancedExtensions()
                 .UseYamlFrontMatter()
                 .Build();
-            return Markdown.ToHtml(sMd, oPipeline);
+            return Markdown.ToHtml(sMd, pipeline);
         }
 
         // Plain-text conversion. Renders the Markdown through
@@ -4689,88 +4731,88 @@ namespace twoHtm
                 { "title", Path.GetFileNameWithoutExtension(sInPath) }
             };
 
-            object oRoot;
+            object vRoot;
             try {
-                var oParser = new jsonParser(sJson);
-                oRoot = oParser.parseValue();
-                oParser.skipWhitespace();
-                if (!oParser.isAtEnd())
-                    throw new FormatException("Unexpected content after root value at position " + oParser.pos);
+                var jsonParserInst = new jsonParser(sJson);
+                vRoot = jsonParserInst.parseValue();
+                jsonParserInst.skipWhitespace();
+                if (!jsonParserInst.isAtEnd())
+                    throw new FormatException("Unexpected content after root value at position " + jsonParserInst.pos);
             } catch (Exception ex) {
-                using (var oOut = new StreamWriter(sOutPath, false, new UTF8Encoding(false))) {
-                    htmlWriter.writeHead(oOut, dMeta);
-                    oOut.WriteLine("<main aria-labelledby=\"doc-title\">");
-                    oOut.WriteLine("<h2>Parse error</h2>");
-                    oOut.WriteLine("<p>" + htmlWriter.escape(ex.Message) + "</p>");
-                    oOut.WriteLine("<h2>Raw content</h2>");
-                    oOut.WriteLine("<pre>" + htmlWriter.escape(sJson) + "</pre>");
-                    oOut.WriteLine("</main>");
-                    htmlWriter.writeFoot(oOut);
+                using (var writer = new StreamWriter(sOutPath, false, new UTF8Encoding(false))) {
+                    htmlWriter.writeHead(writer, dMeta);
+                    writer.WriteLine("<main aria-labelledby=\"doc-title\">");
+                    writer.WriteLine("<h2>Parse error</h2>");
+                    writer.WriteLine("<p>" + htmlWriter.escape(ex.Message) + "</p>");
+                    writer.WriteLine("<h2>Raw content</h2>");
+                    writer.WriteLine("<pre>" + htmlWriter.escape(sJson) + "</pre>");
+                    writer.WriteLine("</main>");
+                    htmlWriter.writeFoot(writer);
                 }
                 return;
             }
 
-            using (var oOut = new StreamWriter(sOutPath, false, new UTF8Encoding(false))) {
-                htmlWriter.writeHead(oOut, dMeta);
-                oOut.WriteLine("<main aria-labelledby=\"doc-title\">");
-                renderValue(oOut, oRoot);
-                oOut.WriteLine("</main>");
-                htmlWriter.writeFoot(oOut);
+            using (var writer = new StreamWriter(sOutPath, false, new UTF8Encoding(false))) {
+                htmlWriter.writeHead(writer, dMeta);
+                writer.WriteLine("<main aria-labelledby=\"doc-title\">");
+                renderValue(writer, vRoot);
+                writer.WriteLine("</main>");
+                htmlWriter.writeFoot(writer);
             }
         }
 
-        private static void renderValue(TextWriter oOut, object oVal)
+        private static void renderValue(TextWriter writer, object oVal)
         {
             if (oVal == null) {
-                oOut.WriteLine("<span class=\"json-value null\">null</span>");
+                writer.WriteLine("<span class=\"json-value null\">null</span>");
             } else if (oVal is bool b) {
-                oOut.WriteLine("<span class=\"json-value bool\">" + (b ? "true" : "false") + "</span>");
+                writer.WriteLine("<span class=\"json-value bool\">" + (b ? "true" : "false") + "</span>");
             } else if (oVal is double nD) {
-                oOut.WriteLine("<span class=\"json-value num\">" +
+                writer.WriteLine("<span class=\"json-value num\">" +
                     htmlWriter.escape(nD.ToString("R", CultureInfo.InvariantCulture)) + "</span>");
             } else if (oVal is long nL) {
-                oOut.WriteLine("<span class=\"json-value num\">" + nL + "</span>");
+                writer.WriteLine("<span class=\"json-value num\">" + nL + "</span>");
             } else if (oVal is string s) {
-                oOut.WriteLine("<span class=\"json-value str\">" + htmlWriter.escape(s) + "</span>");
+                writer.WriteLine("<span class=\"json-value str\">" + htmlWriter.escape(s) + "</span>");
             } else if (oVal is List<KeyValuePair<string, object>> lObj) {
-                renderObject(oOut, lObj);
+                renderObject(writer, lObj);
             } else if (oVal is List<object> lArr) {
-                renderArray(oOut, lArr);
+                renderArray(writer, lArr);
             } else {
-                oOut.WriteLine("<span class=\"json-value\">" +
+                writer.WriteLine("<span class=\"json-value\">" +
                     htmlWriter.escape(Convert.ToString(oVal, CultureInfo.InvariantCulture)) + "</span>");
             }
         }
 
-        private static void renderObject(TextWriter oOut, List<KeyValuePair<string, object>> lObj)
+        private static void renderObject(TextWriter writer, List<KeyValuePair<string, object>> lObj)
         {
             if (lObj.Count == 0) {
-                oOut.WriteLine("<span class=\"json-value\">{} <em>(empty object)</em></span>");
+                writer.WriteLine("<span class=\"json-value\">{} <em>(empty object)</em></span>");
                 return;
             }
-            oOut.WriteLine("<dl class=\"json-obj\">");
+            writer.WriteLine("<dl class=\"json-obj\">");
             foreach (var kv in lObj) {
-                oOut.WriteLine("<dt>" + htmlWriter.escape(kv.Key) + ":</dt>");
-                oOut.WriteLine("<dd>");
-                renderValue(oOut, kv.Value);
-                oOut.WriteLine("</dd>");
+                writer.WriteLine("<dt>" + htmlWriter.escape(kv.Key) + ":</dt>");
+                writer.WriteLine("<dd>");
+                renderValue(writer, kv.Value);
+                writer.WriteLine("</dd>");
             }
-            oOut.WriteLine("</dl>");
+            writer.WriteLine("</dl>");
         }
 
-        private static void renderArray(TextWriter oOut, List<object> lArr)
+        private static void renderArray(TextWriter writer, List<object> lArr)
         {
             if (lArr.Count == 0) {
-                oOut.WriteLine("<span class=\"json-value\">[] <em>(empty array)</em></span>");
+                writer.WriteLine("<span class=\"json-value\">[] <em>(empty array)</em></span>");
                 return;
             }
-            oOut.WriteLine("<ol class=\"json-arr\">");
+            writer.WriteLine("<ol class=\"json-arr\">");
             foreach (var v in lArr) {
-                oOut.WriteLine("<li>");
-                renderValue(oOut, v);
-                oOut.WriteLine("</li>");
+                writer.WriteLine("<li>");
+                renderValue(writer, v);
+                writer.WriteLine("</li>");
             }
-            oOut.WriteLine("</ol>");
+            writer.WriteLine("</ol>");
         }
 
         public class jsonParser
@@ -4935,16 +4977,16 @@ namespace twoHtm
             var dMeta = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
                 { "title", Path.GetFileNameWithoutExtension(sInPath) }
             };
-            using (var oOut = new StreamWriter(sOutPath, false, new UTF8Encoding(false))) {
-                htmlWriter.writeHead(oOut, dMeta);
-                oOut.WriteLine("<main aria-labelledby=\"doc-title\">");
+            using (var writer = new StreamWriter(sOutPath, false, new UTF8Encoding(false))) {
+                htmlWriter.writeHead(writer, dMeta);
+                writer.WriteLine("<main aria-labelledby=\"doc-title\">");
                 foreach (var sPara in Regex.Split(sContent, @"\r?\n\s*\r?\n")) {
                     string s = sPara.Trim();
                     if (s.Length == 0) continue;
-                    oOut.WriteLine("<p>" + htmlWriter.escape(s).Replace("\n", "<br>") + "</p>");
+                    writer.WriteLine("<p>" + htmlWriter.escape(s).Replace("\n", "<br>") + "</p>");
                 }
-                oOut.WriteLine("</main>");
-                htmlWriter.writeFoot(oOut);
+                writer.WriteLine("</main>");
+                htmlWriter.writeFoot(writer);
             }
         }
     }
@@ -5142,12 +5184,12 @@ namespace twoHtm
         {
             string sAppData = Environment.GetFolderPath(
                 Environment.SpecialFolder.LocalApplicationData);
-            return Path.Combine(sAppData, "2htm");
+            return Path.Combine(sAppData, program.sConfigDirName);
         }
 
         public static string getConfigPath()
         {
-            return Path.Combine(getConfigDir(), "2htm.ini");
+            return Path.Combine(getConfigDir(), program.sConfigFileName);
         }
 
         public static bool configExists()
@@ -5246,7 +5288,7 @@ namespace twoHtm
                 program.bLog = getBool(dVals, "log_session");
         }
 
-        public static void save(string sSource, string sOutDir,
+        public static void save(string sSource, string sOutputDir,
             bool bStrip, bool bPlain, bool bForce, bool bView, bool bLog)
         {
             string sDir = getConfigDir();
@@ -5259,7 +5301,7 @@ namespace twoHtm
                 sb.AppendLine("; Delete this file to reset, or click Default settings in");
                 sb.AppendLine("; the GUI, which also deletes the file and the 2htm folder.");
                 sb.AppendLine("source_files=" + (sSource ?? ""));
-                sb.AppendLine("output_directory=" + (sOutDir ?? ""));
+                sb.AppendLine("output_directory=" + (sOutputDir ?? ""));
                 sb.AppendLine("strip_images=" + (bStrip ? "1" : "0"));
                 sb.AppendLine("plain_text=" + (bPlain ? "1" : "0"));
                 sb.AppendLine("force_replacements=" + (bForce ? "1" : "0"));

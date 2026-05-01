@@ -1,23 +1,24 @@
-﻿# 2htm — Produce accessible HTML versions of popular file formats from a single Windows executable
+# 2htm Release Notes
 
-I am pleased to share a new free, open-source tool I have just released on GitHub. `2htm` is a single, independent executable that runs on any modern Windows computer with Microsoft Office installed (no installer to run, no runtime to download, no additional DLLs to track).
+## Version 1.18.3
 
-## 2htm
+This release brings 2htm's source code into compliance with the project's Camel Type coding standard:
 
-<https://github.com/jamalmazrui/2htm>
+- The Hungarian `o` prefix is now reserved for COM objects only. Variables holding managed .NET objects (StreamWriter, FileStream, Process, Regex, Match, ProcessStartInfo, ZipArchive, FileInfo, etc.) now use the lowercase class name as their prefix per the rule.
+- Renames are mechanical and do not change runtime behavior. Examples: `oOut` → `writer`, `oFs` → `fileStream`, `oZip` → `zipArchive`, `oMatch` → `match`, `oResult` → `dialogResult`. COM objects driving Word/Excel/PowerPoint (`oWord`, `oExcel`, `oPpt`, `oWb`, `oDoc`, `oCell`, `oRange`, `oSheet`, `oSlide`, `oShape`, `oTable`, `oChart`, etc.) keep their `o` prefix.
+- **Cross-program naming.** Identifier names for shared concepts now match across the three companion tools (urlCheck, extCheck, 2htm). The program-name and version constants are `sProgramName` and `sProgramVersion` (was `sVersion`). New constants `sConfigDirName`, `sConfigFileName`, `sLogFileName` replace the inline string literals. GUI layout constants are now all `iLayout*` (was `iDefault*`). The output-directory parameter is `sOutputDir` everywhere (was `sOutDir` in some signatures). The `logger` surface is uniform: `open`, `close`, `info`, `warn`, `error`, `debug`.
+- **Picker initial directory.** The Browse source and Choose output buttons now open at the directory derived from the text-field value when that value points to an existing path (whether the user just typed it or it was loaded from a saved configuration), and at the user's Documents folder otherwise.
+- **Markdig fetch logic inlined.** The previous `build2htm.cmd` placed the Markdig-download routine in a separate `:fnFetchMarkdig` subroutine and used `call :fnFetchMarkdig` to invoke it. cmd.exe has a known chunk-boundary bug in its label-search code (the search reads the file in 512/1024-byte chunks; a label at certain byte positions can be missed), which surfaced here as "The system cannot find the batch label specified - fnFetchMarkdig". Inlining the fetch logic eliminates the forward `call :label` and so eliminates the bug. .cmd files in this archive ship with CRLF line endings as additional defense-in-depth.
 
-`2htm` converts Microsoft Word, Excel, PowerPoint, PDF, and Markdown files into a single-file, HTML equivalent that opens in any modern browser — Chrome, Edge, Firefox, Safari — with no companion folders or special viewer required. It can also produce plain-text output instead.
+The icon is now embedded in `2htm.exe` at build time via the `/win32icon` flag, and shortcuts inherit it automatically. A 2htm.ico file ships in the GitHub repo for the installer wizard's own icon (compile-time use), but does not need to ship with the installed program.
 
-The single executable can run in two modes with the same set of options. Command-line mode handles scripted and batch use. GUI mode opens a small, keyboard-accessible dialog with every option exposed as a field or checkbox, for users who prefer an interactive workflow. 
+The installer (`2htm_setup.exe`):
 
-The conversion aims for WCAG 2.2 AAA conformance to the extent the source document's structure and content permit. Landmarks, headings, table markup, alt-text propagation, color contrast, and language declaration are preserved or inferred where possible. The output is designed to work cleanly with screen readers and to reflow on small screens.
+- Prompts for the installation directory (default: `C:\Program Files\2htm`).
+- Includes a brief MIT-license summary on the welcome page.
+- Installs only HTML versions of the documentation (`ReadMe.htm`, `Announce.htm`, `License.htm`); the Markdown counterparts and the source/build/installer scripts live in the GitHub repository.
+- The "Launch 2htm now" checkbox on the final page reminds the user that the desktop hotkey is Alt+Ctrl+2.
 
-`2htm` fits naturally into pipelines that produce "alternate formats" — accessible versions of public documents for users with disabilities. Call it synchronously from a batch file or scheduled task -- even serve the resulting `.htm` files directly from any web host. 
+## Earlier versions
 
-The tool is released under the permissive MIT license, so programmers can freely modify or extend the code. It is written in C# -- Microsoft's flagship application language, well-documented, with a mature free toolchain.
-
-This project was developed in collaboration with Anthropic's Claude AI.
-
-You can download the whole project in a single zip archive using the following link:
-
-<http://GitHub.com/JamalMazrui/2htm/archive/main.zip>
+For the full revision history see the GitHub repository.
