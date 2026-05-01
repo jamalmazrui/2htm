@@ -224,6 +224,66 @@ Choose output buttons now open at the directory derived from the
 text-field value when that value points to an existing path (whether the
 user just typed it or it was loaded from a saved configuration), and at
 the user’s Documents folder otherwise.</li>
+<li><strong>Friendlier source-field parsing.</strong> When you supply a
+single path, you no longer need to put quotes around it just because the
+path contains spaces. 2htm tests the entire trimmed source field as a
+single spec first; only when it is not a usable single spec does it fall
+back to space-tokenization. Quotes are only required when supplying
+multiple specs and at least one contains a space.</li>
+<li><strong>Output-directory create prompt.</strong> If you press OK
+with an output directory that does not yet exist, 2htm asks “Create
+[path]?” with default Yes. Choosing No keeps the dialog open with focus
+on the output field.</li>
+<li><strong>Office automation alerts disabled.</strong> Word, Excel, and
+PowerPoint application objects created by 2htm now have their
+<code>DisplayAlerts</code> property set to none, plus other
+prompt-suppression options. Of particular note,
+<code>Word.Application.Options.DoNotPromptForConvert = true</code>
+suppresses the “Word will now convert your PDF to an editable Word
+document” dialog that previously locked up 2htm when converting a PDF.
+<code>AutomationSecurity = msoAutomationSecurityForceDisable</code>
+blocks any macros silently.</li>
+<li><strong>Progress display fix.</strong> The “Converting” status bar
+now shows files <strong>already completed</strong> rather than the file
+being started. When converting a single file, you see “file.pdf — 0 of
+1, 0%” while it is being processed (rather than the previous misleading
+“1 of 1, 100%” while still working).</li>
+<li><strong>Concise skip message.</strong> The “skipped because output
+exists” message now uses the input basename rather than the full path,
+matching the basename-only style of the success line. Full paths still
+go to the log when <code>-l</code> is given.</li>
+<li><strong>Pre-pruning + structured results summary.</strong> Before
+the conversion loop runs and before the progress UI opens, the file list
+is pruned in two passes: (1) unsupported extensions are silently dropped
+(logged when <code>-l</code> is on); (2) files whose output target
+already exists are dropped unless <strong>Force replacements</strong> is
+checked — these are counted as “skipped.” The progress counter
+denominator is the post-pruning count, so percentages reflect actual
+work. The final summary is structured as up to three sections —
+<code>Converted N file(s):</code>,
+<code>Failed to convert N file(s):</code>, and
+<code>Skipped N file(s). Check "Force replacements" to overwrite.</code>
+— each shown only when its count is non-zero, with singular “file” /
+plural “files” inflection. Failed entries include a short reason after
+the basename when one is available
+(<code>slides.pptx: file is corrupt</code>); the full exception and
+stack trace go to the log when <code>-l</code> is on.</li>
+<li><strong>CLI vs GUI output styles.</strong> In CLI mode (real console
+attached) basenames print inline as the loop runs — natural progress
+feedback for the console user. In GUI mode (and right-click invocations)
+the loop is silent on stdout; the progress status form shows the current
+file, and the structured summary is the final MessageBox. The structured
+summary is printed in both modes, but the per-name lists are suppressed
+in CLI mode (they would just repeat what already scrolled by).</li>
+<li><strong>Log header.</strong> When <code>-l</code> (Log session) is
+enabled, the log file now begins with a clean header before the
+timestamped processing notifications: program name and version, a
+friendly run timestamp (<code>Run on May 1, 2026 at 2:30 PM</code>), and
+a <code>Parameters:</code> block listing each setting with both explicit
+and defaulted values resolved (Source, Output directory, Force
+replacements, Plain text, Strip images, View output, Use configuration,
+Log session, GUI mode, Working directory, Command line). The header is
+followed by the normal timestamped log entries.</li>
 <li><strong>Markdig fetch logic inlined.</strong> The previous
 <code>build2htm.cmd</code> placed the Markdig-download routine in a
 separate <code>:fnFetchMarkdig</code> subroutine and used
@@ -243,8 +303,13 @@ installer wizard’s own icon (compile-time use), but does not need to
 ship with the installed program.</p>
 <p>The installer (<code>2htm_setup.exe</code>):</p>
 <ul>
-<li>Prompts for the installation directory (default:
-<code>C:\Program Files\2htm</code>).</li>
+<li>Prompts for the installation directory on every run (default:
+<code>C:\Program Files\2htm</code>). The directory page is now
+explicitly enabled (<code>DisableDirPage=no</code> in the .iss);
+previously it was at the Inno Setup default of <code>auto</code>, which
+silently skipped the page on reinstalls of the same <code>AppId</code>.
+The previous directory is pre-filled, so on a reinstall the user just
+presses Next to keep the same path.</li>
 <li>Includes a brief MIT-license summary on the welcome page.</li>
 <li>Installs only HTML versions of the documentation
 (<code>ReadMe.htm</code>, <code>Announce.htm</code>,
@@ -252,6 +317,10 @@ ship with the installed program.</p>
 source/build/installer scripts live in the GitHub repository.</li>
 <li>The “Launch 2htm now” checkbox on the final page reminds the user
 that the desktop hotkey is Alt+Ctrl+2.</li>
+<li>Adds a “Convert via <strong>2</strong>htm” entry to the File
+Explorer right-click menu for all file types. The accelerator letter
+<code>2</code> matches the desktop hotkey accelerator. Uninstall removes
+the registry entries.</li>
 </ul>
 <h2 id="earlier-versions">Earlier versions</h2>
 <p>For the full revision history see the GitHub repository.</p>

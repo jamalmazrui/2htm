@@ -318,10 +318,13 @@ license text is installed alongside the program as
 <li>Adds a Start-menu shortcut and a desktop shortcut whose hotkey is
 <strong>Alt+Ctrl+2</strong>. Pressing <strong>Alt+Ctrl+2</strong> from
 anywhere in Windows opens the <code>2htm</code> dialog.</li>
-<li>The installer also adds a <strong>Convert with 2htm</strong> entry
-to the File Explorer right-click menu for all file types. Right-clicking
-any supported file and choosing this entry is the fastest way to convert
-a single file.</li>
+<li>The installer also adds a <strong>Convert via 2htm</strong> entry to
+the File Explorer right-click menu for all file types. Right-clicking
+any supported file (or pressing <strong>Shift+F10</strong>) and choosing
+this entry is the fastest way to convert a single file. The accelerator
+letter is <strong>2</strong> (matching the <strong>Alt+Ctrl+2</strong>
+desktop hotkey), so the keyboard shortcut from a focused file in File
+Explorer is <strong>Shift+F10</strong>, then <strong>2</strong>.</li>
 </ul>
 <p>The final wizard page offers two checkboxes (both checked by
 default): launch <code>2htm</code> (with a hotkey reminder) and read the
@@ -343,7 +346,10 @@ that control:</p>
 <ul>
 <li><strong>Source files</strong> [S] — a single file path, a wildcard
 pattern (e.g., <code>*.docx</code>), or several of either separated by
-spaces. Wrap paths containing spaces in double quotes.</li>
+spaces. A single path containing spaces does not need quotes — 2htm
+recognizes the entire trimmed field as one path when it points to an
+existing file or directory. Quotes are only needed when supplying
+multiple specs and at least one contains a space.</li>
 <li><strong>Browse source…</strong> [B] — pick a single source from a
 file picker</li>
 <li><strong>Output directory</strong> [O] — where the output is written.
@@ -379,6 +385,9 @@ value points to an existing path; otherwise they open at your Documents
 folder. With <strong>Use configuration</strong> checked, those text
 fields are pre-populated from your last session, so the pickers
 naturally pick up where you left off.</p>
+<p>If you press OK with an output directory that does not yet exist,
+2htm prompts to create it (default Yes). Choosing No keeps the dialog
+open with focus on the output field so you can correct it.</p>
 <p>When all files have been processed, a final results dialog summarizes
 what was done.</p>
 <h3 id="from-the-command-line">From the command line</h3>

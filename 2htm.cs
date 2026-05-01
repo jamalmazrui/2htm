@@ -459,11 +459,31 @@ namespace twoHtm
 
             int iExitCode = iExitOk;
             try {
-                logger.info(program.sProgramName + " " + sProgramVersion + " starting");
-                logger.info("Command line: " + string.Join(" ", asArgs));
-                logger.info("Working directory: " + Directory.GetCurrentDirectory());
-                if (!string.IsNullOrEmpty(sOutputDir))
-                    logger.info("Output directory: " + sOutputDir);
+                // Write the run header to the log: program version,
+                // friendly start time, and the resolved parameter
+                // list (showing both explicit and defaulted values).
+                // The parameter list mirrors the GUI dialog controls
+                // so the user can map a logged run to the equivalent
+                // dialog state.
+                var lsParams = new List<KeyValuePair<string, string>>();
+                lsParams.Add(new KeyValuePair<string, string>("Source",
+                    lsFileArgs.Count == 0
+                        ? "(none)"
+                        : string.Join(" ", lsFileArgs.ConvertAll(s => s.Contains(" ") ? "\"" + s + "\"" : s))));
+                lsParams.Add(new KeyValuePair<string, string>("Output directory",
+                    string.IsNullOrEmpty(sOutputDir)
+                        ? Directory.GetCurrentDirectory() + " (default: working dir)"
+                        : sOutputDir));
+                lsParams.Add(new KeyValuePair<string, string>("Force replacements", bForce.ToString().ToLowerInvariant()));
+                lsParams.Add(new KeyValuePair<string, string>("Plain text",         bPlainText.ToString().ToLowerInvariant()));
+                lsParams.Add(new KeyValuePair<string, string>("Strip images",       bStripImages.ToString().ToLowerInvariant()));
+                lsParams.Add(new KeyValuePair<string, string>("View output",        bViewOutput.ToString().ToLowerInvariant()));
+                lsParams.Add(new KeyValuePair<string, string>("Use configuration",  bUseConfig.ToString().ToLowerInvariant()));
+                lsParams.Add(new KeyValuePair<string, string>("Log session",        bLog.ToString().ToLowerInvariant()));
+                lsParams.Add(new KeyValuePair<string, string>("GUI mode",           bGuiMode.ToString().ToLowerInvariant()));
+                lsParams.Add(new KeyValuePair<string, string>("Working directory",  Directory.GetCurrentDirectory()));
+                lsParams.Add(new KeyValuePair<string, string>("Command line",       string.Join(" ", asArgs)));
+                logger.header(program.sProgramName, sProgramVersion, lsParams);
 
                 var lsFiles = expandWildcards(lsFileArgs.ToArray());
                 if (lsFiles.Count == 0) {
@@ -471,29 +491,113 @@ namespace twoHtm
                     logger.info("No matching files; exiting.");
                     iExitCode = iExitOk;
                 } else {
-                    logger.info("Matched " + lsFiles.Count + " file(s) to convert.");
+                    logger.info("Matched " + lsFiles.Count + " file(s).");
 
-                    int iFailed = 0;
-                    int iConverted = 0;
+                    // ---- Pre-prune ----
+                    //
+                    // Two passes happen BEFORE the conversion loop
+                    // and BEFORE the progress UI opens, so the
+                    // counter denominator reflects only files that
+                    // will actually be processed:
+                    //
+                    //   1. Drop files whose extension 2htm cannot
+                    //      handle (silent; logged).
+                    //   2. If --force is NOT set, drop files whose
+                    //      target output already exists. These are
+                    //      counted as "skipped" and surface in the
+                    //      results summary with a Force-replacements
+                    //      hint.
+                    List<string> lsToConvert;
+                    List<string> lsSkippedExisting;
+                    prePrune(lsFiles, out lsToConvert, out lsSkippedExisting);
 
-                    // In GUI mode, run the conversion in a small
-                    // progress dialog that shows each file's
-                    // basename and a percent indication in a status
-                    // bar. In CLI mode, run it synchronously on
-                    // this thread with no progress UI (the user's
-                    // console already serves as a progress log via
-                    // the basenames printed by convertOne).
-                    if (bGuiMode) {
-                        guiProgress.runConversions(lsFiles,
-                            out iConverted, out iFailed);
-                    } else {
-                        runConversionLoop(lsFiles,
-                            null, out iConverted, out iFailed);
+                    // ---- Conversion loop ----
+                    var lsConverted = new List<string>();
+                    var lsFailed = new List<program.failure>();
+                    if (lsToConvert.Count > 0) {
+                        // GUI mode (or right-click) shows a status
+                        // form during the loop and the structured
+                        // summary at the end as a MessageBox; no
+                        // inline per-file console writes -- the
+                        // captured stdout becomes the MessageBox
+                        // text, and we want only the summary there.
+                        //
+                        // Pure CLI mode (a real console attached)
+                        // prints each basename inline as work
+                        // begins, so the user sees progress as the
+                        // run proceeds; on success the line is
+                        // terminated with a newline, on failure
+                        // ": <reason>" is appended on the same line.
+                        // The structured summary is also printed at
+                        // the end of the run.
+                        bool bGuiOrHidden = bGuiMode || bHideConsoleMode;
+                        if (bGuiOrHidden) {
+                            guiProgress.runConversions(lsToConvert,
+                                out lsConverted, out lsFailed);
+                        } else {
+                            runConversionLoop(lsToConvert, null,
+                                /* bInlineConsole: */ true,
+                                out lsConverted, out lsFailed);
+                        }
+                    }
+
+                    // ---- Structured results summary ----
+                    //
+                    // Three sections, each printed only when its
+                    // count is non-zero. Singular "file" when the
+                    // count is 1; plural "files" otherwise. In GUI
+                    // mode the captured stdout becomes the final
+                    // MessageBox; in CLI mode it follows the inline
+                    // basenames printed during the loop.
+                    int iConverted = lsConverted.Count;
+                    int iFailed = lsFailed.Count;
+                    int iSkippedExisting = lsSkippedExisting.Count;
+                    bool bGuiOrHidden2 = bGuiMode || bHideConsoleMode;
+
+                    if (iConverted > 0) {
+                        // In CLI mode the basenames were already
+                        // printed inline during the loop. Print the
+                        // section header but suppress the per-name
+                        // list (it would just repeat what scrolled
+                        // by). In GUI/hidden mode include the names
+                        // since nothing else has been written.
+                        Console.WriteLine("Converted " + iConverted + " " +
+                            (iConverted == 1 ? "file" : "files") + ":");
+                        if (bGuiOrHidden2) {
+                            foreach (var sName in lsConverted)
+                                Console.WriteLine(sName);
+                        }
+                    }
+                    if (iFailed > 0) {
+                        if (iConverted > 0) Console.WriteLine();
+                        Console.WriteLine("Failed to convert " + iFailed + " " +
+                            (iFailed == 1 ? "file" : "files") + ":");
+                        if (bGuiOrHidden2) {
+                            // In GUI/hidden mode list each failure on
+                            // its own line as "basename: reason" (or
+                            // just basename if no reason).
+                            foreach (var oFail in lsFailed) {
+                                if (string.IsNullOrEmpty(oFail.sReason))
+                                    Console.WriteLine(oFail.sBase);
+                                else
+                                    Console.WriteLine(oFail.sBase + ": " + oFail.sReason);
+                            }
+                        }
+                        // In CLI mode the failure line was already
+                        // written inline. Don't repeat.
+                    }
+                    if (iSkippedExisting > 0) {
+                        if (iConverted > 0 || iFailed > 0) Console.WriteLine();
+                        Console.WriteLine("Skipped " + iSkippedExisting + " " +
+                            (iSkippedExisting == 1 ? "file" : "files") +
+                            ". Check \"Force replacements\" to overwrite.");
+                    }
+                    if (iConverted == 0 && iFailed == 0 && iSkippedExisting == 0) {
+                        Console.WriteLine("No supported files to convert.");
                     }
 
                     logger.info("Done. " + iConverted + " converted, " +
-                        (lsFiles.Count - iConverted - iFailed) + " skipped, " +
-                        iFailed + " failed.");
+                        iSkippedExisting + " skipped, " + iFailed + " failed.");
                     iExitCode = iFailed == 0 ? iExitOk : iExitPartial;
 
                     // --view-output: open the output directory in
@@ -550,11 +654,33 @@ namespace twoHtm
         // double-quoted paths with embedded spaces.
         public static List<string> splitSourceField(string sField)
         {
+            // Friendlier parsing rules:
+            //   1. Trim the input.
+            //   2. Strip a single layer of surrounding double quotes.
+            //   3. Test the entire (unquoted) trimmed field as a single
+            //      spec (existing file, existing directory, or wildcard
+            //      pattern matching at least one file). If usable,
+            //      return it as one token.
+            //   4. Otherwise fall back to space-tokenization, honoring
+            //      "..." segments so the user can mix paths-with-spaces
+            //      and ones without.
+            // The user only needs to use quotes when supplying multiple
+            // specs and at least one contains a space.
             var ls = new List<string>();
             if (string.IsNullOrWhiteSpace(sField)) return ls;
+            string sTrimmed = sField.Trim();
+            string sUnquoted = sTrimmed;
+            if (sUnquoted.Length >= 2 && sUnquoted[0] == '"' && sUnquoted[sUnquoted.Length - 1] == '"')
+                sUnquoted = sUnquoted.Substring(1, sUnquoted.Length - 2).Trim();
+
+            if (isUsableSingleSpec(sUnquoted)) {
+                ls.Add(sUnquoted);
+                return ls;
+            }
+
             var sb = new StringBuilder();
             bool bInQuote = false;
-            foreach (char c in sField) {
+            foreach (char c in sTrimmed) {
                 if (c == '"') { bInQuote = !bInQuote; continue; }
                 if (!bInQuote && (c == ' ' || c == '\t')) {
                     if (sb.Length > 0) { ls.Add(sb.ToString()); sb.Clear(); }
@@ -564,6 +690,35 @@ namespace twoHtm
             }
             if (sb.Length > 0) ls.Add(sb.ToString());
             return ls;
+        }
+
+        /// <summary>
+        /// Return true if sSpec, taken whole, is a usable file
+        /// specification (existing file, existing directory, or
+        /// wildcard pattern that matches at least one file). Used by
+        /// splitSourceField to recognize a single path with embedded
+        /// spaces vs multiple space-separated paths.
+        /// </summary>
+        private static bool isUsableSingleSpec(string sSpec)
+        {
+            if (string.IsNullOrEmpty(sSpec)) return false;
+            try {
+                if (System.IO.File.Exists(sSpec)) return true;
+                if (System.IO.Directory.Exists(sSpec)) return true;
+                if (sSpec.IndexOfAny(new[] { '*', '?' }) >= 0) {
+                    string sDir = System.IO.Path.GetDirectoryName(sSpec);
+                    if (string.IsNullOrEmpty(sDir))
+                        sDir = System.IO.Directory.GetCurrentDirectory();
+                    string sPattern = System.IO.Path.GetFileName(sSpec);
+                    if (System.IO.Directory.Exists(sDir) && !string.IsNullOrEmpty(sPattern)) {
+                        try {
+                            string[] aMatched = System.IO.Directory.GetFiles(sDir, sPattern);
+                            if (aMatched != null && aMatched.Length > 0) return true;
+                        } catch { }
+                    }
+                }
+            } catch { }
+            return false;
         }
 
         // Displays a modal MessageBox with the captured console
@@ -853,65 +1008,90 @@ namespace twoHtm
             return !string.IsNullOrEmpty(sName) && sName.StartsWith("~$");
         }
 
-        // Returns true if a new output file was produced, false if
-        // the input was skipped (self-overwrite guard, or output
-        // already exists without --force). Throws on any real
-        // conversion failure. The caller uses the return value to
-        // decide whether to open the output directory in the
-        // shell (--view-output), and to track summary counts.
-        private static bool convertOne(string sInPath)
+        // Compute the output path for an input file. Single source of
+        // truth for the rule "<input-basename-without-ext>.<htm|txt>"
+        // in the effective output directory. Used by prePrune to
+        // detect "output already exists" and by convertOne to know
+        // where to write.
+        private static string computeOutputPath(string sInPath)
         {
-            string sExt = Path.GetExtension(sInPath).ToLowerInvariant();
             string sOutExt = bPlainText ? ".txt" : ".htm";
-            // Output directory: caller-specified (via -o or GUI),
-            // else the current working directory. The caller ensures
-            // the directory exists before the conversion begins.
-            // Decide where this input's converted output goes.
-            // Simple rule: use the directory specified by -o if
-            // given; otherwise use the current working directory.
-            // When 2htm is launched from the File Explorer
-            // right-click menu, Windows sets the process's working
-            // directory to the folder containing the right-clicked
-            // file, so "CWD" is already the right answer in that
-            // case without any special logic here.
             string sEffectiveOutputDir = string.IsNullOrEmpty(sOutputDir)
                 ? Directory.GetCurrentDirectory()
                 : sOutputDir;
-            string sOutPath = Path.Combine(sEffectiveOutputDir,
+            return Path.Combine(sEffectiveOutputDir,
                 Path.GetFileNameWithoutExtension(sInPath) + sOutExt);
-            string sBase = Path.GetFileName(sInPath);
+        }
 
-            // Refuse to overwrite the input file itself. This can
-            // happen in plain-text mode when the input is a .txt
-            // file: the output path derived from the basename would
-            // collide with the source. Without this guard, --force
-            // would silently destroy the user's source file.
-            // Silent on console; logged only.
-            if (string.Equals(Path.GetFullPath(sInPath), Path.GetFullPath(sOutPath),
-                StringComparison.OrdinalIgnoreCase)) {
-                logger.info("Skipped (cannot overwrite input with its own output): " + sInPath);
-                return false;
+        // Pre-prune the input list before the conversion loop runs.
+        // Two passes:
+        //
+        //   1. Drop files whose extension 2htm cannot convert. These
+        //      are dropped silently -- they do not appear in any
+        //      result section since the user cannot un-skip them by
+        //      checking "Force replacements". The log records each
+        //      drop when -l is given.
+        //
+        //   2. If --force is NOT set, drop files whose target output
+        //      already exists. These ARE counted as "skipped" and
+        //      surface in the final results MessageBox along with a
+        //      hint about the Force replacements checkbox.
+        //
+        // Also drops files where the input path equals the output
+        // path (the self-overwrite guard, e.g. a .txt input in
+        // --plain-text mode that would write back to itself). These
+        // are silent like the unsupported drop -- the user cannot
+        // un-skip them by toggling Force.
+        //
+        // Pre-pruning happens BEFORE the progress UI opens so the
+        // counter denominator reflects only files that will actually
+        // be processed.
+        public static void prePrune(List<string> lsFiles,
+            out List<string> lsToConvert,
+            out List<string> lsSkippedExisting)
+        {
+            lsToConvert = new List<string>();
+            lsSkippedExisting = new List<string>();
+            foreach (var sFile in lsFiles) {
+                string sExt = Path.GetExtension(sFile).ToLowerInvariant();
+                if (!hsSupportedExts.Contains(sExt)) {
+                    logger.info("Skipped (unsupported extension " + sExt + "): " + sFile);
+                    continue;
+                }
+                string sOutPath = computeOutputPath(sFile);
+                // Self-overwrite guard.
+                if (string.Equals(Path.GetFullPath(sFile),
+                                  Path.GetFullPath(sOutPath),
+                                  StringComparison.OrdinalIgnoreCase)) {
+                    logger.info("Skipped (cannot overwrite input with its own output): " + sFile);
+                    continue;
+                }
+                if (File.Exists(sOutPath) && !bForce) {
+                    lsSkippedExisting.Add(sFile);
+                    logger.info("Skipped (" + Path.GetFileName(sOutPath) +
+                        " already exists; use --force to overwrite): " + sFile);
+                    continue;
+                }
+                lsToConvert.Add(sFile);
             }
+        }
 
-            // Skip if the output file already exists in the current
-            // directory — unless --force is active, in which case we
-            // overwrite. Print the skip notice to the console so the
-            // user has visible feedback (matches extCheck's style).
-            if (File.Exists(sOutPath) && !bForce) {
-                Console.WriteLine("Skipping (" + Path.GetFileName(sOutPath) +
-                    " exists, use -f to overwrite): " + sInPath);
-                logger.info("Skipped (" + Path.GetFileName(sOutPath) +
-                    " already exists; use --force to overwrite): " + sInPath);
-                return false;
-            }
+        // Converts a single input file to its output path. Throws on
+        // any conversion failure. The caller (runConversionLoop) is
+        // responsible for the per-file try/catch and for choosing
+        // what to do with errors (typically: log and add to the
+        // failed list).
+        //
+        // Pre-pruning (prePrune) has already filtered out unsupported
+        // extensions, self-overwrite cases, and "target exists
+        // without --force" cases, so anything reaching convertOne is
+        // expected to actually convert.
+        private static void convertOne(string sInPath)
+        {
+            string sExt = Path.GetExtension(sInPath).ToLowerInvariant();
+            string sOutPath = computeOutputPath(sInPath);
 
             logger.info("Converting: " + sInPath + " -> " + sOutPath);
-            // Print just the input basename. The presumption is
-            // success; if the conversion fails, the caller (or the
-            // catch below) appends the error to this line before
-            // the newline. Any failure from here on has the
-            // basename already on the line.
-            Console.Write(sBase);
 
             // Pre-flight integrity check for Office formats. Saves us
             // a slow COM round-trip and a confusing RPC error message
@@ -934,9 +1114,6 @@ namespace twoHtm
                 }
                 bSucceeded = true;
                 logger.info("Converted ok: " + sInPath);
-                // End the started console line. The basename stays
-                // as the user's record of what was processed.
-                Console.WriteLine();
             } finally {
                 if (!bSucceeded) {
                     try {
@@ -949,42 +1126,92 @@ namespace twoHtm
                     }
                 }
             }
-            return true;
         }
 
-        // Runs the conversion loop over a list of files. Shared by
-        // CLI mode (called directly from run()) and GUI mode
-        // (called by guiProgress.runConversions on a worker
-        // thread). The onStarting callback, if non-null, is
-        // invoked once per file before convertOne runs, with the
-        // basename and a 1-based index and total. The callback is
-        // the progress hook — in GUI mode it updates the status
-        // label; in CLI mode it is null (the basenames printed by
-        // convertOne itself are the progress record).
-        public static void runConversionLoop(List<string> lsFiles,
-            Action<string, int, int> onStarting,
-            out int iConverted, out int iFailed)
+        // Runs the conversion loop over a pre-pruned list of files.
+        // The caller is expected to have already filtered out
+        // unsupported extensions, self-overwrite cases, and
+        // "target exists without --force" cases via prePrune. Shared
+        // by CLI mode (called directly from run()) and GUI mode
+        // (called by guiProgress.runConversions). The onStarting
+        // callback, if non-null, is invoked once per file before
+        // convertOne runs, with the basename and a 1-based index
+        // and total. In GUI mode it updates the status label; in
+        // CLI mode it is null.
+        //
+        // Trim and shorten a message for inline display next to a
+        // basename. Office COM exceptions can produce multi-paragraph
+        // text; we want a single short line. Returns "" if the input
+        // is null or empty.
+        public static string firstLine(string s)
         {
-            iConverted = 0;
-            iFailed = 0;
+            const int iMaxLen = 120;
+            if (string.IsNullOrEmpty(s)) return "";
+            int i = s.IndexOfAny(new[] { '\r', '\n' });
+            if (i >= 0) s = s.Substring(0, i);
+            s = s.Trim();
+            if (s.Length > iMaxLen) s = s.Substring(0, iMaxLen - 3) + "...";
+            return s;
+        }
+
+        // A single failure record: basename and a short reason. The
+        // reason is whatever firstLine() gave us; the full exception
+        // and stack trace are in the log. The structured summary at
+        // the end uses this to render "basename: reason" on one line.
+        public class failure
+        {
+            public string sBase;
+            public string sReason;
+            public failure(string sB, string sR) { sBase = sB; sReason = sR; }
+        }
+
+        // Runs the conversion loop. The caller has already pre-pruned
+        // (unsupported extensions and target-exists cases dropped).
+        // The onStarting callback updates the progress UI in GUI
+        // mode; in pure CLI mode it is null and the loop instead
+        // prints each basename inline as the file is processed.
+        //
+        // The bInlineConsole parameter selects between the two
+        // output styles for the per-file progress:
+        //   true  -- CLI mode: print basename to stdout as work
+        //            begins; on success terminate with "\n"; on
+        //            failure append ": <reason>\n".
+        //   false -- GUI mode (and right-click): print nothing
+        //            inline. The progress form shows the current
+        //            file; the structured summary at the end shows
+        //            the per-file outcomes.
+        //
+        // Outputs lsConverted (basenames of successes) and lsFailed
+        // (failure records: basename + short reason). Their sum is
+        // exactly lsToConvert.Count.
+        public static void runConversionLoop(List<string> lsToConvert,
+            Action<string, int, int> onStarting,
+            bool bInlineConsole,
+            out List<string> lsConverted,
+            out List<failure> lsFailed)
+        {
+            lsConverted = new List<string>();
+            lsFailed = new List<failure>();
             int iIndex = 0;
-            foreach (var sFile in lsFiles) {
+            foreach (var sFile in lsToConvert) {
                 iIndex++;
+                string sBase = Path.GetFileName(sFile);
                 if (onStarting != null) {
                     try {
-                        onStarting(Path.GetFileName(sFile), iIndex, lsFiles.Count);
+                        onStarting(sBase, iIndex, lsToConvert.Count);
                     } catch {
                         // Callback failure must not abort the run.
                     }
                 }
+                if (bInlineConsole) Console.Write(sBase);
                 try {
-                    if (convertOne(sFile)) iConverted++;
+                    convertOne(sFile);
+                    lsConverted.Add(sBase);
+                    if (bInlineConsole) Console.WriteLine();
                 } catch (Exception ex) {
-                    iFailed++;
-                    // The basename was already written to stdout
-                    // by convertOne before the failure. Append
-                    // the error on the same line and newline.
-                    Console.WriteLine(": " + ex.Message);
+                    string sReason = firstLine(ex.Message);
+                    lsFailed.Add(new failure(sBase, sReason));
+                    if (bInlineConsole) Console.WriteLine(": " + sReason);
                     logger.error("Conversion failed: " + sFile);
                     logger.error("Exception: " + ex.GetType().FullName + ": " + ex.Message);
                     if (ex.InnerException != null)
@@ -1341,6 +1568,43 @@ namespace twoHtm
             btnOk.Size = new System.Drawing.Size(iLayoutButtonWidth, iLayoutButtonHeight);
             btnOk.TabIndex = 12;
             btnOk.UseVisualStyleBackColor = true;
+            // Validate output directory before allowing the dialog to
+            // close. If the user has typed a non-existent directory,
+            // prompt to create it (default Yes). On No or creation
+            // failure, set DialogResult = None so the dialog stays
+            // open. WinForms invokes Click handlers BEFORE the
+            // automatic close, so this hook runs first.
+            btnOk.Click += (s, e) => {
+                string sOutCandidate = (txtOut.Text ?? "").Trim();
+                if (sOutCandidate.Length >= 2 && sOutCandidate[0] == '"' && sOutCandidate[sOutCandidate.Length - 1] == '"')
+                    sOutCandidate = sOutCandidate.Substring(1, sOutCandidate.Length - 2).Trim();
+                if (string.IsNullOrEmpty(sOutCandidate)) return;
+                try {
+                    if (System.IO.Directory.Exists(sOutCandidate)) return;
+                } catch { return; }
+                System.Windows.Forms.DialogResult dr = System.Windows.Forms.MessageBox.Show(frm,
+                    "Create " + sOutCandidate + "?",
+                    program.sProgramName,
+                    System.Windows.Forms.MessageBoxButtons.YesNo,
+                    System.Windows.Forms.MessageBoxIcon.Question,
+                    System.Windows.Forms.MessageBoxDefaultButton.Button1);
+                if (dr != System.Windows.Forms.DialogResult.Yes) {
+                    frm.DialogResult = System.Windows.Forms.DialogResult.None;
+                    txtOut.Focus();
+                    return;
+                }
+                try {
+                    System.IO.Directory.CreateDirectory(sOutCandidate);
+                } catch (Exception ex) {
+                    System.Windows.Forms.MessageBox.Show(frm,
+                        "Could not create directory:\r\n" + sOutCandidate + "\r\n\r\n" + ex.Message,
+                        program.sProgramName,
+                        System.Windows.Forms.MessageBoxButtons.OK,
+                        System.Windows.Forms.MessageBoxIcon.Warning);
+                    frm.DialogResult = System.Windows.Forms.DialogResult.None;
+                    txtOut.Focus();
+                }
+            };
             frm.Controls.Add(btnOk);
 
             var btnCancel = new System.Windows.Forms.Button();
@@ -1594,13 +1858,33 @@ namespace twoHtm
     // form has no buttons, so there is no re-entrancy concern from
     // DoEvents pumping a stray click.
     // -----------------------------------------------------------------
+    // -----------------------------------------------------------------
+    // guiProgress: a small modeless status form shown during the file-
+    // conversion loop in GUI mode (and in right-click invocations).
+    // The same three-method API (open / update / close) is used by
+    // extCheck. The label uses AccessibleRole.StatusBar so screen
+    // readers announce text changes; Application.DoEvents() pumps the
+    // message queue so the new text actually paints between files.
+    //
+    // The displayed count reflects files ALREADY COMPLETED, not the
+    // file being started. When starting file 1 of 5, the label shows
+    // "file.pdf -- 0 of 5, 0%". The percent and count advance only
+    // after the file finishes. This avoids the confusion of seeing
+    // "100%" while the (only) file is still being processed -- a
+    // real user complaint.
+    //
+    // The form has no buttons, so DoEvents pumping is safe (no stray
+    // click can re-enter the conversion code).
+    // -----------------------------------------------------------------
     public static class guiProgress
     {
-        public static void runConversions(List<string> lsFiles,
-            out int iConverted, out int iFailed)
+        private static System.Windows.Forms.Form frm;
+        private static System.Windows.Forms.Label lblStatus;
+
+        public static void open(int iTotal)
         {
-            var frm = new System.Windows.Forms.Form();
-            frm.Text = "2htm — Converting";
+            frm = new System.Windows.Forms.Form();
+            frm.Text = "2htm \u2014 Converting";
             frm.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             frm.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             frm.MaximizeBox = false;
@@ -1618,7 +1902,7 @@ namespace twoHtm
             lblIntro.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             frm.Controls.Add(lblIntro);
 
-            var lblStatus = new System.Windows.Forms.Label();
+            lblStatus = new System.Windows.Forms.Label();
             lblStatus.Text = "Starting...";
             lblStatus.AutoSize = false;
             lblStatus.Location = new System.Drawing.Point(14, 42);
@@ -1628,31 +1912,48 @@ namespace twoHtm
             lblStatus.AccessibleRole = System.Windows.Forms.AccessibleRole.StatusBar;
             frm.Controls.Add(lblStatus);
 
-            // Progress callback invoked by runConversionLoop before
-            // each file. Updates the status label and pumps the
-            // message queue so the new text appears and screen
-            // readers see the change. Since we're single-threaded,
-            // "update" here means "write to the property and pump";
-            // there is no cross-thread marshaling to worry about.
-            Action<string, int, int> onStarting = (sBase, iIndex, iTotal) => {
-                int iPercent = iTotal > 0 ? (iIndex * 100 / iTotal) : 0;
-                lblStatus.Text = sBase + " — " + iIndex + " of " + iTotal +
-                    ", " + iPercent + "%";
-                System.Windows.Forms.Application.DoEvents();
-            };
-
-            // Show the form non-modally so control returns here
-            // immediately. Pump once so the initial state paints
-            // before the first file's conversion starts.
             frm.Show();
             System.Windows.Forms.Application.DoEvents();
+        }
 
+        public static void update(string sBase, int iIndex, int iTotal)
+        {
+            if (frm == null || lblStatus == null) return;
+            // iIndex is 1-based; we display "iIndex - 1" as the
+            // completed count, so the percentage and count reflect
+            // work DONE, not work in progress.
+            int iCompleted = iIndex - 1;
+            int iPercent = iTotal > 0 ? (iCompleted * 100 / iTotal) : 0;
+            lblStatus.Text = sBase + " \u2014 " + iCompleted + " of " + iTotal +
+                ", " + iPercent + "%";
+            System.Windows.Forms.Application.DoEvents();
+        }
+
+        public static void close()
+        {
+            if (frm == null) return;
+            try { frm.Close(); frm.Dispose(); } catch { }
+            frm = null;
+            lblStatus = null;
+        }
+
+        // Wrapper that opens the progress form, runs the conversion
+        // loop with the update callback, and closes the form. The
+        // call site in run() uses this; passes a pre-pruned list
+        // and gets back two lists of basenames (converted + failed).
+        public static void runConversions(List<string> lsToConvert,
+            out List<string> lsConverted,
+            out List<program.failure> lsFailed)
+        {
+            open(lsToConvert.Count);
             try {
-                program.runConversionLoop(lsFiles, onStarting,
-                    out iConverted, out iFailed);
+                Action<string, int, int> onStarting = (sBase, iIndex, iTotal) =>
+                    update(sBase, iIndex, iTotal);
+                program.runConversionLoop(lsToConvert, onStarting,
+                    /* bInlineConsole: */ false,
+                    out lsConverted, out lsFailed);
             } finally {
-                frm.Close();
-                frm.Dispose();
+                close();
             }
         }
     }
@@ -1731,6 +2032,45 @@ namespace twoHtm
         public static void warn(string sMsg)  { write("WARN", sMsg); }
         public static void error(string sMsg) { write("ERROR", sMsg); }
         public static void debug(string sMsg) { write("DEBUG", sMsg); }
+
+        // Write the run header to the top of the log: program name
+        // and version, the friendly run-start timestamp, and the
+        // resolved parameter list. Emits raw lines (no per-line
+        // timestamp/level prefix) so the header reads as a clean
+        // banner. The processing notifications that follow use the
+        // standard timestamped format via info/warn/error/debug.
+        //
+        // dParams is a List<KeyValuePair<string,string>> rather than
+        // a Dictionary so the caller controls the order in which
+        // parameters appear.
+        public static void header(string sName, string sVersion,
+            List<KeyValuePair<string, string>> dParams)
+        {
+            if (writer == null) return;
+            try {
+                writer.WriteLine("=== " + sName + " " + sVersion + " ===");
+                writer.WriteLine("Run on " + friendlyTime(DateTime.Now));
+                if (dParams != null && dParams.Count > 0) {
+                    writer.WriteLine("Parameters:");
+                    int iPad = 0;
+                    foreach (var oKv in dParams)
+                        if (oKv.Key.Length > iPad) iPad = oKv.Key.Length;
+                    foreach (var oKv in dParams)
+                        writer.WriteLine("  " + oKv.Key.PadRight(iPad) + " : " + oKv.Value);
+                }
+                writer.WriteLine("===");
+            } catch { }
+        }
+
+        // Render a DateTime in a friendly form, e.g.,
+        // "May 1, 2026 at 2:30 PM". Uses invariant culture for
+        // stable output across machines.
+        public static string friendlyTime(DateTime dt)
+        {
+            return dt.ToString("MMMM d, yyyy", CultureInfo.InvariantCulture) +
+                " at " +
+                dt.ToString("h:mm tt", CultureInfo.InvariantCulture);
+        }
 
         private static void write(string sLevel, string sMsg)
         {
@@ -2377,7 +2717,83 @@ namespace twoHtm
                 throw new InvalidOperationException(
                     "Office component '" + sProgId + "' is not installed or not registered. " +
                     "This file cannot be converted without it.");
-            return Activator.CreateInstance(type);
+            dynamic oApp = Activator.CreateInstance(type);
+            silenceAlerts(sProgId, oApp);
+            return oApp;
+        }
+
+        /// <summary>
+        /// Silence interactive alerts on a freshly-created Office
+        /// Application object so unattended automation does not stall
+        /// on a dialog. This handles the common Word/Excel/PowerPoint
+        /// alert sources, including:
+        ///
+        ///   Word
+        ///     - DisplayAlerts = wdAlertsNone (0): no on-screen alerts.
+        ///     - Options.ConfirmConversions = false: no encoding prompt
+        ///       when opening text files of unknown encoding.
+        ///     - Options.DoNotPromptForConvert = true: no "Word will
+        ///       convert this PDF to an editable Word document" prompt
+        ///       (this was the dialog that previously locked up 2htm
+        ///       when converting a PDF). Available since Word 2013.
+        ///     - AutomationSecurity = msoAutomationSecurityForceDisable
+        ///       (3): macros in opened files are blocked silently
+        ///       instead of prompting.
+        ///     - Visible = false: window is hidden.
+        ///
+        ///   Excel
+        ///     - DisplayAlerts = false
+        ///     - AskToUpdateLinks = false: no "update external links"
+        ///       prompt when opening a workbook with external refs.
+        ///     - AlertBeforeOverwriting = false
+        ///     - AutomationSecurity = msoAutomationSecurityForceDisable
+        ///     - Visible = false
+        ///
+        ///   PowerPoint
+        ///     - DisplayAlerts = ppAlertsNone (1)
+        ///     - AutomationSecurity = msoAutomationSecurityForceDisable
+        ///     - PowerPoint cannot run with Visible = false; the window
+        ///       is left visible (Microsoft documents this limitation).
+        ///
+        /// Each setter is wrapped in its own try/catch because not all
+        /// versions of Office expose every property, and some of the
+        /// settings throw harmlessly when set on certain editions.
+        /// </summary>
+        private static void silenceAlerts(string sProgId, dynamic oApp)
+        {
+            // Office .mso constants. Hard-coded to avoid pulling in
+            // an Office interop reference at compile time.
+            const int iMsoAutomationSecurityForceDisable = 3;
+            const int iWdAlertsNone = 0;
+            const int iPpAlertsNone = 1;
+
+            string sLowered = (sProgId ?? "").ToLowerInvariant();
+            try { oApp.AutomationSecurity = iMsoAutomationSecurityForceDisable; } catch { }
+
+            if (sLowered.StartsWith("word.")) {
+                try { oApp.DisplayAlerts = iWdAlertsNone; } catch { }
+                try { oApp.Visible = false; } catch { }
+                try { oApp.Options.ConfirmConversions = false; } catch { }
+                try { oApp.Options.DoNotPromptForConvert = true; } catch { }
+                try { oApp.Options.SaveNormalPrompt = false; } catch { }
+                try { oApp.Options.WarnBeforeSavingPrintingSendingMarkup = false; } catch { }
+                try { oApp.Options.UpdateLinksAtOpen = false; } catch { }
+                try { oApp.Options.CheckGrammarAsYouType = false; } catch { }
+                try { oApp.Options.CheckSpellingAsYouType = false; } catch { }
+            }
+            else if (sLowered.StartsWith("excel.")) {
+                try { oApp.DisplayAlerts = false; } catch { }
+                try { oApp.Visible = false; } catch { }
+                try { oApp.AskToUpdateLinks = false; } catch { }
+                try { oApp.AlertBeforeOverwriting = false; } catch { }
+                try { oApp.ScreenUpdating = false; } catch { }
+                try { oApp.EnableEvents = false; } catch { }
+            }
+            else if (sLowered.StartsWith("powerpoint.")) {
+                try { oApp.DisplayAlerts = iPpAlertsNone; } catch { }
+                // PowerPoint requires a visible window to render slides,
+                // so we do NOT set Visible = false. Leave it as-is.
+            }
         }
 
         public static void release(object oObj)

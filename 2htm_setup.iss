@@ -14,7 +14,7 @@
 ;   - Creates a desktop shortcut with hotkey Alt+Ctrl+2 that
 ;     launches 2htm in GUI mode with saved-configuration loading
 ;     enabled (equivalent to 2htm -g -u).
-;   - Adds "Convert with 2htm" to the File Explorer right-click
+;   - Adds "Convert via 2htm" to the File Explorer right-click
 ;     menu for all file types.
 ;   - On the final wizard page, offers two PostInstall checkboxes
 ;     (both checked by default): launch 2htm (with a hotkey reminder)
@@ -55,6 +55,16 @@ DefaultDirName={autopf}\{#sAppName}
 DefaultGroupName={#sAppName}
 DisableProgramGroupPage=yes
 UsePreviousAppDir=yes
+
+; Force the "Select Destination Location" page to always be shown,
+; even on reinstall. Without this, DisableDirPage defaults to "auto",
+; which means: hide the directory page if a prior install of the same
+; AppId is detected. We want the page shown every time so the user
+; can review the install location, and so it is obviously editable.
+; UsePreviousAppDir=yes pre-fills the field with the previous
+; directory, so the user just presses Next on a reinstall to keep the
+; same path -- but they can also change it.
+DisableDirPage=no
 UsePreviousGroup=yes
 
 OutputDir=.
@@ -128,7 +138,7 @@ Name: "{userdesktop}\{#sAppName}"; \
   Comment: "Convert files to accessible HTML ({#sHotKey})"
 
 [Registry]
-; File Explorer "Convert with 2htm" right-click menu entry.
+; File Explorer "Convert via 2htm" right-click menu entry.
 ; Registered unconditionally under HKLM so it is available for
 ; every user on the machine. The verb passes "%1" (the full
 ; absolute path of the right-clicked file) to 2htm.exe. The
@@ -142,7 +152,7 @@ Name: "{userdesktop}\{#sAppName}"; \
 ; Setup to remove the entire subtree (including the command
 ; subkey) automatically on uninstall.
 Root: HKLM; Subkey: "SOFTWARE\Classes\*\shell\2htm"; \
-  ValueType: string; ValueName: ""; ValueData: "Convert with &2htm"; \
+  ValueType: string; ValueName: ""; ValueData: "Convert via &2htm"; \
   Flags: uninsdeletekey
 Root: HKLM; Subkey: "SOFTWARE\Classes\*\shell\2htm"; \
   ValueType: string; ValueName: "Icon"; ValueData: """{app}\{#sAppExeName}"",0"

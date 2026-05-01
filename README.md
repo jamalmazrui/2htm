@@ -42,7 +42,7 @@ Download `2htm_setup.exe` from the [GitHub repository](https://github.com/JamalM
 - Prompts you for the installation directory (default: `C:\Program Files\2htm`).
 - Includes a brief MIT license summary on the welcome page; the full license text is installed alongside the program as `License.htm`.
 - Adds a Start-menu shortcut and a desktop shortcut whose hotkey is **Alt+Ctrl+2**. Pressing **Alt+Ctrl+2** from anywhere in Windows opens the `2htm` dialog.
-- The installer also adds a **Convert with 2htm** entry to the File Explorer right-click menu for all file types. Right-clicking any supported file and choosing this entry is the fastest way to convert a single file.
+- The installer also adds a **Convert via 2htm** entry to the File Explorer right-click menu for all file types. Right-clicking any supported file (or pressing **Shift+F10**) and choosing this entry is the fastest way to convert a single file. The accelerator letter is **2** (matching the **Alt+Ctrl+2** desktop hotkey), so the keyboard shortcut from a focused file in File Explorer is **Shift+F10**, then **2**.
 
 The final wizard page offers two checkboxes (both checked by default): launch `2htm` (with a hotkey reminder) and read the HTML documentation.
 
@@ -61,7 +61,7 @@ Launch `2htm` from any of these:
 
 The parameter dialog has these controls. Each label has an underlined letter that you can press with **Alt** to jump straight to that control:
 
-- **Source files** [S] — a single file path, a wildcard pattern (e.g., `*.docx`), or several of either separated by spaces. Wrap paths containing spaces in double quotes.
+- **Source files** [S] — a single file path, a wildcard pattern (e.g., `*.docx`), or several of either separated by spaces. A single path containing spaces does not need quotes — 2htm recognizes the entire trimmed field as one path when it points to an existing file or directory. Quotes are only needed when supplying multiple specs and at least one contains a space.
 - **Browse source...** [B] — pick a single source from a file picker
 - **Output directory** [O] — where the output is written. Blank means the current working directory.
 - **Choose output...** [C] — pick the output directory from a folder picker
@@ -76,6 +76,8 @@ The parameter dialog has these controls. Each label has an underlined letter tha
 - **OK** / **Cancel** — start the run, or cancel without running. Enter is OK; Esc is Cancel.
 
 The Browse source and Choose output pickers open at the directory derived from the corresponding text field's current value when that value points to an existing path; otherwise they open at your Documents folder. With **Use configuration** checked, those text fields are pre-populated from your last session, so the pickers naturally pick up where you left off.
+
+If you press OK with an output directory that does not yet exist, 2htm prompts to create it (default Yes). Choosing No keeps the dialog open with focus on the output field so you can correct it.
 
 When all files have been processed, a final results dialog summarizes what was done.
 
