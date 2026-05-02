@@ -326,7 +326,7 @@ namespace twoHtm
                     // so the user learns the correct usage.
                     if (i + 1 >= asArgs.Length ||
                         string.IsNullOrWhiteSpace(asArgs[i + 1])) {
-                        Console.Error.WriteLine("[ERROR] " + sArg +
+                        Console.Error.WriteLine(sArg +
                             " requires a directory argument.");
                         Console.Error.WriteLine("Run '2htm --help' for usage.");
                         return iExitFatal;
@@ -336,7 +336,7 @@ namespace twoHtm
                     continue;
                 }
                 if (sArg.StartsWith("-") && !File.Exists(sArg) && !Directory.Exists(sArg)) {
-                    Console.Error.WriteLine("[ERROR] Unknown option: " + sArg);
+                    Console.Error.WriteLine("Unknown option: " + sArg);
                     Console.Error.WriteLine("Run '2htm --help' for usage.");
                     return iExitFatal;
                 }
@@ -428,7 +428,7 @@ namespace twoHtm
                 } catch (Exception ex) {
                     string sErr = "Output directory '" + sOutputDir +
                         "' does not exist and cannot be created: " + ex.Message;
-                    Console.Error.WriteLine("[ERROR] " + sErr);
+                    Console.Error.WriteLine(sErr);
                     if (bGuiMode) showFinalMessage(sErr);
                     return iExitFatal;
                 }
@@ -487,7 +487,7 @@ namespace twoHtm
 
                 var lsFiles = expandWildcards(lsFileArgs.ToArray());
                 if (lsFiles.Count == 0) {
-                    Console.Error.WriteLine("[INFO] No matching files.");
+                    Console.WriteLine("No matching files.");
                     logger.info("No matching files; exiting.");
                     iExitCode = iExitOk;
                 } else {
@@ -811,7 +811,7 @@ namespace twoHtm
 
         private static void printUsage()
         {
-            Console.WriteLine(program.sProgramName + " " + sProgramVersion + " - convert documents to accessible HTML");
+            Console.WriteLine(program.sProgramName + " " + sProgramVersion);
             Console.WriteLine();
             Console.WriteLine("Usage: 2htm [options] <file-or-wildcard> [<file-or-wildcard> ...]");
             Console.WriteLine();
@@ -963,24 +963,24 @@ namespace twoHtm
                 string sPattern = Path.GetFileName(sArg);
                 if (string.IsNullOrEmpty(sDir)) sDir = Directory.GetCurrentDirectory();
                 if (!Directory.Exists(sDir)) {
-                    Console.Error.WriteLine("[WARN] Directory not found: " + sDir);
+                    Console.Error.WriteLine("Directory not found: " + sDir);
                     continue;
                 }
                 if (sPattern.IndexOfAny(new[] { '*', '?' }) < 0) {
                     string sFull = Path.GetFullPath(sArg);
                     if (File.Exists(sFull) && !isLockFile(sFull)) hsResult.Add(sFull);
                     else if (!File.Exists(sFull))
-                        Console.Error.WriteLine("[WARN] File not found: " + sArg);
+                        Console.Error.WriteLine("File not found: " + sArg);
                 } else {
                     string[] aMatches;
                     try {
                         aMatches = Directory.GetFiles(sDir, sPattern);
                     } catch (Exception ex) {
-                        Console.Error.WriteLine("[WARN] Cannot enumerate '" + sArg + "': " + ex.Message);
+                        Console.Error.WriteLine("Cannot enumerate '" + sArg + "': " + ex.Message);
                         continue;
                     }
                     if (aMatches.Length == 0)
-                        Console.Error.WriteLine("[WARN] No files match: " + sArg);
+                        Console.Error.WriteLine("No files match: " + sArg);
                     foreach (var sMatch in aMatches) {
                         if (isLockFile(sMatch)) continue;
                         // For a bare-directory expansion, skip files
@@ -1376,6 +1376,12 @@ namespace twoHtm
             txtSource.Location = new System.Drawing.Point(iTextX, y);
             txtSource.Size = new System.Drawing.Size(iTextW, iLayoutTextHeight);
             txtSource.TabIndex = 0;
+            // Explicit AccessibleName so JAWS/NVDA announce the field
+            // by its label even when the visual layout (label-left,
+            // textbox-right at the same y) doesn't auto-associate.
+            // The screen reader hears "Source files, edit, ..." when
+            // the textbox gains focus.
+            txtSource.AccessibleName = "Source files";
             frm.Controls.Add(txtSource);
 
             var btnBrowseSource = new System.Windows.Forms.Button();
@@ -1415,6 +1421,7 @@ namespace twoHtm
             txtOut.Location = new System.Drawing.Point(iTextX, y);
             txtOut.Size = new System.Drawing.Size(iTextW, iLayoutTextHeight);
             txtOut.TabIndex = 2;
+            txtOut.AccessibleName = "Output directory";
             frm.Controls.Add(txtOut);
 
             var btnBrowseOut = new System.Windows.Forms.Button();
@@ -2011,7 +2018,7 @@ namespace twoHtm
                 writer = new StreamWriter(sPath, append: false, encoding: new UTF8Encoding(true));
                 writer.AutoFlush = true;
             } catch (Exception ex) {
-                Console.Error.WriteLine("[WARN] Could not open log file '" + sPath + "': " +
+                Console.Error.WriteLine("Could not open log file '" + sPath + "': " +
                     ex.Message + ". Continuing without a log.");
                 writer = null;
             }
@@ -5668,7 +5675,7 @@ namespace twoHtm
             } catch (Exception ex) {
                 string sMsg = "Could not read configuration from:\r\n" +
                     sPath + "\r\n\r\n" + ex.Message;
-                Console.Error.WriteLine("[WARN] " + sMsg);
+                Console.Error.WriteLine(sMsg);
                 if (program.bGuiMode) {
                     try {
                         System.Windows.Forms.MessageBox.Show(sMsg,
@@ -5733,7 +5740,7 @@ namespace twoHtm
                 // to persist and the user has no way to tell.
                 string sMsg = "Could not save configuration to:\r\n" +
                     sPath + "\r\n\r\n" + ex.Message;
-                Console.Error.WriteLine("[WARN] " + sMsg);
+                Console.Error.WriteLine(sMsg);
                 logger.info("Could not save configuration: " + ex.Message);
                 if (program.bGuiMode) {
                     try {

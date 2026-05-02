@@ -230,6 +230,21 @@ path contains spaces. 2htm tests the entire trimmed source field as a
 single spec first; only when it is not a usable single spec does it fall
 back to space-tokenization. Quotes are only required when supplying
 multiple specs and at least one contains a space.</li>
+<li><strong>Source field accessibility.</strong> The Source files and
+Output directory text boxes now have explicit
+<code>AccessibleName</code> properties so JAWS and NVDA reliably
+announce each field by its label when focus moves to it, regardless of
+label-textbox visual layout.</li>
+<li><strong>Cleaner result messages.</strong> The result MessageBox in
+GUI mode and the matching console output in CLI mode now show only what
+the user needs: per-file basenames and the structured summary. The
+program-name-with-tagline line that used to head the help/usage output
+is gone (just the version is shown). The <code>[INFO]</code> /
+<code>[WARN]</code> / <code>[ERROR]</code> prefixes that used to appear
+on console diagnostic writes have been removed – they were redundant
+with the log file’s own level columns and made the GUI MessageBox text
+noisy. The same level data is still recorded in the log file when
+<code>-l</code> is given.</li>
 <li><strong>Output-directory create prompt.</strong> If you press OK
 with an output directory that does not yet exist, 2htm asks “Create
 [path]?” with default Yes. Choosing No keeps the dialog open with focus
