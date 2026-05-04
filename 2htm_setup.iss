@@ -1,4 +1,4 @@
-; =====================================================================
+﻿; =====================================================================
 ; 2htm installer script for Inno Setup 6.x
 ;
 ; Compile with the Inno Setup IDE (ISCC.exe) to produce 2htm_setup.exe.

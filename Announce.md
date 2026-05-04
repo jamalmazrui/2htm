@@ -1,4 +1,4 @@
-# 2htm Release Notes
+﻿# 2htm Release Notes
 
 ## Version 1.18.3
 
