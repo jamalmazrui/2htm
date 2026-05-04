@@ -1,5 +1,6 @@
 ﻿// =====================================================================
 // 2htm.cs - Convert documents to accessible HTML.
+// Copyright (c) 2026 Jamal Mazrui — MIT License — https://github.com/JamalMazrui/2htm
 //
 // Supported input formats:
 //   Office:     .docx .doc .rtf .odt (via Word COM)

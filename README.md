@@ -7,19 +7,13 @@ description: "Convert Documents to Accessible HTML"
 # 2htm
 
 **Author:** Jamal Mazrui
-**License:** MIT
-
-`2htm` is one of three companion accessibility tools by Jamal Mazrui:
-
-- **2htm** — convert documents (Word, Excel, PowerPoint, PDF, Markdown) to accessible HTML
-- **extCheck** — check Office and Markdown files for accessibility problems
-- **urlCheck** — check web pages for accessibility problems
-
-The three tools share a common command-line and GUI layout, so learning one makes the others easy to pick up.
+**Copyright:** © 2026 Jamal Mazrui
+**License:** [MIT](https://opensource.org/license/mit/)
+**Project home:** <https://github.com/JamalMazrui/2htm>
 
 `2htm` is a Windows tool that converts documents in several formats (Microsoft Word, Excel, PowerPoint, PDF, and Pandoc Markdown) into accessible HTML files. For each input file you give it, 2htm writes a `.htm` companion file alongside the source. The output preserves headings, lists, tables, and image alternative text in a structure that screen readers and other assistive technologies can navigate.
 
-Like its companion tools, `2htm` runs in two modes: a **GUI mode** (a small parameter dialog launched by double-clicking the program, pressing its desktop hotkey, or running with `-g`) and a **command-line mode** (any other invocation, suitable for batch files and pipelines). Both modes accept the same options.
+Like its companion tools `urlCheck` and `extCheck` (see the Announce file for a description of the family), `2htm` runs in two modes: a **GUI mode** (a small parameter dialog launched by double-clicking the program, pressing its desktop hotkey, or running with `-g`) and a **command-line mode** (any other invocation, suitable for batch files and pipelines). Both modes accept the same options.
 
 ---
 
