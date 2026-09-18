@@ -29,24 +29,6 @@ rem ===================================================================
 setlocal
 cd /d "%~dp0"
 
-rem ---- The log -------------------------------------------------------
-rem
-rem Every run writes build2htm.log BESIDE THIS SCRIPT, not in a
-rem temporary folder and not only to the console. A build that fails
-rem in a window that has since been closed leaves nothing to read,
-rem and the compiler's own errors are exactly what somebody needs.
-rem
-rem The log is replaced on each run, so it always describes the build
-rem you just did rather than an accumulation of old ones.
-rem --------------------------------------------------------------------
-set "sLog=%~dp0build2htm.log"
-> "%sLog%" echo build2htm log
-call :say "Started %DATE% %TIME%"
-call :say "Script:   %~f0"
-call :say "Folder:   %CD%"
-call :say "Computer: %COMPUTERNAME%   User: %USERNAME%"
-call :say "OS:       %OS%   Processor: %PROCESSOR_ARCHITECTURE%"
-
 rem ---- Locate a Roslyn csc.exe ---------------------------------------
 rem
 rem Search known install locations for Roslyn. The .NET Framework
@@ -221,41 +203,7 @@ rem installs by default since Office 2019. If your Office is 32-bit,
 rem change /platform:x64 to /platform:x86 and rebuild. A 64-bit
 rem process cannot automate a 32-bit Office COM server and vice
 rem versa.
-rem ---- netstandard.dll ----------------------------------------------
-rem
-rem Markdig targets netstandard2.0, so the types it exposes are
-rem declared in netstandard.dll. Without a reference to it the
-rem compiler cannot resolve them and reports errors that name the
-rem Markdig CALL SITES rather than the missing reference:
-rem
-rem   error CS0012: The type 'Object' is defined in an assembly that
-rem   is not referenced. You must add a reference to assembly
-rem   'netstandard, Version=2.0.0.0 ...'
-rem
-rem Those errors point at renderMarkdown and look like a fault in the
-rem source, which is what makes them worth this comment. The facade
-rem lives with the .NET Framework reference assemblies; the bare name
-rem is tried last in case the compiler can already resolve it.
-rem --------------------------------------------------------------------
-rem %ProgramFiles(x86)% is copied to a plain name FIRST. Its own value
-rem is fine, but the variable NAME contains brackets, and inside a
-rem parenthesised block cmd.exe takes that ")" as the end of the block.
-rem The loop below would break on itself.
-set "sRefRoot=%ProgramFiles(x86)%\Reference Assemblies\Microsoft\Framework\.NETFramework"
-set "sNetStandard="
-for %%V in (v4.8 v4.7.2 v4.7.1 v4.7 v4.6.2 v4.6.1 v4.6 v4.5.2 v4.5.1 v4.5) do (
-    if not defined sNetStandard (
-        if exist "%sRefRoot%\%%V\Facades\netstandard.dll" (
-            set "sNetStandard=%sRefRoot%\%%V\Facades\netstandard.dll"
-        )
-    )
-)
-if not defined sNetStandard set "sNetStandard=netstandard.dll"
-call :say "netstandard: %sNetStandard%"
-call :say "Compiling 2htm.cs"
-
 "%sCsc%" /nologo /target:exe /platform:x64 /optimize+ ^
-    /reference:"%sNetStandard%" ^
     /reference:System.dll ^
     /reference:System.Core.dll ^
     /reference:System.Xml.dll ^
@@ -268,29 +216,13 @@ call :say "Compiling 2htm.cs"
     /resource:Markdig.dll,Markdig.dll ^
     /win32icon:2htm.ico ^
     /out:2htm.exe ^
-    2htm.cs >> "%sLog%" 2>&1
+    2htm.cs
 
-rem The compiler's own output goes to the log AND to the console, so a
-rem failure can be read now and sent later.
 if errorlevel 1 (
-    call :say "[ERROR] Build failed. The compiler said:"
-    type "%sLog%"
-    echo [ERROR] Build failed. The detail is in %sLog%
+    echo [ERROR] Build failed.
     exit /b 1
 )
-call :say "[INFO] Built 2htm.exe successfully (with embedded icon)."
-for %%F in (2htm.exe) do call :say "2htm.exe is %%~zF bytes, written %%~tF"
-call :say "Finished %DATE% %TIME%"
-echo [INFO] Built 2htm.exe successfully. The log is %sLog%
+echo [INFO] Built 2htm.exe successfully (with embedded icon).
 
 endlocal
-goto :eof
-
-rem ---- say -----------------------------------------------------------
-rem One line, to the console and to the log. Anything worth telling the
-rem person running this is worth having in the file afterwards.
-rem --------------------------------------------------------------------
-:say
-echo %~1
->> "%sLog%" echo %~1
 goto :eof

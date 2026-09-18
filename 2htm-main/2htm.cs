@@ -265,26 +265,13 @@ namespace twoHtm
                     printUsage();
                     return iExitOk;
                 }
-            } else if (bOwnConsole && !Console.IsOutputRedirected) {
+            } else if (bOwnConsole) {
                 // CLI launched by Explorer (context-menu verb).
                 // Hide the console flash and mark that we should
                 // report any conversion errors via MessageBox.
                 bHideConsoleMode = true;
                 hideOwnConsoleWindow();
             }
-            // NEVER A DIALOG WHEN SOMEBODY IS READING THE OUTPUT.
-            //
-            // A program that started 2htm and redirected its output is waiting
-            // to read that output, not to click OK. HomerView launches it with
-            // no window and both streams redirected; the console-owner test
-            // above said "Explorer launched me", so an ordinary error went up
-            // as a MODAL MESSAGE BOX ON AN INVISIBLE WINDOW -- unseeable,
-            // undismissable, and it hung the caller until it was killed.
-            //
-            // Console.IsOutputRedirected is the honest test: it is true exactly
-            // when another program is on the other end of the pipe. If it is,
-            // errors go to the stream where that program will actually find
-            // them.
 
             // First pass: recognize flags and separate them from
             // file/wildcard arguments. Flags starting with "-" are

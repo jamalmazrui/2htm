@@ -1,0 +1,426 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2htm Announce</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <style>
+  body { font-family: Arial, Helvetica, sans-serif; max-width: 50em; margin: 1em auto; padding: 0 1em; line-height: 1.5; color: #222; }
+  h1 { font-size: 1.5em; border-bottom: 1px solid #ccc; padding-bottom: 0.2em; }
+  h2 { font-size: 1.25em; margin-top: 1.5em; }
+  h3 { font-size: 1.1em; margin-top: 1.3em; }
+  p { margin: 0.7em 0; }
+  code { font-family: Consolas, "Courier New", monospace; background: #f4f4f4; padding: 1px 4px; border-radius: 3px; }
+  pre { background: #f4f4f4; padding: 0.6em 1em; border-radius: 4px; overflow-x: auto; line-height: 1.35; }
+  pre code { background: transparent; padding: 0; }
+  ul, ol { margin: 0.5em 0; padding-left: 1.6em; }
+  li { margin: 0.25em 0; }
+  table { border-collapse: collapse; margin: 1em 0; }
+  th, td { border: 1px solid #bbb; padding: 0.3em 0.7em; text-align: left; }
+  th { background: #efefef; }
+  blockquote { border-left: 4px solid #bbb; margin: 1em 0; padding: 0.2em 1em; color: #555; }
+  a { color: #0645ad; }
+  a:visited { color: #0b0080; }
+  hr { border: 0; border-top: 1px solid #ccc; margin: 2em 0; }
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2htm Announce</h1>
+</header>
+<h1 id="htm-release-notes">2htm Release Notes</h1>
+<p><strong>Copyright:</strong> © 2026 Jamal Mazrui — Released under the
+<a href="https://opensource.org/license/mit/">MIT License</a>
+<strong>Project home:</strong> <a
+href="https://github.com/JamalMazrui/2htm"
+class="uri">https://github.com/JamalMazrui/2htm</a></p>
+<h2 id="version-1.18.3">Version 1.18.3</h2>
+<p>This release brings 2htm’s source code into compliance with the
+project’s Camel Type coding standard:</p>
+<ul>
+<li>The Hungarian <code>o</code> prefix is now reserved for COM objects
+only. Variables holding managed .NET objects (StreamWriter, FileStream,
+Process, Regex, Match, ProcessStartInfo, ZipArchive, FileInfo, etc.) now
+use the lowercase class name as their prefix per the rule.</li>
+<li>Renames are mechanical and do not change runtime behavior. Examples:
+<code>oOut</code> → <code>writer</code>, <code>oFs</code> →
+<code>fileStream</code>, <code>oZip</code> → <code>zipArchive</code>,
+<code>oMatch</code> → <code>match</code>, <code>oResult</code> →
+<code>dialogResult</code>. COM objects driving Word/Excel/PowerPoint
+(<code>oWord</code>, <code>oExcel</code>, <code>oPpt</code>,
+<code>oWb</code>, <code>oDoc</code>, <code>oCell</code>,
+<code>oRange</code>, <code>oSheet</code>, <code>oSlide</code>,
+<code>oShape</code>, <code>oTable</code>, <code>oChart</code>, etc.)
+keep their <code>o</code> prefix.</li>
+<li><strong>Cross-program naming.</strong> Identifier names for shared
+concepts now match across the three companion tools (urlCheck, extCheck,
+2htm). The program-name and version constants are
+<code>sProgramName</code> and <code>sProgramVersion</code> (was
+<code>sVersion</code>). New constants <code>sConfigDirName</code>,
+<code>sConfigFileName</code>, <code>sLogFileName</code> replace the
+inline string literals. GUI layout constants are now all
+<code>iLayout*</code> (was <code>iDefault*</code>). The output-directory
+parameter is <code>sOutputDir</code> everywhere (was
+<code>sOutDir</code> in some signatures). The <code>logger</code>
+surface is uniform: <code>open</code>, <code>close</code>,
+<code>info</code>, <code>warn</code>, <code>error</code>,
+<code>debug</code>.</li>
+<li><strong>Picker initial directory.</strong> The Browse source and
+Choose output buttons now open at the directory derived from the
+text-field value when that value points to an existing path (whether the
+user just typed it or it was loaded from a saved configuration), and at
+the user’s Documents folder otherwise.</li>
+<li><strong>Friendlier source-field parsing.</strong> When you supply a
+single path, you no longer need to put quotes around it just because the
+path contains spaces. 2htm tests the entire trimmed source field as a
+single spec first; only when it is not a usable single spec does it fall
+back to space-tokenization. Quotes are only required when supplying
+multiple specs and at least one contains a space.</li>
+<li><strong>Source field accessibility.</strong> The Source files and
+Output directory text boxes now have explicit
+<code>AccessibleName</code> properties so JAWS and NVDA reliably
+announce each field by its label when focus moves to it, regardless of
+label-textbox visual layout.</li>
+<li><strong>Cleaner result messages.</strong> The result MessageBox in
+GUI mode and the matching console output in CLI mode now show only what
+the user needs: per-file basenames and the structured summary. The
+program-name-with-tagline line that used to head the help/usage output
+is gone (just the version is shown). The <code>[INFO]</code> /
+<code>[WARN]</code> / <code>[ERROR]</code> prefixes that used to appear
+on console diagnostic writes have been removed – they were redundant
+with the log file’s own level columns and made the GUI MessageBox text
+noisy. The same level data is still recorded in the log file when
+<code>-l</code> is given.</li>
+<li><strong>Output-directory create prompt.</strong> If you press OK
+with an output directory that does not yet exist, 2htm asks “Create
+[path]?” with default Yes. Choosing No keeps the dialog open with focus
+on the output field.</li>
+<li><strong>Office automation alerts disabled.</strong> Word, Excel, and
+PowerPoint application objects created by 2htm now have their
+<code>DisplayAlerts</code> property set to none, plus other
+prompt-suppression options. Of particular note,
+<code>Word.Application.Options.DoNotPromptForConvert = true</code>
+suppresses the “Word will now convert your PDF to an editable Word
+document” dialog that previously locked up 2htm when converting a PDF.
+<code>AutomationSecurity = msoAutomationSecurityForceDisable</code>
+blocks any macros silently.</li>
+<li><strong>Progress display fix.</strong> The “Converting” status bar
+now shows files <strong>already completed</strong> rather than the file
+being started. When converting a single file, you see “file.pdf — 0 of
+1, 0%” while it is being processed (rather than the previous misleading
+“1 of 1, 100%” while still working).</li>
+<li><strong>Concise skip message.</strong> The “skipped because output
+exists” message now uses the input basename rather than the full path,
+matching the basename-only style of the success line. Full paths still
+go to the log when <code>-l</code> is given.</li>
+<li><strong>Pre-pruning + structured results summary.</strong> Before
+the conversion loop runs and before the progress UI opens, the file list
+is pruned in two passes: (1) unsupported extensions are silently dropped
+(logged when <code>-l</code> is on); (2) files whose output target
+already exists are dropped unless <strong>Force replacements</strong> is
+checked — these are counted as “skipped.” The progress counter
+denominator is the post-pruning count, so percentages reflect actual
+work. The final summary is structured as up to three sections —
+<code>Converted N file(s):</code>,
+<code>Failed to convert N file(s):</code>, and
+<code>Skipped N file(s). Check "Force replacements" to overwrite.</code>
+— each shown only when its count is non-zero, with singular “file” /
+plural “files” inflection. Failed entries include a short reason after
+the basename when one is available
+(<code>slides.pptx: file is corrupt</code>); the full exception and
+stack trace go to the log when <code>-l</code> is on.</li>
+<li><strong>CLI vs GUI output styles.</strong> In CLI mode (real console
+attached) basenames print inline as the loop runs — natural progress
+feedback for the console user. In GUI mode (and right-click invocations)
+the loop is silent on stdout; the progress status form shows the current
+file, and the structured summary is the final MessageBox. The structured
+summary is printed in both modes, but the per-name lists are suppressed
+in CLI mode (they would just repeat what already scrolled by).</li>
+<li><strong>Log header.</strong> When <code>-l</code> (Log session) is
+enabled, the log file now begins with a clean header before the
+timestamped processing notifications: program name and version, a
+friendly run timestamp (<code>Run on May 1, 2026 at 2:30 PM</code>), and
+a <code>Parameters:</code> block listing each setting with both explicit
+and defaulted values resolved (Source, Output directory, Force
+replacements, Plain text, Strip images, View output, Use configuration,
+Log session, GUI mode, Working directory, Command line). The header is
+followed by the normal timestamped log entries.</li>
+<li><strong>Markdig fetch logic inlined.</strong> The previous
+<code>build2htm.cmd</code> placed the Markdig-download routine in a
+separate <code>:fnFetchMarkdig</code> subroutine and used
+<code>call :fnFetchMarkdig</code> to invoke it. cmd.exe has a known
+chunk-boundary bug in its label-search code (the search reads the file
+in 512/1024-byte chunks; a label at certain byte positions can be
+missed), which surfaced here as “The system cannot find the batch label
+specified - fnFetchMarkdig”. Inlining the fetch logic eliminates the
+forward <code>call :label</code> and so eliminates the bug. .cmd files
+in this archive ship with CRLF line endings as additional
+defense-in-depth.</li>
+</ul>
+<p>The icon is now embedded in <code>2htm.exe</code> at build time via
+the <code>/win32icon</code> flag, and shortcuts inherit it
+automatically. A 2htm.ico file ships in the GitHub repo for the
+installer wizard’s own icon (compile-time use), but does not need to
+ship with the installed program.</p>
+<p>The installer (<code>2htm_setup.exe</code>):</p>
+<ul>
+<li>Prompts for the installation directory on every run (default:
+<code>C:\Program Files\2htm</code>). The directory page is now
+explicitly enabled (<code>DisableDirPage=no</code> in the .iss);
+previously it was at the Inno Setup default of <code>auto</code>, which
+silently skipped the page on reinstalls of the same <code>AppId</code>.
+The previous directory is pre-filled, so on a reinstall the user just
+presses Next to keep the same path.</li>
+<li>Includes a brief MIT-license summary on the welcome page.</li>
+<li>Installs only HTML versions of the documentation
+(<code>ReadMe.htm</code>, <code>Announce.htm</code>,
+<code>License.htm</code>); the Markdown counterparts and the
+source/build/installer scripts live in the GitHub repository.</li>
+<li>The “Launch 2htm now” checkbox on the final page reminds the user
+that the desktop hotkey is Alt+Ctrl+2.</li>
+<li>Adds a “Convert via <strong>2</strong>htm” entry to the File
+Explorer right-click menu for all file types. The accelerator letter
+<code>2</code> matches the desktop hotkey accelerator. Uninstall removes
+the registry entries.</li>
+</ul>
+<h2 id="earlier-versions">Earlier versions</h2>
+<p>For the full revision history see the GitHub repository.</p>
+<h2 id="about-the-companion-accessibility-tools">About the companion
+accessibility tools</h2>
+<p><code>urlCheck</code>, <code>extCheck</code>, and <code>2htm</code>
+are a small family of free, MIT-licensed Windows command-line tools
+written by Jamal Mazrui and shared on GitHub. Each is distributed as a
+single-file, independent binary executable that runs without an
+installation step, without a runtime dependency, and without anything in
+the registry.</p>
+<ul>
+<li><a
+href="https://github.com/JamalMazrui/urlCheck"><code>urlCheck</code></a>
+— drives Microsoft Edge through Playwright and runs axe-core on each
+page, producing per-page reports plus a session-level Accessibility
+Conformance Report (<code>ACR.xlsx</code> and <code>ACR.docx</code>)
+covering all 86 WCAG 2.2 success criteria.</li>
+<li><a
+href="https://github.com/JamalMazrui/extCheck"><code>extCheck</code></a>
+— checks the accessibility of <code>.docx</code>, <code>.xlsx</code>,
+<code>.pptx</code>, and <code>.md</code> files, writing per-file CSV
+reports of issues found by an extensible rule registry.</li>
+<li><a href="https://github.com/JamalMazrui/2htm"><code>2htm</code></a>
+— converts Office documents and other text formats to clean, accessible
+HTML using Microsoft’s own conversion engines, with options for plain
+text and image stripping.</li>
+</ul>
+<p>The three programs share a deliberately consistent interface and a
+set of friendly features intended to make them equally usable for the
+typical Windows user (working through a GUI dialog) and for developers
+automating tasks (working through the command line). Because the same
+options are available either way, the same scan or conversion can be
+reproduced from a script or scheduled task exactly as it was performed
+by hand.</p>
+<p>Common features:</p>
+<ul>
+<li><strong>Fully accessible CLI and GUI</strong>, following platform
+conventions for accessible interfaces. Every GUI control has a unique
+mnemonic hotkey; tab order is logical; status, progress, and result
+messages are announced consistently to screen readers; help text is
+available in both modes.</li>
+<li><strong>Equivalent CLI and GUI behavior.</strong> Every option
+exposed by one mode is exposed by the other, with the same spelling and
+the same defaults.</li>
+<li><strong>Familiar across the family.</strong> The three programs use
+the same control names, dialog layout, and command-line flag spellings
+wherever the underlying concept is the same. A user who has learned one
+is immediately at home in the other two — no re-learning.</li>
+<li><strong>Optional installer for users who prefer a Windows-native
+install flow.</strong> Each program ships with a small Inno Setup
+installer (<code>&lt;program&gt;_setup.exe</code>) that puts the
+executable in Program Files, registers a global desktop hotkey (mnemonic
+to the program name: Alt+Ctrl+U for urlCheck, Alt+Ctrl+2 for 2htm,
+Alt+Ctrl+X for extCheck), adds a Start Menu entry, and installs the
+documentation. Users who prefer no installer can run the executable
+directly from the .zip.</li>
+<li><strong>Multiple sources in a single command.</strong> A single
+invocation accepts any number of files, wildcards, folders, URLs, or
+list files, processed sequentially.</li>
+<li><strong>Opt-in configuration recall.</strong> When checked, the
+program remembers the most recent dialog values to a configuration file
+under <code>%LOCALAPPDATA%</code>, so a frequent task is one click away
+on the next run.</li>
+<li><strong>Real-time progress in CLI mode; structured summary in GUI
+mode.</strong> The console shows files and URLs as they are processed,
+with a short error reason on failure; the GUI message box at the end of
+the session shows a categorized list of what was completed, failed, or
+skipped.</li>
+<li><strong>Force-replacement and skip-existing behavior.</strong> By
+default, prior outputs are preserved and re-runs skip work already done.
+A force flag overrides this for a clean re-run.</li>
+<li><strong>Optional session log.</strong> A diagnostic log can be
+written next to the program’s outputs for after-the-fact review.</li>
+</ul>
+<p>All three are released under the <a
+href="https://opensource.org/license/mit/">MIT license</a> — a short,
+permissive open-source license that permits use, modification, and
+redistribution for any purpose, including commercial use, with the only
+requirement being that the original copyright notice and license text
+are preserved in copies of the software.</p>
+</body>
+</html>
