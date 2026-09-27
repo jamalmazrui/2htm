@@ -35,6 +35,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml;
 using Markdig;
+using Homer;
 
 namespace twoHtm
 {
@@ -48,9 +49,16 @@ namespace twoHtm
         public const int iExitFatal = 2;
 
         public const string sProgramName = "2htm";
-        public const string sProgramVersion = "1.18.3";
+        // From version.txt, through the Version.cs the build writes on
+        // every build, so -v, the log, F11 and the installer report one
+        // number.
+        public const string sProgramVersion = BuildVersion.Version;
         public const string sConfigDirName = "2htm";
-        public const string sConfigFileName = "2htm.ini";
+        public const string sConfigFileName = "2htm.inix";
+        // The GitHub owner whose 2htm releases F11 asks about, and the
+        // settings file of the versions before 1.19.
+        public const string c_sGitHubOwner = "jamalmazrui";
+        public const string c_sLegacyConfigFileName = "2htm.ini";
         public const string sLogFileName = "2htm.log";
 
         // Global flags set by command-line switches. All converters
@@ -102,7 +110,7 @@ namespace twoHtm
         public static bool bViewOutput = false;
 
         // When true, load saved defaults from
-        // %LOCALAPPDATA%\2htm\2htm.ini on startup (before the GUI
+        // %LOCALAPPDATA%\2htm\configs\2htm.inix on startup (before the GUI
         // dialog opens) and, on OK-click, write the dialog's
         // current values back. Off by default — 2htm leaves no
         // filesystem footprint of its own unless the user opts in
@@ -152,7 +160,28 @@ namespace twoHtm
         public static int Main(string[] asArgs)
         {
             AppDomain.CurrentDomain.AssemblyResolve += resolveEmbeddedAssembly;
-            return run(asArgs);
+            // ONE SESSION LOG, ALWAYS: %LOCALAPPDATA%\2htm\logs\
+            // 2htm-yyyyMMdd-HHmmss.log, from Homer's Log, with the
+            // environment already in its header. -l still writes 2htm.log
+            // beside the output as well. Neither Log nor Elevate touches
+            // Markdig, so Main still references no embedded assembly.
+            Log.start(sProgramName);
+            Elevate.configure(c_sGitHubOwner, sProgramName, sProgramVersion);
+            int iExit = iExitFatal;
+            try {
+                iExit = run(asArgs);
+            } catch (Exception ex) {
+                // Whatever run() did not catch is recorded with its
+                // stack, and the console names the log rather than
+                // showing a trace.
+                Log.exception(ex);
+                Console.Error.WriteLine("2htm stopped: " + ex.Message);
+                Console.Error.WriteLine("The session log has the details: " + Log.path);
+                iExit = iExitFatal;
+            }
+            Log.info("Exit code " + iExit);
+            Log.close();
+            return iExit;
         }
 
         // Returns true when this process appears to have been
@@ -359,7 +388,7 @@ namespace twoHtm
             }
 
             // Configuration file (opt-in, per-user INI at
-            // %LOCALAPPDATA%\2htm\2htm.ini):
+            // %LOCALAPPDATA%\2htm\configs\2htm.inix):
             //
             //   - In CLI mode: the file is loaded ONLY when -u /
             //     --use-configuration is passed. A user who never
@@ -873,21 +902,23 @@ namespace twoHtm
             Console.WriteLine("                       already displaying that directory.");
             Console.WriteLine("  -u, --use-configuration");
             Console.WriteLine("                       Read saved defaults from");
-            Console.WriteLine("                       %LOCALAPPDATA%\\2htm\\2htm.ini. Any other");
+            Console.WriteLine("                       %LOCALAPPDATA%\\2htm\\configs\\2htm.inix. Any other");
             Console.WriteLine("                       options supplied on the command line take");
             Console.WriteLine("                       precedence over saved values. In GUI mode,");
             Console.WriteLine("                       the Use configuration checkbox also");
             Console.WriteLine("                       controls whether the current dialog values");
             Console.WriteLine("                       are written back as next-run defaults.");
-            Console.WriteLine("                       Without -u (and no checkbox), 2htm");
-            Console.WriteLine("                       creates no files of its own.");
-            Console.WriteLine("  -l, --log            Write detailed diagnostics to 2htm.log");
+            Console.WriteLine("                       Without -u (and no checkbox), no");
+            Console.WriteLine("                       settings are saved.");
+            Console.WriteLine("  -l, --log            Also write detailed diagnostics to 2htm.log");
             Console.WriteLine("                       (UTF-8 with BOM) in the output directory if");
             Console.WriteLine("                       one was specified, or the current working");
             Console.WriteLine("                       directory otherwise. Any prior 2htm.log in");
             Console.WriteLine("                       that location is overwritten so the file");
             Console.WriteLine("                       always reflects only the current session.");
             Console.WriteLine("                       Useful for reporting conversion problems.");
+            Console.WriteLine("                       A session log is always kept in");
+            Console.WriteLine("                       %LOCALAPPDATA%\\2htm\\logs.");
             Console.WriteLine();
             Console.WriteLine("Supported input formats:");
             Console.WriteLine("  Word:       .docx .doc .rtf .odt");
@@ -1316,366 +1347,152 @@ namespace twoHtm
     // -----------------------------------------------------------------
     public static class guiDialog
     {
+        // THE DIALOG IS BUILT FROM Homer's Lbc (since 1.19.1), like every
+        // Homer dialog: one control per row in tab order, each field's label
+        // just before it so the label names it, a band where a field and the
+        // button that fills it share a row. Lbc supplies, with no code here,
+        // Control+Enter for OK from any control, Shift+F1 for a field's tip,
+        // F7 for a list of the dialog's controls, the editing keys of every
+        // text field, and the Help button (F1), which lists each field with
+        // its tip and ends with the version check. F11 is claimed below. The
+        // Guide button opens the full guide and returns to the dialog with
+        // everything as it was, as Default settings does.
         public static bool show(ref string sSource, ref string sOutputDir,
             ref bool bStrip, ref bool bPlain, ref bool bForce, ref bool bView,
             ref bool bLog, ref bool bUseCfg)
         {
-            // Build the form.
-            var frm = new System.Windows.Forms.Form();
-            frm.Text = program.sProgramName;
-            frm.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            frm.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            frm.MaximizeBox = false;
-            frm.MinimizeBox = false;
-            frm.ShowInTaskbar = false;
-            frm.ClientSize = new System.Drawing.Size(560, 220);
-            frm.Font = System.Drawing.SystemFonts.MessageBoxFont;
+            while (true) {
+                string sButton;
+                using (var dlg = new LbcDialog(program.sProgramName, null)) {
+                    string sStartSource = string.IsNullOrWhiteSpace(sSource) ? defaultSourceForGui() : sSource;
+                    dlg.addBand();
+                    System.Windows.Forms.TextBox tbSource = dlg.addInputBox("&Source files:", sStartSource,
+                        "One or more files, folders or wildcard patterns such as *.docx, " +
+                        "separated by spaces. A folder means every supported file in it.");
+                    System.Windows.Forms.Button btnBrowse = dlg.addButton("&Browse source...",
+                        "Choose a folder of files to convert.");
+                    dlg.addBand();
+                    System.Windows.Forms.TextBox tbOut = dlg.addInputBox("&Output directory:",
+                        !string.IsNullOrWhiteSpace(sOutputDir) ? sOutputDir : deriveOutputDirFromSource(sStartSource),
+                        "Where each converted file is written. Blank means beside the source.");
+                    System.Windows.Forms.Button btnChoose = dlg.addButton("&Choose output...",
+                        "Choose the folder the converted files go to.");
+                    dlg.endBand();
 
-            // Route F1 to the same action as clicking the Help
-            // button: show the help MessageBox with an option to
-            // launch the full HTML documentation. KeyPreview lets
-            // the form see the keystroke before whatever child
-            // control currently has focus consumes it. F1 is the
-            // standard Windows help shortcut and is expected by
-            // keyboard-driven users, including screen-reader users.
-            frm.KeyPreview = true;
-            frm.KeyDown += (s, e) => {
-                if (e.KeyCode == System.Windows.Forms.Keys.F1) {
-                    e.Handled = true;
-                    e.SuppressKeyPress = true;
-                    showHelpMessage();
+                    btnBrowse.Click += (o, e) => {
+                        string sPicked = pickFolder("Choose a folder of files to convert", tbSource.Text);
+                        if (sPicked == null) return;
+                        // The output follows the source only while it still
+                        // mirrors it; a folder the user chose stays.
+                        string sOldDerived = deriveOutputDirFromSource(tbSource.Text);
+                        bool bOutputMirrorsSource = string.IsNullOrWhiteSpace(tbOut.Text) ||
+                            string.Equals(tbOut.Text.Trim(), sOldDerived, StringComparison.OrdinalIgnoreCase);
+                        tbSource.Text = sPicked;
+                        if (bOutputMirrorsSource) tbOut.Text = deriveOutputDirFromSource(sPicked);
+                        tbSource.Focus();
+                    };
+                    btnChoose.Click += (o, e) => {
+                        string sPicked = pickFolder("Choose the output directory", tbOut.Text);
+                        if (sPicked == null) return;
+                        tbOut.Text = sPicked;
+                        tbOut.Focus();
+                    };
+
+                    dlg.addSeparator();
+                    System.Windows.Forms.CheckBox cbStrip = dlg.addCheckBox("Strip &images", bStrip,
+                        "Leave images out of the output.");
+                    System.Windows.Forms.CheckBox cbPlain = dlg.addCheckBox("&Plain text", bPlain,
+                        "Write plain text, .txt, instead of HTML.");
+                    System.Windows.Forms.CheckBox cbForce = dlg.addCheckBox("&Force replacements", bForce,
+                        "Overwrite an existing output file instead of skipping the input.");
+                    System.Windows.Forms.CheckBox cbView = dlg.addCheckBox("&View output", bView,
+                        "Open the output folder in File Explorer when the run is done.");
+                    System.Windows.Forms.CheckBox cbLog = dlg.addCheckBox("&Log session", bLog,
+                        "Also write " + program.sLogFileName + " in the output folder. A session log is always kept in %LOCALAPPDATA%\\2htm\\logs.");
+                    System.Windows.Forms.CheckBox cbUseCfg = dlg.addCheckBox("&Use configuration", bUseCfg,
+                        "Load these settings next time, and save them when you press OK, in configs\\" + program.sConfigFileName + ".");
+
+                    // F11: is there a newer 2htm on the web? (Elevate sounds
+                    // like eleven.) Claimed before any control sees the key.
+                    dlg.commandKey = k => {
+                        if (k != System.Windows.Forms.Keys.F11) return false;
+                        logger.info("F11: checking the web for a newer version");
+                        if (Elevate.offer(dlg.form)) {
+                            logger.info("F11: the setup program was started; closing the dialog");
+                            dlg.form.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+                            dlg.form.Close();
+                        }
+                        return true;
+                    };
+
+                    sButton = dlg.runWithButtons(new string[] {
+                        "OK", "Guide", "Default settings", "Cancel" });
+
+                    // Harvest every field before the dialog is disposed, so a
+                    // return to the dialog keeps whatever else was typed.
+                    sSource = (tbSource.Text ?? "").Trim();
+                    sOutputDir = (tbOut.Text ?? "").Trim();
+                    bStrip = cbStrip.Checked;
+                    bPlain = cbPlain.Checked;
+                    bForce = cbForce.Checked;
+                    bView = cbView.Checked;
+                    bLog = cbLog.Checked;
+                    bUseCfg = cbUseCfg.Checked;
                 }
-            };
 
-            // Layout constants in pixels. These deliberately reflect
-            // Windows desktop conventions: ~7 px gutter, ~11 px row
-            // spacing, button width ~120 px.
-            const int iLayoutLeft = 12;
-            const int iLayoutRight = 12;
-            const int iLayoutTop = 12;
-            const int iLayoutGap = 7;
-            const int iLayoutRowGap = 11;
-            const int iLayoutLabelWidth = 110;
-            const int iLayoutButtonWidth = 130;
-            const int iLayoutButtonHeight = 26;
-            const int iLayoutTextHeight = 23;
-
-            int iFormW = frm.ClientSize.Width;
-            int iTextX = iLayoutLeft + iLayoutLabelWidth + iLayoutGap;
-            int iTextW = iFormW - iTextX - iLayoutGap - iLayoutButtonWidth - iLayoutRight;
-            int iBtnX = iFormW - iLayoutRight - iLayoutButtonWidth;
-
-            // --- Row 1: Source files ---
-            int y = iLayoutTop;
-            var lblSource = new System.Windows.Forms.Label();
-            lblSource.Text = "&Source files:";
-            lblSource.AutoSize = false;
-            lblSource.Location = new System.Drawing.Point(iLayoutLeft, y + 3);
-            lblSource.Size = new System.Drawing.Size(iLayoutLabelWidth, iLayoutTextHeight);
-            lblSource.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            frm.Controls.Add(lblSource);
-
-            var txtSource = new System.Windows.Forms.TextBox();
-            // Default when nothing was supplied on the command line
-            // and no saved config filled the field: the user's
-            // Documents folder. This is the Microsoft-recommended
-            // starting point for file operations in a user-facing
-            // GUI (it's what every Office file dialog opens to by
-            // default). A command-line user invoking 2htm -g from a
-            // specific directory on the command line still gets
-            // their own path if they passed one.
-            txtSource.Text = string.IsNullOrWhiteSpace(sSource)
-                ? defaultSourceForGui()
-                : sSource;
-            txtSource.Location = new System.Drawing.Point(iTextX, y);
-            txtSource.Size = new System.Drawing.Size(iTextW, iLayoutTextHeight);
-            txtSource.TabIndex = 0;
-            // Explicit AccessibleName so JAWS/NVDA announce the field
-            // by its label even when the visual layout (label-left,
-            // textbox-right at the same y) doesn't auto-associate.
-            // The screen reader hears "Source files, edit, ..." when
-            // the textbox gains focus.
-            txtSource.AccessibleName = "Source files";
-            frm.Controls.Add(txtSource);
-
-            var btnBrowseSource = new System.Windows.Forms.Button();
-            btnBrowseSource.Text = "&Browse source...";
-            btnBrowseSource.Location = new System.Drawing.Point(iBtnX, y - 1);
-            btnBrowseSource.Size = new System.Drawing.Size(iLayoutButtonWidth, iLayoutButtonHeight);
-            btnBrowseSource.TabIndex = 1;
-            btnBrowseSource.UseVisualStyleBackColor = true;
-            // Click handler wired below, after txtOut is declared
-            // (so the handler can reference it to auto-fill).
-            frm.Controls.Add(btnBrowseSource);
-
-            // --- Row 2: Output directory ---
-            y += iLayoutTextHeight + iLayoutRowGap;
-            var lblOut = new System.Windows.Forms.Label();
-            lblOut.Text = "&Output directory:";
-            lblOut.AutoSize = false;
-            lblOut.Location = new System.Drawing.Point(iLayoutLeft, y + 3);
-            lblOut.Size = new System.Drawing.Size(iLayoutLabelWidth, iLayoutTextHeight);
-            lblOut.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            frm.Controls.Add(lblOut);
-
-            var txtOut = new System.Windows.Forms.TextBox();
-            // If no output directory is supplied (from CLI or saved
-            // config), pre-populate from the source textbox's
-            // current value rather than leaving the user staring
-            // at a blank field. This makes the "blank = same as
-            // source" semantics visible upfront and gives the user
-            // a starting point to edit from. If the source can't
-            // be resolved to a directory (multiple patterns, bad
-            // path), leave the field blank.
-            if (!string.IsNullOrWhiteSpace(sOutputDir)) {
-                txtOut.Text = sOutputDir;
-            } else {
-                txtOut.Text = deriveOutputDirFromSource(txtSource.Text);
+                if (string.IsNullOrEmpty(sButton) ||
+                        string.Equals(sButton, "Cancel", StringComparison.OrdinalIgnoreCase))
+                    return false;
+                if (string.Equals(sButton, "Guide", StringComparison.OrdinalIgnoreCase)) {
+                    launchReadMe();
+                    continue;
+                }
+                if (string.Equals(sButton, "Default settings", StringComparison.OrdinalIgnoreCase)) {
+                    sSource = defaultSourceForGui();
+                    sOutputDir = deriveOutputDirFromSource(sSource);
+                    bStrip = false; bPlain = false; bForce = false;
+                    bView = false; bLog = false; bUseCfg = false;
+                    configManager.eraseAll();
+                    logger.info("Default settings restored");
+                    continue;
+                }
+                // OK: offer to create an output directory that does not exist
+                // yet; a blank one is derived from the source, as before.
+                if (!confirmOutputDir(sOutputDir)) continue;
+                if (string.IsNullOrEmpty(sOutputDir))
+                    sOutputDir = deriveOutputDirFromSource(sSource);
+                return true;
             }
-            txtOut.Location = new System.Drawing.Point(iTextX, y);
-            txtOut.Size = new System.Drawing.Size(iTextW, iLayoutTextHeight);
-            txtOut.TabIndex = 2;
-            txtOut.AccessibleName = "Output directory";
-            frm.Controls.Add(txtOut);
-
-            var btnBrowseOut = new System.Windows.Forms.Button();
-            btnBrowseOut.Text = "&Choose output...";
-            btnBrowseOut.Location = new System.Drawing.Point(iBtnX, y - 1);
-            btnBrowseOut.Size = new System.Drawing.Size(iLayoutButtonWidth, iLayoutButtonHeight);
-            btnBrowseOut.TabIndex = 3;
-            btnBrowseOut.UseVisualStyleBackColor = true;
-            btnBrowseOut.Click += (s, e) => {
-                string sPicked = pickFolder("Choose the output directory",
-                    txtOut.Text);
-                if (sPicked != null) txtOut.Text = sPicked;
-            };
-            frm.Controls.Add(btnBrowseOut);
-
-            // Wire the source-browse handler now that txtOut is in
-            // scope. When the user picks a new source folder, the
-            // output field auto-follows IF the user hasn't
-            // explicitly edited it — detected by checking whether
-            // the current output value matches what the OLD source
-            // would have auto-derived. If the user typed something
-            // else in there, leave it alone.
-            btnBrowseSource.Click += (s, e) => {
-                string sPicked = pickFolder("Choose a folder of files to convert",
-                    txtSource.Text);
-                if (sPicked != null) {
-                    string sOldDerived = deriveOutputDirFromSource(txtSource.Text);
-                    bool bOutputMirrorsSource =
-                        string.IsNullOrWhiteSpace(txtOut.Text) ||
-                        string.Equals(txtOut.Text.Trim(), sOldDerived,
-                            StringComparison.OrdinalIgnoreCase);
-                    txtSource.Text = sPicked;
-                    if (bOutputMirrorsSource) {
-                        txtOut.Text = deriveOutputDirFromSource(sPicked);
-                    }
-                }
-            };
-
-            // --- Row 3+4: Option checkboxes (2x2 grid) ---
-            //   [ Strip images ]   [ Plain text ]
-            //   [ Force replacements ] [ View output ]
-            // A 2x2 grid gives each label room to display fully and
-            // aligns checkboxes predictably for screen-reader
-            // traversal.
-            y += iLayoutTextHeight + iLayoutRowGap * 2;
-            int iChkW = (iFormW - iLayoutLeft - iLayoutRight) / 2;
-            var chkStrip = new System.Windows.Forms.CheckBox();
-            chkStrip.Text = "Strip &images";
-            chkStrip.Checked = bStrip;
-            chkStrip.Location = new System.Drawing.Point(iLayoutLeft, y);
-            chkStrip.Size = new System.Drawing.Size(iChkW, iLayoutTextHeight);
-            chkStrip.TabIndex = 4;
-            frm.Controls.Add(chkStrip);
-
-            var chkPlain = new System.Windows.Forms.CheckBox();
-            chkPlain.Text = "&Plain text";
-            chkPlain.Checked = bPlain;
-            chkPlain.Location = new System.Drawing.Point(iLayoutLeft + iChkW, y);
-            chkPlain.Size = new System.Drawing.Size(iChkW, iLayoutTextHeight);
-            chkPlain.TabIndex = 5;
-            frm.Controls.Add(chkPlain);
-
-            y += iLayoutTextHeight + iLayoutRowGap;
-            var chkForce = new System.Windows.Forms.CheckBox();
-            chkForce.Text = "&Force replacements";
-            chkForce.Checked = bForce;
-            chkForce.Location = new System.Drawing.Point(iLayoutLeft, y);
-            chkForce.Size = new System.Drawing.Size(iChkW, iLayoutTextHeight);
-            chkForce.TabIndex = 6;
-            frm.Controls.Add(chkForce);
-
-            var chkView = new System.Windows.Forms.CheckBox();
-            chkView.Text = "&View output";
-            chkView.Checked = bView;
-            chkView.Location = new System.Drawing.Point(iLayoutLeft + iChkW, y);
-            chkView.Size = new System.Drawing.Size(iChkW, iLayoutTextHeight);
-            chkView.TabIndex = 7;
-            frm.Controls.Add(chkView);
-
-            // Third row: Log session and Use configuration. Both
-            // are "meta" options that affect persistence/diagnostics
-            // rather than the conversion itself, so they sit
-            // together below the conversion-control checkboxes.
-            y += iLayoutTextHeight + iLayoutRowGap;
-            var chkLog = new System.Windows.Forms.CheckBox();
-            chkLog.Text = "&Log session";
-            chkLog.Checked = bLog;
-            chkLog.Location = new System.Drawing.Point(iLayoutLeft, y);
-            chkLog.Size = new System.Drawing.Size(iChkW, iLayoutTextHeight);
-            chkLog.TabIndex = 8;
-            frm.Controls.Add(chkLog);
-
-            var chkUseCfg = new System.Windows.Forms.CheckBox();
-            chkUseCfg.Text = "&Use configuration";
-            chkUseCfg.Checked = bUseCfg;
-            chkUseCfg.Location = new System.Drawing.Point(iLayoutLeft + iChkW, y);
-            chkUseCfg.Size = new System.Drawing.Size(iChkW, iLayoutTextHeight);
-            chkUseCfg.TabIndex = 9;
-            frm.Controls.Add(chkUseCfg);
-
-            // --- Bottom row: commit buttons per Windows UX ---
-            // Help and Default settings on the left (they don't
-            // commit or cancel the dialog), OK and Cancel on the
-            // right. This matches Microsoft's UX guidance for
-            // secondary dialogs.
-            y += iLayoutTextHeight + iLayoutRowGap * 2;
-            var btnHelp = new System.Windows.Forms.Button();
-            btnHelp.Text = "&Help";
-            btnHelp.Location = new System.Drawing.Point(iLayoutLeft, y);
-            btnHelp.Size = new System.Drawing.Size(iLayoutButtonWidth, iLayoutButtonHeight);
-            btnHelp.TabIndex = 10;
-            btnHelp.UseVisualStyleBackColor = true;
-            btnHelp.Click += (s, e) => showHelpMessage();
-            frm.Controls.Add(btnHelp);
-
-            var btnDefaults = new System.Windows.Forms.Button();
-            btnDefaults.Text = "&Default settings";
-            btnDefaults.Location = new System.Drawing.Point(
-                iLayoutLeft + iLayoutButtonWidth + iLayoutGap, y);
-            btnDefaults.Size = new System.Drawing.Size(iLayoutButtonWidth, iLayoutButtonHeight);
-            btnDefaults.TabIndex = 11;
-            btnDefaults.UseVisualStyleBackColor = true;
-            // Default settings: full reset. Resets the dialog's
-            // fields to factory defaults AND deletes the saved
-            // configuration file (plus the 2htm directory under
-            // %LOCALAPPDATA% if it becomes empty). This is the
-            // explicit way for a user to fully opt out of the
-            // footprint — "start over, leave no trace." The
-            // deletion happens immediately on click, not on OK; a
-            // user who clicks Default settings and then Cancel has
-            // still cleared the saved config.
-            btnDefaults.Click += (s, e) => {
-                string sDefault = defaultSourceForGui();
-                txtSource.Text = sDefault;
-                txtOut.Text = deriveOutputDirFromSource(sDefault);
-                chkStrip.Checked = false;
-                chkPlain.Checked = false;
-                chkForce.Checked = false;
-                chkView.Checked = false;
-                chkLog.Checked = false;
-                chkUseCfg.Checked = false;
-                configManager.eraseAll();
-            };
-            frm.Controls.Add(btnDefaults);
-
-            var btnOk = new System.Windows.Forms.Button();
-            btnOk.Text = "OK";
-            btnOk.DialogResult = System.Windows.Forms.DialogResult.OK;
-            btnOk.Location = new System.Drawing.Point(
-                iFormW - iLayoutRight - 2 * iLayoutButtonWidth - iLayoutGap, y);
-            btnOk.Size = new System.Drawing.Size(iLayoutButtonWidth, iLayoutButtonHeight);
-            btnOk.TabIndex = 12;
-            btnOk.UseVisualStyleBackColor = true;
-            // Validate output directory before allowing the dialog to
-            // close. If the user has typed a non-existent directory,
-            // prompt to create it (default Yes). On No or creation
-            // failure, set DialogResult = None so the dialog stays
-            // open. WinForms invokes Click handlers BEFORE the
-            // automatic close, so this hook runs first.
-            btnOk.Click += (s, e) => {
-                string sOutCandidate = (txtOut.Text ?? "").Trim();
-                if (sOutCandidate.Length >= 2 && sOutCandidate[0] == '"' && sOutCandidate[sOutCandidate.Length - 1] == '"')
-                    sOutCandidate = sOutCandidate.Substring(1, sOutCandidate.Length - 2).Trim();
-                if (string.IsNullOrEmpty(sOutCandidate)) return;
-                try {
-                    if (System.IO.Directory.Exists(sOutCandidate)) return;
-                } catch { return; }
-                System.Windows.Forms.DialogResult dr = System.Windows.Forms.MessageBox.Show(frm,
-                    "Create " + sOutCandidate + "?",
-                    program.sProgramName,
-                    System.Windows.Forms.MessageBoxButtons.YesNo,
-                    System.Windows.Forms.MessageBoxIcon.Question,
-                    System.Windows.Forms.MessageBoxDefaultButton.Button1);
-                if (dr != System.Windows.Forms.DialogResult.Yes) {
-                    frm.DialogResult = System.Windows.Forms.DialogResult.None;
-                    txtOut.Focus();
-                    return;
-                }
-                try {
-                    System.IO.Directory.CreateDirectory(sOutCandidate);
-                } catch (Exception ex) {
-                    System.Windows.Forms.MessageBox.Show(frm,
-                        "Could not create directory:\r\n" + sOutCandidate + "\r\n\r\n" + ex.Message,
-                        program.sProgramName,
-                        System.Windows.Forms.MessageBoxButtons.OK,
-                        System.Windows.Forms.MessageBoxIcon.Warning);
-                    frm.DialogResult = System.Windows.Forms.DialogResult.None;
-                    txtOut.Focus();
-                }
-            };
-            frm.Controls.Add(btnOk);
-
-            var btnCancel = new System.Windows.Forms.Button();
-            btnCancel.Text = "Cancel";
-            btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            btnCancel.Location = new System.Drawing.Point(iBtnX, y);
-            btnCancel.Size = new System.Drawing.Size(iLayoutButtonWidth, iLayoutButtonHeight);
-            btnCancel.TabIndex = 13;
-            btnCancel.UseVisualStyleBackColor = true;
-            frm.Controls.Add(btnCancel);
-
-            // Wire Enter = OK and Esc = Cancel per Windows guidelines.
-            frm.AcceptButton = btnOk;
-            frm.CancelButton = btnCancel;
-
-            // Adjust form height to the last control's bottom + margin.
-            frm.ClientSize = new System.Drawing.Size(iFormW,
-                y + iLayoutButtonHeight + iLayoutTop);
-
-            // Show it.
-            var dialogResult = frm.ShowDialog();
-            if (dialogResult != System.Windows.Forms.DialogResult.OK) return false;
-
-            // Hand values back.
-            sSource = txtSource.Text.Trim();
-            sOutputDir = txtOut.Text.Trim();
-            // If the output directory is still blank at submission
-            // time, derive a sensible default from the source field.
-            // For a single entry that is a folder or a
-            // wildcard/file, use the containing folder; for multiple
-            // entries, leave blank (caller falls back to the current
-            // working directory).
-            if (string.IsNullOrEmpty(sOutputDir))
-                sOutputDir = deriveOutputDirFromSource(sSource);
-            bStrip = chkStrip.Checked;
-            bPlain = chkPlain.Checked;
-            bForce = chkForce.Checked;
-            bView = chkView.Checked;
-            bLog = chkLog.Checked;
-            bUseCfg = chkUseCfg.Checked;
-            return true;
         }
 
-        // Sensible starting path for the Source files textbox when
-        // nothing is supplied on the command line and no saved
-        // configuration is in play. Uses the user's Documents
-        // folder — Microsoft's recommended starting point for
-        // user-facing file operations (it's what every Office file
-        // dialog defaults to). If that folder can't be resolved,
-        // falls back to the current working directory.
+        // Offer to create a non-existent output directory, default Yes.
+        // Returns false to send the user back to the dialog.
+        private static bool confirmOutputDir(string sOutputDir)
+        {
+            string sOutCandidate = (sOutputDir ?? "").Trim();
+            if (sOutCandidate.Length >= 2 && sOutCandidate[0] == '"' && sOutCandidate[sOutCandidate.Length - 1] == '"')
+                sOutCandidate = sOutCandidate.Substring(1, sOutCandidate.Length - 2).Trim();
+            if (string.IsNullOrEmpty(sOutCandidate)) return true;
+            try { if (System.IO.Directory.Exists(sOutCandidate)) return true; } catch { return true; }
+            System.Windows.Forms.DialogResult dr = System.Windows.Forms.MessageBox.Show(
+                "Create " + sOutCandidate + "?", program.sProgramName,
+                System.Windows.Forms.MessageBoxButtons.YesNo,
+                System.Windows.Forms.MessageBoxIcon.Question,
+                System.Windows.Forms.MessageBoxDefaultButton.Button1);
+            if (dr != System.Windows.Forms.DialogResult.Yes) return false;
+            try {
+                System.IO.Directory.CreateDirectory(sOutCandidate);
+                return true;
+            } catch (Exception ex) {
+                System.Windows.Forms.MessageBox.Show(
+                    "Could not create directory:\r\n" + sOutCandidate + "\r\n\r\n" + ex.Message,
+                    program.sProgramName,
+                    System.Windows.Forms.MessageBoxButtons.OK,
+                    System.Windows.Forms.MessageBoxIcon.Warning);
+                return false;
+            }
+        }
+
         private static string defaultSourceForGui()
         {
             try {
@@ -1785,59 +1602,28 @@ namespace twoHtm
             return null;
         }
 
-        private static void showHelpMessage()
-        {
-            string sMsg =
-                "2htm converts documents (Word, Excel, PowerPoint, PDF, " +
-                "Markdown, and more) to accessible HTML or plain text.\r\n\r\n" +
-                "Fill in the source files to convert, pick any options, " +
-                "and press OK. Leave the output directory blank to write " +
-                "results to the current folder.\r\n\r\n" +
-                "Options:\r\n" +
-                "  Strip images - omit images from the output\r\n" +
-                "  Plain text - write .txt instead of .htm\r\n" +
-                "  Force replacements - overwrite existing output files\r\n" +
-                "  View output - open the output folder when done\r\n" +
-                "  Log session - write 2htm.log (replacing any prior log) " +
-                "to the output folder, or to the current folder if no " +
-                "output folder is set\r\n" +
-                "  Use configuration - remember these settings for next time, " +
-                "in %LOCALAPPDATA%\\2htm\\2htm.ini\r\n\r\n" +
-                "Press Cancel to exit without converting.\r\n\r\n" +
-                "Open the full documentation in your browser?";
-            var dialogResult = System.Windows.Forms.MessageBox.Show(sMsg,
-                "2htm — Help",
-                System.Windows.Forms.MessageBoxButtons.YesNo,
-                System.Windows.Forms.MessageBoxIcon.Information,
-                System.Windows.Forms.MessageBoxDefaultButton.Button2);
-            if (dialogResult == System.Windows.Forms.DialogResult.Yes) {
-                launchReadMe();
-            }
-        }
-
-        // Opens readMe.htm in the user's default browser. readMe.htm
-        // lives alongside 2htm.exe (generated by the installer at
-        // install time, or put there by the user when deploying
-        // 2htm standalone). If the file is missing, fall back to
-        // readMe.md, and if that's also missing, show a polite
-        // notice rather than a system-level "file not found" error.
+        // Opens the full guide. The Homer layout puts it in
+        // help\2htm.htm, beside exec\ where the program runs, in the
+        // installed tree and in the project alike; Paths.installedFolder
+        // finds that folder. ReadMe.htm at the top is the fallback, then
+        // the Markdown forms.
         private static void launchReadMe()
         {
-            string sExeDir = Path.GetDirectoryName(
-                System.Reflection.Assembly.GetExecutingAssembly().Location);
-            string sHtm = Path.Combine(sExeDir, "readMe.htm");
-            string sMd = Path.Combine(sExeDir, "readMe.md");
-            string sTarget = File.Exists(sHtm)
-                ? sHtm
-                : (File.Exists(sMd) ? sMd : null);
+            string sFolder = Paths.installedFolder;
+            string[] aCandidates = {
+                Path.Combine(Path.Combine(sFolder, "help"), "2htm.htm"),
+                Path.Combine(sFolder, "ReadMe.htm"),
+                Path.Combine(Path.Combine(sFolder, "help"), "2htm.md"),
+                Path.Combine(sFolder, "ReadMe.md") };
+            string sTarget = null;
+            foreach (string sCandidate in aCandidates)
+                if (sTarget == null && File.Exists(sCandidate)) sTarget = sCandidate;
             if (sTarget == null) {
+                logger.warn("No guide found under " + sFolder);
                 System.Windows.Forms.MessageBox.Show(
-                    "Documentation (readMe.htm or readMe.md) was not found " +
-                    "in the 2htm install folder:\r\n\r\n" + sExeDir + "\r\n\r\n" +
-                    "If 2htm was installed via the installer, reinstall it. " +
-                    "If you deployed 2htm.exe manually, place readMe.htm " +
-                    "(or readMe.md) in the same folder.",
-                    "2htm — Documentation not found",
+                    "The guide was not found in the 2htm folder:\r\n\r\n" +
+                    sFolder + "\r\n\r\nReinstalling 2htm puts it back.",
+                    "2htm — Guide not found",
                     System.Windows.Forms.MessageBoxButtons.OK,
                     System.Windows.Forms.MessageBoxIcon.Warning);
                 return;
@@ -1849,7 +1635,7 @@ namespace twoHtm
                 System.Diagnostics.Process.Start(processStartInfo);
             } catch (Exception ex) {
                 System.Windows.Forms.MessageBox.Show(
-                    "Could not open the documentation:\r\n\r\n" + ex.Message,
+                    "Could not open the guide:\r\n\r\n" + ex.Message,
                     "2htm — Error",
                     System.Windows.Forms.MessageBoxButtons.OK,
                     System.Windows.Forms.MessageBoxIcon.Warning);
@@ -2049,10 +1835,14 @@ namespace twoHtm
             writer = null;
         }
 
-        public static void info(string sMsg)  { write("INFO", sMsg); }
-        public static void warn(string sMsg)  { write("WARN", sMsg); }
-        public static void error(string sMsg) { write("ERROR", sMsg); }
-        public static void debug(string sMsg) { write("DEBUG", sMsg); }
+        // EVERY LINE ALSO GOES TO THE SESSION LOG that Homer's Log keeps
+        // in %LOCALAPPDATA%\2htm\logs, whatever the options, so a
+        // failure always leaves a record. 2htm.log (-l) stays what it
+        // was: an extra copy beside the output.
+        public static void info(string sMsg)  { Log.info(sMsg); write("INFO", sMsg); }
+        public static void warn(string sMsg)  { Log.warn(sMsg); write("WARN", sMsg); }
+        public static void error(string sMsg) { Log.error(sMsg); write("ERROR", sMsg); }
+        public static void debug(string sMsg) { Log.line("DEBUG  " + sMsg); write("DEBUG", sMsg); }
 
         // Write the run header to the top of the log: program name
         // and version, the friendly run-start timestamp, and the
@@ -2067,6 +1857,8 @@ namespace twoHtm
         public static void header(string sName, string sVersion,
             List<KeyValuePair<string, string>> dParams)
         {
+            Log.section("Settings");
+            if (dParams != null) foreach (var oKv in dParams) Log.keyValue(oKv.Key, oKv.Value);
             if (writer == null) return;
             try {
                 writer.WriteLine("=== " + sName + " " + sVersion + " ===");
@@ -5644,7 +5436,7 @@ namespace twoHtm
     }
 
     // -----------------------------------------------------------------
-    // Per-user configuration file, %LOCALAPPDATA%\2htm\2htm.ini.
+    // Per-user configuration file, %LOCALAPPDATA%\2htm\configs\2htm.inix.
     //
     // This file is OPT-IN. 2htm reads it only when -u /
     // --use-configuration is given (or the matching checkbox is on
@@ -5670,11 +5462,18 @@ namespace twoHtm
     // -----------------------------------------------------------------
     public static class configManager
     {
+        // Since 1.19 the settings live in the [Settings] section of
+        // %LOCALAPPDATA%\2htm\configs\2htm.inix (Homer's Paths.configs(),
+        // written through Homer's InixCodec, which keeps any comment a
+        // person adds). The 2htm.ini of earlier versions, directly under
+        // %LOCALAPPDATA%\2htm, is read while no .inix exists, its
+        // snake_case names read as today's, and it is removed the first
+        // time the new file is saved.
+        const string c_sSettingsSection = "Settings";
+
         public static string getConfigDir()
         {
-            string sAppData = Environment.GetFolderPath(
-                Environment.SpecialFolder.LocalApplicationData);
-            return Path.Combine(sAppData, program.sConfigDirName);
+            return Paths.configs();
         }
 
         public static string getConfigPath()
@@ -5682,9 +5481,16 @@ namespace twoHtm
             return Path.Combine(getConfigDir(), program.sConfigFileName);
         }
 
+        public static string getLegacyPath()
+        {
+            string sAppData = Environment.GetFolderPath(
+                Environment.SpecialFolder.LocalApplicationData);
+            return Path.Combine(Path.Combine(sAppData, program.sConfigDirName), program.c_sLegacyConfigFileName);
+        }
+
         public static bool configExists()
         {
-            try { return File.Exists(getConfigPath()); }
+            try { return File.Exists(getConfigPath()) || File.Exists(getLegacyPath()); }
             catch { return false; }
         }
 
@@ -5696,33 +5502,19 @@ namespace twoHtm
         // throw), because the whole point is to clean up gracefully.
         public static void eraseAll()
         {
-            string sDir = getConfigDir();
-            string sPath = getConfigPath();
-            try {
-                if (File.Exists(sPath)) {
-                    File.Delete(sPath);
-                    logger.info("Deleted configuration file: " + sPath);
-                }
-            } catch (Exception ex) {
-                logger.info("Could not delete configuration file " +
-                    sPath + ": " + ex.Message);
-            }
-            try {
-                if (Directory.Exists(sDir)) {
-                    // Remove only if empty, to preserve any other
-                    // content a future version of 2htm — or a
-                    // curious user — might have placed there.
-                    bool bEmpty = Directory.EnumerateFileSystemEntries(sDir)
-                        .GetEnumerator().MoveNext() == false;
-                    if (bEmpty) {
-                        Directory.Delete(sDir);
-                        logger.info("Removed empty configuration directory: " +
-                            sDir);
+            // Both the settings file and one left by a version before
+            // 1.19. The folders stay: %LOCALAPPDATA%\2htm also holds the
+            // session logs.
+            foreach (string sPath in new string[] { getConfigPath(), getLegacyPath() }) {
+                try {
+                    if (File.Exists(sPath)) {
+                        File.Delete(sPath);
+                        logger.info("Deleted configuration file: " + sPath);
                     }
+                } catch (Exception ex) {
+                    logger.info("Could not delete configuration file " +
+                        sPath + ": " + ex.Message);
                 }
-            } catch (Exception ex) {
-                logger.info("Could not remove configuration directory " +
-                    sDir + ": " + ex.Message);
             }
         }
 
@@ -5734,7 +5526,9 @@ namespace twoHtm
         public static void loadInto(List<string> lsFileArgs)
         {
             string sPath = getConfigPath();
+            if (!File.Exists(sPath)) sPath = getLegacyPath();
             if (!File.Exists(sPath)) return;
+            logger.info("Reading configuration from " + sPath);
 
             Dictionary<string, string> dVals;
             try {
@@ -5757,7 +5551,7 @@ namespace twoHtm
             // Source files: only if the CLI had no file args at all.
             if (!program.bSourceFromCli) {
                 string sSaved;
-                if (dVals.TryGetValue("source_files", out sSaved) &&
+                if (dVals.TryGetValue("SourceFiles", out sSaved) &&
                     !string.IsNullOrWhiteSpace(sSaved)) {
                     foreach (var sArg in program.splitSourceField(sSaved))
                         lsFileArgs.Add(sArg);
@@ -5765,17 +5559,17 @@ namespace twoHtm
             }
 
             if (!program.bOutputDirFromCli)
-                program.sOutputDir = getOrEmpty(dVals, "output_directory");
+                program.sOutputDir = getOrEmpty(dVals, "OutputDirectory");
             if (!program.bStripImagesFromCli)
-                program.bStripImages = getBool(dVals, "strip_images");
+                program.bStripImages = getBool(dVals, "StripImages");
             if (!program.bPlainTextFromCli)
-                program.bPlainText = getBool(dVals, "plain_text");
+                program.bPlainText = getBool(dVals, "PlainText");
             if (!program.bForceFromCli)
-                program.bForce = getBool(dVals, "force_replacements");
+                program.bForce = getBool(dVals, "ForceReplacements");
             if (!program.bViewOutputFromCli)
-                program.bViewOutput = getBool(dVals, "view_output");
+                program.bViewOutput = getBool(dVals, "ViewOutput");
             if (!program.bLogFromCli)
-                program.bLog = getBool(dVals, "log_session");
+                program.bLog = getBool(dVals, "LogSession");
         }
 
         public static void save(string sSource, string sOutputDir,
@@ -5785,20 +5579,27 @@ namespace twoHtm
             string sPath = getConfigPath();
             try {
                 if (!Directory.Exists(sDir)) Directory.CreateDirectory(sDir);
-                var sb = new StringBuilder();
-                sb.AppendLine("; 2htm configuration");
-                sb.AppendLine("; auto-written on OK-click when Use configuration was checked.");
-                sb.AppendLine("; Delete this file to reset, or click Default settings in");
-                sb.AppendLine("; the GUI, which also deletes the file and the 2htm folder.");
-                sb.AppendLine("source_files=" + (sSource ?? ""));
-                sb.AppendLine("output_directory=" + (sOutputDir ?? ""));
-                sb.AppendLine("strip_images=" + (bStrip ? "1" : "0"));
-                sb.AppendLine("plain_text=" + (bPlain ? "1" : "0"));
-                sb.AppendLine("force_replacements=" + (bForce ? "1" : "0"));
-                sb.AppendLine("view_output=" + (bView ? "1" : "0"));
-                sb.AppendLine("log_session=" + (bLog ? "1" : "0"));
-                File.WriteAllText(sPath, sb.ToString(), new UTF8Encoding(true));
+                if (!File.Exists(sPath)) {
+                    var sb = new StringBuilder();
+                    sb.AppendLine("; 2htm settings, written when Use configuration is checked at OK.");
+                    sb.AppendLine("; Delete this file to reset, or press Default settings in the dialog.");
+                    sb.AppendLine("[" + c_sSettingsSection + "]");
+                    File.WriteAllText(sPath, sb.ToString(), new UTF8Encoding(true));
+                }
+                // InixCodec.writeValue changes one value in place, leaving
+                // every comment and every other key where it was.
+                InixCodec.writeValue(sPath, c_sSettingsSection, "SourceFiles", sSource ?? "");
+                InixCodec.writeValue(sPath, c_sSettingsSection, "OutputDirectory", sOutputDir ?? "");
+                InixCodec.writeValue(sPath, c_sSettingsSection, "StripImages", bStrip ? "yes" : "no");
+                InixCodec.writeValue(sPath, c_sSettingsSection, "PlainText", bPlain ? "yes" : "no");
+                InixCodec.writeValue(sPath, c_sSettingsSection, "ForceReplacements", bForce ? "yes" : "no");
+                InixCodec.writeValue(sPath, c_sSettingsSection, "ViewOutput", bView ? "yes" : "no");
+                InixCodec.writeValue(sPath, c_sSettingsSection, "LogSession", bLog ? "yes" : "no");
                 logger.info("Saved configuration to " + sPath);
+                if (File.Exists(getLegacyPath())) {
+                    File.Delete(getLegacyPath());
+                    logger.info("Removed the old " + getLegacyPath() + "; the settings are now in " + sPath);
+                }
             } catch (Exception ex) {
                 // Writing the config is a convenience; don't fail
                 // the whole run if it can't be written, but do
@@ -5820,6 +5621,12 @@ namespace twoHtm
             }
         }
 
+        static readonly Dictionary<string, string> dLegacyNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
+            { "force_replacements", "ForceReplacements" }, { "log_session", "LogSession" },
+            { "output_directory", "OutputDirectory" }, { "plain_text", "PlainText" },
+            { "source_files", "SourceFiles" }, { "strip_images", "StripImages" },
+            { "view_output", "ViewOutput" } };
+
         private static Dictionary<string, string> parseFile(string sPath)
         {
             var d = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -5832,6 +5639,9 @@ namespace twoHtm
                 if (iEq <= 0) continue;
                 string sKey = sLine.Substring(0, iEq).Trim();
                 string sVal = sLine.Substring(iEq + 1).Trim();
+                // The names of versions before 1.19, read as today's.
+                string sNew;
+                if (dLegacyNames.TryGetValue(sKey, out sNew)) sKey = sNew;
                 d[sKey] = sVal;
             }
             return d;

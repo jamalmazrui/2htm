@@ -1,296 +1,712 @@
 @echo off
 rem ===================================================================
-rem Build 2htm.exe from 2htm.cs.
+rem build2htm.cmd -- build 2htm.exe from 2htm.cs and the Homer C#
+rem classes in C:\HomerDev.
 rem
-rem Requires:
-rem   - Windows 10 or later.
-rem   - A Roslyn-based C# compiler (csc.exe). Roslyn is the modern
-rem     compiler that supports current language features. It ships
-rem     with:
-rem       - Visual Studio 2017 or later (any edition, including the
-rem         free Community edition), OR
-rem       - Visual Studio Build Tools 2019/2022 (a free, smaller
-rem         download that installs just the compiler). Download from:
-rem         https://visualstudio.microsoft.com/downloads/
+rem 2htm is a Windows console program with a WinForms dialog that converts
+rem Word, Excel, PowerPoint, PDF, Markdown and other files to accessible HTML
+rem or plain text, driving Office through COM and Markdown through Markdig.
+rem This build is the kit's C# template, Templates\build_APP_.cmd, with its
+rem SETTINGS filled in for 2htm, plus two sections of its own: Markdig,
+rem fetched at a pinned version and embedded, and the carry-over from the
+rem layout before the kit.
 rem
-rem   NOTE: The compiler at
-rem         %WINDIR%\Microsoft.NET\Framework64\v4.0.30319\csc.exe
-rem         that ships with .NET Framework 4.x is the older
-rem         pre-Roslyn compiler and cannot build 2htm (it only
-rem         supports C# 5 and earlier).
+rem 64-BIT: Office COM needs this process and the installed Office to share a
+rem bitness, and modern Office is 64-bit. For 32-bit Office, change
+rem /platform:x64 to /platform:x86 in the compile line and rebuild.
 rem
-rem If Markdig.dll is not present in the build folder, it is
-rem fetched from nuget.org on first build (requires internet access
-rem that first time only). Markdig.dll is embedded as a manifest
-rem resource; the resulting 2htm.exe is a true single-file
-rem executable and does NOT need Markdig.dll at runtime.
+rem IT KEEPS THE SAME CONTRACT AS THE PYTHON BUILD, build2htmPy.cmd,
+rem clause for clause (kit 1.43.3):
+rem   - finds the kit, and stops with a plain message when the kit is older
+rem     than kitNeeded, telling a parse failure from an old kit;
+rem   - version.txt is the single source of truth: stepped on every build
+rem     (nobump keeps it), seeded when missing from the app's own number or
+rem     one past its newest release tag, never from 1.0.0 over a released
+rem     app, and written into Version.cs as BuildVersion.Version;
+rem   - the program goes to exec\, as in the installed tree;
+rem   - the kit's classes are NOT copied: each module named in homerModules
+rem     is compiled straight from C:\HomerDev\CSharp, and a stale copy of a
+rem     kit class at the top of the project is deleted once the kit's is here;
+rem   - the compiler is Roslyn, found with vswhere or installed with winget
+rem     as the free Build Tools. The Framework's own csc stops at C# 5 and
+rem     cannot compile the kit, so it is never used;
+rem   - the kit tools this app uses are refreshed into scripts\ and retired
+rem     ones deleted, saying so when the kit lacks one;
+rem   - documents: every .md at the top and in help\ gets its .htm when the
+rem     .htm is missing or older; then fixEncoding puts every file the
+rem     project names into the Homer encoding;
+rem   - every file in help\ and every scripts\install*.cmd must be named by
+rem     a Source: line of 2htm_setup.iss, or the build stops;
+rem   - the installer is compiled with /DHomerDev=<kit>;
+rem   - one log per run: logs\2htm-build-yyyyMMdd-HHmmss.log. The console
+rem     says briefly what is happening; the log holds every command and
+rem     its exit code.
+rem
+rem   build2htm          steps the version, then builds
+rem   build2htm nobump   keeps the current number
+rem
+rem A running copy of the program is never closed. The build says so and
+rem stops only when the copy running is exec\2htm.exe from THIS project,
+rem which cannot be replaced while it runs; an installed copy under Program
+rem Files is no concern of the build's.
+rem
+rem PARSE-TIME PITFALL: the variable NAME ProgramFiles(x86) contains
+rem parentheses, and cmd.exe scans a parenthesised block for its closing
+rem paren BEFORE expanding variables. The name is copied into progFiles86
+rem outside any block, and only !progFiles86! is used inside one.
 rem ===================================================================
 
-setlocal
+setlocal enabledelayedexpansion
 cd /d "%~dp0"
 
-rem ---- The log -------------------------------------------------------
-rem
-rem Every run writes build2htm.log BESIDE THIS SCRIPT, not in a
-rem temporary folder and not only to the console. A build that fails
-rem in a window that has since been closed leaves nothing to read,
-rem and the compiler's own errors are exactly what somebody needs.
-rem
-rem The log is replaced on each run, so it always describes the build
-rem you just did rather than an accumulation of old ones.
-rem --------------------------------------------------------------------
-set "sLog=%~dp0build2htm.log"
-> "%sLog%" echo build2htm log
-call :say "Started %DATE% %TIME%"
-call :say "Script:   %~f0"
-call :say "Folder:   %CD%"
-call :say "Computer: %COMPUTERNAME%   User: %USERNAME%"
-call :say "OS:       %OS%   Processor: %PROCESSOR_ARCHITECTURE%"
+set "app=2htm"
+set "progFiles86=%ProgramFiles(x86)%"
+set "progFiles=%ProgramFiles%"
 
-rem ---- Locate a Roslyn csc.exe ---------------------------------------
-rem
-rem Search known install locations for Roslyn. The .NET Framework
-rem redistributable csc.exe is intentionally NOT used here — it is
-rem pre-Roslyn and cannot compile modern C#.
-rem -------------------------------------------------------------------
-set "sCsc="
+rem ---- SETTINGS: the part an app edits -------------------------------
+rem The oldest kit with everything this build uses.
+set "kitNeeded=1.43.19"
+rem The number to start from when version.txt is missing. A newer release
+rem tag, if the repository has one, wins. It is also a floor: a version.txt
+rem holding less is raised to it.
+rem 2htm's last hand-numbered release was 1.18.3; the first built from
+rem version.txt is 1.19.0.
+set "seedVersion=1.19.0"
+rem winexe for a program with only windows; exe for one that writes to the
+rem console, even if it also opens a dialog.
+set "cscTarget=exe"
+rem The kit classes the program uses, alphabetical. Lbc needs Elevate (its
+rem Help box offers the update), Log, Paths, Say and Util; Log needs Paths and
+rem Say; Mdi needs KeyMap. Each is compiled from C:\HomerDev\CSharp.
+rem 2htm's dialog is built with Lbc (since 1.19.1), which needs Elevate,
+rem Inix, Log, Say and Util; Elevate needs Web, Log needs Paths and Say.
+set "homerModules=Elevate Inix Lbc Log Paths Say Util Web"
+rem The app's own sources beside 2htm.cs, if any, space separated.
+set "appSources="
+rem Files embedded in the program as resources, space separated: a sound, a
+rem native DLL the program extracts itself.
+set "csResources="
+rem NVDA's controller client, the DLL Say.cs speaks to NVDA through.
+rem   exec   fetched and put beside the program in exec (the usual choice;
+rem          the installer ships exec\*.dll)
+rem   embed  fetched and embedded as a resource, for a program that extracts
+rem          and loads it itself (urlFido)
+rem   (empty) not used
+set "nvdaClient="
+rem NuGet packages the program references, as id:assembly pairs, such as
+rem Markdig:Markdig.dll. Each is fetched into exec and referenced there.
+set "nugetPackages="
+rem The kit tools this app uses, refreshed into scripts\ on every build.
+rem Name each; add one the day it is used (installCommon.cmd for install
+rem scripts written in cmd, buildTutorials and its fellows once a walk exists).
+set "kitTools=check.cmd check.py fixEncoding.cmd fixEncoding.py push.cmd release.cmd release.ps1 tidy.cmd tidy.py unpushed.cmd unpushed.py"
+set "useDocs=1"
+set "useInstaller=1"
+set "useVersionSteps=1"
+rem ---- end of SETTINGS -------------------------------------------------
 
-rem Visual Studio Build Tools 2022
-if exist "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\Roslyn\csc.exe" (
-    set "sCsc=C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\Roslyn\csc.exe"
-    goto :cscFound
+rem Retired and renamed kit scripts an app may still carry: deleted.
+set "retiredTools=checkHomerApp.cmd checkHomerApp.py cleanDir.cmd cleanDir.py gitPush.cmd gitRelease.cmd gitUnpushed.cmd gitUnpushed.py homerFinish.cmd homerInstall.cmd homerPolicy.py homerTidy.cmd homerTidy.py installTools.cmd sayTutorial.cmd sayTutorial.py tagRelease.cmd tagRelease.ps1 tidyRepo.cmd tidyRepo.py"
+rem Kit classes an app used to carry its own copy of. Once the kit's is here,
+rem a copy at the top of the project is deleted: copies drift, and every one
+rem found so far had.
+set "kitClasses=Elevate.cs Inix.cs inixVert.cs KeyMap.cs KeyName.cs Lbc.cs Log.cs Mdi.cs Ollama.cs Paths.cs PdfRead.cs Say.cs Util.cs Web.cs"
+
+rem EVERY SESSION ITS OWN LOG, IN logs\: <App>-build-yyyyMMdd-HHmmss.log. An
+rem alphabetical sort is then a chronological one. wmic is gone from Windows
+rem 11, so the stamp comes from PowerShell.
+for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd-HHmmss"') do set "sStamp=%%i"
+if not exist "logs" mkdir "logs"
+set "log=%CD%\logs\%app%-build-%sStamp%.log"
+> "%log%" echo %app% build started %DATE% %TIME%
+>> "%log%" echo Script: %~f0
+>> "%log%" echo Folder: %CD%
+>> "%log%" echo Command line: %0 %*
+>> "%log%" echo User: %USERNAME% on %COMPUTERNAME%
+for /f "delims=" %%v in ('ver') do >> "%log%" echo Windows: %%v
+>> "%log%" echo Settings: kitNeeded=!kitNeeded! seedVersion=!seedVersion! cscTarget=!cscTarget! nvdaClient=!nvdaClient!
+>> "%log%" echo Settings: homerModules=!homerModules!
+>> "%log%" echo Settings: appSources=!appSources! csResources=!csResources! nugetPackages=!nugetPackages!
+>> "%log%" echo Settings: kitTools=!kitTools!
+>> "%log%" echo Settings: useDocs=!useDocs! useInstaller=!useInstaller! useVersionSteps=!useVersionSteps!
+echo Building %app%. The log is %log%
+
+rem ---- the Homer Development Kit -------------------------------------
+set "homerDev="
+if defined HomerDev if exist "%HomerDev%\CSharp\Lbc.cs" set "homerDev=%HomerDev%"
+if not defined homerDev if exist "C:\HomerDev\CSharp\Lbc.cs" set "homerDev=C:\HomerDev"
+if not defined homerDev if exist "%CD%\CSharp\Lbc.cs" set "homerDev=%CD%"
+if not defined homerDev (
+  echo %app% needs the Homer Development Kit and cannot find it.
+  echo Unzip HomerDev.zip into C:\HomerDev, or set the HomerDev environment variable.
+  >> "%log%" echo ERROR: no kit found in %%HomerDev%%, C:\HomerDev or %CD%
+  goto :failed
 )
-
-rem Visual Studio 2022 editions (Community, Professional, Enterprise)
-for %%E in (Community Professional Enterprise) do (
-    if exist "C:\Program Files\Microsoft Visual Studio\2022\%%E\MSBuild\Current\Bin\Roslyn\csc.exe" (
-        set "sCsc=C:\Program Files\Microsoft Visual Studio\2022\%%E\MSBuild\Current\Bin\Roslyn\csc.exe"
-        goto :cscFound
-    )
-    if exist "C:\Program Files (x86)\Microsoft Visual Studio\2022\%%E\MSBuild\Current\Bin\Roslyn\csc.exe" (
-        set "sCsc=C:\Program Files (x86)\Microsoft Visual Studio\2022\%%E\MSBuild\Current\Bin\Roslyn\csc.exe"
-        goto :cscFound
-    )
+rem READ THE KIT'S VERSION WITHOUT ANYTHING INVISIBLE. A byte order mark or a
+rem trailing space rides along with "set /p", and "kit 1.40.1 is older than
+rem 1.40.1" followed on 25 September 2026. PowerShell reads and trims.
+set "homerVer=0.0.0"
+if exist "!homerDev!\version.txt" (
+  for /f "usebackq delims=" %%v in (`powershell -NoProfile -Command "(Get-Content -Raw -LiteralPath '!homerDev!\version.txt').Trim([char]0xFEFF, ' ', [char]13, [char]10)"`) do set "homerVer=%%v"
 )
-
-rem Visual Studio Build Tools 2019
-if exist "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\Roslyn\csc.exe" (
-    set "sCsc=C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\Roslyn\csc.exe"
-    goto :cscFound
+>> "%log%" echo Kit: !homerDev! version !homerVer!, needed !kitNeeded!
+powershell -NoProfile -Command "$h='!homerVer!'.Trim(); $n='!kitNeeded!'.Trim(); try { if ([version]$h -lt [version]$n) { exit 1 } else { exit 0 } } catch { exit 2 }"
+if errorlevel 2 (
+  echo The kit's version.txt at !homerDev! does not hold a version number.
+  >> "%log%" echo ERROR: kit version "!homerVer!" does not parse
+  goto :failed
 )
-
-rem Visual Studio 2019 editions
-for %%E in (Community Professional Enterprise) do (
-    if exist "C:\Program Files (x86)\Microsoft Visual Studio\2019\%%E\MSBuild\Current\Bin\Roslyn\csc.exe" (
-        set "sCsc=C:\Program Files (x86)\Microsoft Visual Studio\2019\%%E\MSBuild\Current\Bin\Roslyn\csc.exe"
-        goto :cscFound
-    )
-)
-
-rem Visual Studio 2017 editions
-for %%E in (Community Professional Enterprise BuildTools) do (
-    if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\%%E\MSBuild\15.0\Bin\Roslyn\csc.exe" (
-        set "sCsc=C:\Program Files (x86)\Microsoft Visual Studio\2017\%%E\MSBuild\15.0\Bin\Roslyn\csc.exe"
-        goto :cscFound
-    )
-)
-
-rem Roslyn standalone in PATH
-where csc.exe >nul 2>&1
-if not errorlevel 1 (
-    rem Make sure it's Roslyn, not the old Framework compiler. The
-    rem Framework path contains "Microsoft.NET\Framework" so we
-    rem reject it. Roslyn csc typically lives under a "Roslyn" dir.
-    for /f "delims=" %%P in ('where csc.exe') do (
-        echo %%P | findstr /i "Microsoft.NET\\Framework" >nul
-        if errorlevel 1 (
-            set "sCsc=%%P"
-            goto :cscFound
-        )
-    )
-)
-
-echo [ERROR] Could not find a Roslyn C# compiler.
-echo.
-echo         2htm uses modern C# features and requires the Roslyn
-echo         compiler that ships with Visual Studio 2017 or later.
-echo.
-echo         Install either:
-echo           - Visual Studio 2022 Community (free):
-echo             https://visualstudio.microsoft.com/downloads/
-echo           - Visual Studio Build Tools 2022 (smaller, free):
-echo             https://visualstudio.microsoft.com/downloads/
-echo             (Under "Tools for Visual Studio" at the bottom of
-echo              the page. During install, select the workload
-echo              ".NET desktop build tools".)
-echo.
-echo         NOTE: The csc.exe included with .NET Framework at
-echo         %%WINDIR%%\Microsoft.NET\Framework64\v4.0.30319\csc.exe
-echo         is the older pre-Roslyn compiler and will NOT work.
-exit /b 2
-
-:cscFound
-echo [INFO] Using compiler: %sCsc%
-
-rem ---- Markdig dependency -------------------------------------------
-rem
-rem If Markdig.dll is not present in the build folder, fetch it from
-rem nuget.org. The .nupkg is a ZIP archive; we extract
-rem lib/net40/Markdig.dll (or net35) into the build folder. Uses
-rem built-in curl (Windows 10 1803+) and PowerShell's Expand-Archive
-rem for extraction. The temp directory is removed afterwards.
-rem
-rem The fetch logic is inlined rather than placed in a separate
-rem `:fnFetchMarkdig` subroutine. cmd.exe has a known chunk-boundary
-rem bug in its label-search code (the search reads file content in
-rem 512/1024-byte chunks; a label at certain byte positions can be
-rem missed) that has been observed to cause "The system cannot find
-rem the batch label specified" failures here. Inlining sidesteps the
-rem bug entirely; there is no forward `call :label` to resolve.
-rem
-rem sTempDir is computed BEFORE the parenthesized if-block. Inside a
-rem parenthesized block, cmd.exe expands %vars% at parse time, so a
-rem `set` followed by `%var%` in the same block silently uses the
-rem pre-set value (or empty string). Pre-computing avoids that.
-rem -------------------------------------------------------------------
-set "sMarkdigVersion=0.18.3"
-set "sMarkdigUrl=https://www.nuget.org/api/v2/package/Markdig/%sMarkdigVersion%"
-set "sTempDir=%TEMP%\2htm_markdig_%RANDOM%%RANDOM%"
-
-if not exist "Markdig.dll" (
-    echo [INFO] Markdig.dll not found. Fetching Markdig %sMarkdigVersion% from nuget.org ...
-
-    mkdir "%sTempDir%" 2>nul
-    if not exist "%sTempDir%" (
-        echo [ERROR] Could not create temp directory %sTempDir%.
-        exit /b 2
-    )
-
-    curl -sL -o "%sTempDir%\markdig.zip" "%sMarkdigUrl%"
-    if errorlevel 1 (
-        echo [ERROR] Download failed. Check your internet connection or firewall.
-        echo         URL: %sMarkdigUrl%
-        rmdir /s /q "%sTempDir%" 2>nul
-        exit /b 2
-    )
-
-    powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-        "Expand-Archive -Path '%sTempDir%\markdig.zip' -DestinationPath '%sTempDir%\unpacked' -Force"
-    if errorlevel 1 (
-        echo [ERROR] Could not extract Markdig nupkg.
-        rmdir /s /q "%sTempDir%" 2>nul
-        exit /b 2
-    )
-
-    rem The nupkg targets .NET Framework 3.5 and 4.0. Prefer net40.
-    if exist "%sTempDir%\unpacked\lib\net40\Markdig.dll" (
-        copy /y "%sTempDir%\unpacked\lib\net40\Markdig.dll" "Markdig.dll" >nul
-    ) else if exist "%sTempDir%\unpacked\lib\net35\Markdig.dll" (
-        copy /y "%sTempDir%\unpacked\lib\net35\Markdig.dll" "Markdig.dll" >nul
-    ) else (
-        echo [ERROR] Expected Markdig.dll not found in the nupkg. Package contents:
-        dir /s /b "%sTempDir%\unpacked\lib"
-        rmdir /s /q "%sTempDir%" 2>nul
-        exit /b 2
-    )
-
-    rmdir /s /q "%sTempDir%" 2>nul
-    echo [INFO] Markdig.dll fetched successfully.
-)
-
-if not exist "Markdig.dll" (
-    echo [ERROR] Markdig.dll could not be obtained. Build cannot proceed.
-    exit /b 2
-)
-
-rem ---- Icon check ---------------------------------------------------
-rem 2htm.ico is embedded into 2htm.exe at build time via /win32icon
-rem below. It must be present in this directory or the build will
-rem produce an iconless exe (which Windows would still run, but the
-rem File Explorer / taskbar / Alt+Tab presentation would default to
-rem the generic-application icon).
-if not exist "2htm.ico" (
-    echo [ERROR] 2htm.ico not found in %CD%.
-    echo         The icon file is required to embed into the exe.
-    exit /b 2
-)
-
-rem ---- Compile ------------------------------------------------------
-rem Target platform: x64, to match the 64-bit Office that Microsoft
-rem installs by default since Office 2019. If your Office is 32-bit,
-rem change /platform:x64 to /platform:x86 and rebuild. A 64-bit
-rem process cannot automate a 32-bit Office COM server and vice
-rem versa.
-rem ---- netstandard.dll ----------------------------------------------
-rem
-rem Markdig targets netstandard2.0, so the types it exposes are
-rem declared in netstandard.dll. Without a reference to it the
-rem compiler cannot resolve them and reports errors that name the
-rem Markdig CALL SITES rather than the missing reference:
-rem
-rem   error CS0012: The type 'Object' is defined in an assembly that
-rem   is not referenced. You must add a reference to assembly
-rem   'netstandard, Version=2.0.0.0 ...'
-rem
-rem Those errors point at renderMarkdown and look like a fault in the
-rem source, which is what makes them worth this comment. The facade
-rem lives with the .NET Framework reference assemblies; the bare name
-rem is tried last in case the compiler can already resolve it.
-rem --------------------------------------------------------------------
-rem %ProgramFiles(x86)% is copied to a plain name FIRST. Its own value
-rem is fine, but the variable NAME contains brackets, and inside a
-rem parenthesised block cmd.exe takes that ")" as the end of the block.
-rem The loop below would break on itself.
-set "sRefRoot=%ProgramFiles(x86)%\Reference Assemblies\Microsoft\Framework\.NETFramework"
-set "sNetStandard="
-for %%V in (v4.8 v4.7.2 v4.7.1 v4.7 v4.6.2 v4.6.1 v4.6 v4.5.2 v4.5.1 v4.5) do (
-    if not defined sNetStandard (
-        if exist "%sRefRoot%\%%V\Facades\netstandard.dll" (
-            set "sNetStandard=%sRefRoot%\%%V\Facades\netstandard.dll"
-        )
-    )
-)
-if not defined sNetStandard set "sNetStandard=netstandard.dll"
-call :say "netstandard: %sNetStandard%"
-call :say "Compiling 2htm.cs"
-
-"%sCsc%" /nologo /target:exe /platform:x64 /optimize+ ^
-    /reference:"%sNetStandard%" ^
-    /reference:System.dll ^
-    /reference:System.Core.dll ^
-    /reference:System.Xml.dll ^
-    /reference:System.IO.Compression.dll ^
-    /reference:System.IO.Compression.FileSystem.dll ^
-    /reference:System.Drawing.dll ^
-    /reference:System.Windows.Forms.dll ^
-    /reference:Microsoft.CSharp.dll ^
-    /reference:Markdig.dll ^
-    /resource:Markdig.dll,Markdig.dll ^
-    /win32icon:2htm.ico ^
-    /out:2htm.exe ^
-    2htm.cs >> "%sLog%" 2>&1
-
-rem The compiler's own output goes to the log AND to the console, so a
-rem failure can be read now and sent later.
 if errorlevel 1 (
-    call :say "[ERROR] Build failed. The compiler said:"
-    type "%sLog%"
-    echo [ERROR] Build failed. The detail is in %sLog%
-    exit /b 1
+  echo %app% needs HomerDev !kitNeeded! or later, and the kit is !homerVer!.
+  echo Unzip HomerDev.zip into C:\HomerDev, then build again.
+  >> "%log%" echo ERROR: kit !homerVer! is older than !kitNeeded!
+  goto :failed
 )
-call :say "[INFO] Built 2htm.exe successfully (with embedded icon)."
-for %%F in (2htm.exe) do call :say "2htm.exe is %%~zF bytes, written %%~tF"
-call :say "Finished %DATE% %TIME%"
-echo [INFO] Built 2htm.exe successfully. The log is %sLog%
+echo Kit !homerVer! at !homerDev!
 
+rem ---- version: version.txt is the single source of truth -----------
+set "bSeeded="
+if not exist "version.txt" call :seedVersion
+if not exist "version.txt" goto :failed
+set "ver="
+for /f "usebackq delims=" %%v in (`powershell -NoProfile -Command "(Get-Content -Raw -LiteralPath 'version.txt').Trim([char]0xFEFF, ' ', [char]13, [char]10)"`) do set "ver=%%v"
+if "!ver!"=="" (
+  echo version.txt is empty.
+  >> "%log%" echo ERROR: version.txt is empty
+  goto :failed
+)
+rem SEEDVERSION IS A FLOOR, not only a starting point (kit 1.43.5). An app
+rem moved to the kit may already have a version.txt below the number its move
+rem was meant to start at -- 2htm had 1.18.4 and stepped to 1.18.5 while its
+rem documents said 1.19.0. A version.txt below seedVersion is raised to it,
+rem and that build takes the seed as it is, just as a newly made version.txt
+rem would. A number that does not parse is left for the step below to report.
+if not defined bSeeded (
+  powershell -NoProfile -Command "try { if ([version]'!ver!' -lt [version]'!seedVersion!') { exit 1 } else { exit 0 } } catch { exit 0 }"
+  if errorlevel 1 (
+    > version.txt echo !seedVersion!
+    echo Version !ver! is below this app's floor of !seedVersion!, so version.txt now holds !seedVersion!
+    >> "%log%" echo Raised version.txt from !ver! to the seedVersion floor !seedVersion!
+    set "ver=!seedVersion!"
+    set "bSeeded=1"
+  )
+)
+if defined bSeeded goto :keepVersion
+if /i "%~1"=="nobump" goto :keepVersion
+if not defined useVersionSteps goto :keepVersion
+call :takeNextVersion
+goto :haveVersion
+
+:keepVersion
+echo Version !ver!, kept
+>> "%log%" echo Version: !ver! (kept: seeded this run, nobump, or no version steps)
+
+:haveVersion
+rem Generated output: do not edit it, and do not commit it. A const, so the
+rem program may build other constants from it (a user agent, say).
+> Version.cs echo // Generated by build2htm.cmd from version.txt.  Do not edit; do not commit.
+>> Version.cs echo public static class BuildVersion
+>> Version.cs echo {
+>> Version.cs echo     public const string Version = "!ver!";
+>> Version.cs echo }
+>> "%log%" echo Wrote Version.cs holding !ver!
+
+rem ---- the Roslyn compiler ------------------------------------------------
+rem vswhere knows every Visual Studio and Build Tools install, of any year and
+rem edition, so no list of paths has to be kept current. The doubled quotes
+rem are for cmd /c, which strips the outer pair of a command that starts
+rem and ends with one.
+set "csc="
+set "vswhere=!progFiles86!\Microsoft Visual Studio\Installer\vswhere.exe"
+if exist "!vswhere!" for /f "usebackq delims=" %%c in (`""!vswhere!" -latest -products * -find "MSBuild\**\Bin\Roslyn\csc.exe""`) do if not defined csc set "csc=%%c"
+if not defined csc (
+  echo Installing the Visual Studio Build Tools, which hold the C# compiler. This takes several minutes.
+  >> "%log%" echo No Roslyn csc.exe; installing Microsoft.VisualStudio.2022.BuildTools with winget
+  winget install --id Microsoft.VisualStudio.2022.BuildTools --silent --accept-source-agreements --accept-package-agreements --override "--quiet --wait --norestart --add Microsoft.VisualStudio.Workload.MSBuildTools --add Microsoft.Net.Component.4.8.TargetingPack" >> "%log%" 2>&1
+  >> "%log%" echo Ran: winget install Microsoft.VisualStudio.2022.BuildTools, exit code !errorlevel!
+  if exist "!vswhere!" for /f "usebackq delims=" %%c in (`""!vswhere!" -latest -products * -find "MSBuild\**\Bin\Roslyn\csc.exe""`) do if not defined csc set "csc=%%c"
+)
+if not defined csc (
+  echo The C# compiler could not be found or installed. The log says why.
+  >> "%log%" echo ERROR: no Roslyn csc.exe
+  goto :failed
+)
+>> "%log%" echo Compiler: !csc!
+
+rem ---- reference assemblies given by full path ---------------------------
+rem Say.cs needs UIAutomationProvider.dll and UIAutomationTypes.dll for its
+rem Narrator notifications, and System.Speech.dll for its SAPI backup. None is
+rem on Roslyn's default reference path, so each is named by full path or the
+rem compile fails with CS0006. The .NET Framework 4.8 targeting pack has them;
+rem the runtime's WPF folder and the assembly cache are the fallbacks.
+set "refBase=Reference Assemblies\Microsoft\Framework\.NETFramework"
+set "speech="
+set "uiaProv="
+set "uiaTypes="
+for %%v in (v4.8.1 v4.8 v4.7.2 v4.7.1 v4.7 v4.6.2) do (
+  if not defined speech if exist "!progFiles86!\!refBase!\%%v\System.Speech.dll" set "speech=!progFiles86!\!refBase!\%%v\System.Speech.dll"
+  if not defined uiaProv if exist "!progFiles86!\!refBase!\%%v\UIAutomationProvider.dll" set "uiaProv=!progFiles86!\!refBase!\%%v\UIAutomationProvider.dll"
+  if not defined uiaTypes if exist "!progFiles86!\!refBase!\%%v\UIAutomationTypes.dll" set "uiaTypes=!progFiles86!\!refBase!\%%v\UIAutomationTypes.dll"
+)
+if not defined speech if exist "%SystemRoot%\Microsoft.NET\assembly\GAC_MSIL\System.Speech\v4.0_4.0.0.0__31bf3856ad364e35\System.Speech.dll" set "speech=%SystemRoot%\Microsoft.NET\assembly\GAC_MSIL\System.Speech\v4.0_4.0.0.0__31bf3856ad364e35\System.Speech.dll"
+if not defined uiaProv if exist "%SystemRoot%\Microsoft.NET\Framework64\v4.0.30319\WPF\UIAutomationProvider.dll" set "uiaProv=%SystemRoot%\Microsoft.NET\Framework64\v4.0.30319\WPF\UIAutomationProvider.dll"
+if not defined uiaTypes if exist "%SystemRoot%\Microsoft.NET\Framework64\v4.0.30319\WPF\UIAutomationTypes.dll" set "uiaTypes=%SystemRoot%\Microsoft.NET\Framework64\v4.0.30319\WPF\UIAutomationTypes.dll"
+if not defined speech goto :noRefs
+if not defined uiaProv goto :noRefs
+if not defined uiaTypes goto :noRefs
+>> "%log%" echo References: !speech! ; !uiaProv! ; !uiaTypes!
+goto :haveRefs
+:noRefs
+echo A .NET Framework reference assembly is missing: System.Speech, UIAutomationProvider or UIAutomationTypes.
+echo Install the .NET Framework 4.8 targeting pack with the Visual Studio Installer, then build again.
+>> "%log%" echo ERROR: speech=!speech! uiaProv=!uiaProv! uiaTypes=!uiaTypes!
+goto :failed
+:haveRefs
+
+rem ---- the kit's classes, and the stale copies they replace ---------------
+set "homerSources="
+for %%M in (!homerModules!) do (
+  if exist "!homerDev!\CSharp\%%M.cs" (
+    set "homerSources=!homerSources! "!homerDev!\CSharp\%%M.cs""
+  ) else (
+    echo The kit has no CSharp\%%M.cs. Update HomerDev to !kitNeeded! or later.
+    >> "%log%" echo ERROR: NOT IN THE KIT: CSharp\%%M.cs
+    goto :failed
+  )
+)
+>> "%log%" echo Kit sources: !homerSources!
+for %%F in (!kitClasses!) do (
+  if exist "%%F" if exist "!homerDev!\CSharp\%%F" (
+    del /q "%%F" && >> "%log%" echo Removed the app's own copy of %%F; the kit's is compiled instead
+  )
+)
+
+rem ---- fetched inputs: NuGet packages and the NVDA controller client -----
+if not exist "exec" mkdir "exec"
+if not exist "work" mkdir "work"
+set "extraRefs="
+for %%P in (!nugetPackages!) do (
+  for /f "tokens=1,2 delims=:" %%a in ("%%P") do (
+    call :getNuGet %%a %%b
+    if not exist "exec\%%b" goto :failed
+    set "extraRefs=!extraRefs! /reference:"exec\%%b""
+  )
+)
+set "resourceArgs="
+for %%R in (!csResources!) do (
+  if exist "%%R" (
+    set "resourceArgs=!resourceArgs! /resource:%%R,%%~nxR"
+  ) else (
+    echo The resource %%R named in csResources is missing.
+    >> "%log%" echo ERROR: resource %%R missing
+    goto :failed
+  )
+)
+if defined nvdaClient (
+  call :getNvdaClient
+  if not exist "work\nvda\nvdaControllerClient.dll" goto :failed
+  if /i "!nvdaClient!"=="embed" set "resourceArgs=!resourceArgs! /resource:work\nvda\nvdaControllerClient.dll,nvdaControllerClient.dll"
+  if /i "!nvdaClient!"=="exec" copy /y "work\nvda\nvdaControllerClient.dll" "exec\" >nul
+)
+
+rem ---- Markdig, fetched at a pinned version and embedded -----------------------
+rem 2htm renders Markdown with Markdig 0.18.3, which travels INSIDE 2htm.exe as
+rem a resource its AssemblyResolve handler loads, so the program stays a single
+rem file. The package is fetched once into work\nuget; lib\net40 is taken, else
+rem lib\net35. Markdig's types are declared in netstandard.dll, so the facade
+rem is referenced too -- without it csc reports CS0012 against the Markdig call
+rem sites, which looks like a fault in the source and is not.
+if not exist "work\nuget" mkdir "work\nuget"
+if exist "Markdig.dll" if not exist "work\nuget\Markdig.dll" (
+  move /y "Markdig.dll" "work\nuget\" >nul
+  >> "%log%" echo Moved the Markdig.dll fetched before the kit into work\nuget
+)
+if not exist "work\nuget\Markdig.dll" (
+  echo Fetching Markdig 0.18.3 from nuget.org
+  powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+    "$ErrorActionPreference = 'Stop';" ^
+    "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
+    "$sZip = Join-Path $env:TEMP ('2htm_markdig_' + [guid]::NewGuid().ToString('N') + '.zip');" ^
+    "$sDir = $sZip + '.d';" ^
+    "Invoke-WebRequest -Uri 'https://api.nuget.org/v3-flatcontainer/markdig/0.18.3/markdig.0.18.3.nupkg' -OutFile $sZip -UseBasicParsing;" ^
+    "Expand-Archive -LiteralPath $sZip -DestinationPath $sDir -Force;" ^
+    "$sDll = $null; foreach ($sTarget in @('net40', 'net35')) { $sTry = Join-Path $sDir ('lib\' + $sTarget + '\Markdig.dll'); if (-not $sDll -and (Test-Path $sTry)) { $sDll = $sTry } };" ^
+    "if (-not $sDll) { throw 'No net40 or net35 Markdig.dll in the package.' };" ^
+    "Copy-Item -LiteralPath $sDll -Destination '%CD%\work\nuget\Markdig.dll' -Force;" ^
+    "Remove-Item -LiteralPath $sZip, $sDir -Recurse -Force -ErrorAction SilentlyContinue;" ^
+    "'Markdig taken from ' + $sDll" >> "%log%" 2>&1
+  >> "%log%" echo Ran: fetch Markdig 0.18.3, exit code !errorlevel!
+)
+if not exist "work\nuget\Markdig.dll" (
+  echo Markdig could not be fetched. The log says why.
+  >> "%log%" echo ERROR: no work\nuget\Markdig.dll
+  goto :failed
+)
+set "netstd="
+for %%v in (v4.8.1 v4.8 v4.7.2) do if not defined netstd if exist "!progFiles86!\Reference Assemblies\Microsoft\Framework\.NETFramework\%%v\Facades\netstandard.dll" set "netstd=!progFiles86!\Reference Assemblies\Microsoft\Framework\.NETFramework\%%v\Facades\netstandard.dll"
+if not defined netstd if exist "%SystemRoot%\Microsoft.NET\assembly\GAC_MSIL\netstandard\v4.0_2.0.0.0__cc7b13ffcd2ddd51\netstandard.dll" set "netstd=%SystemRoot%\Microsoft.NET\assembly\GAC_MSIL\netstandard\v4.0_2.0.0.0__cc7b13ffcd2ddd51\netstandard.dll"
+if not defined netstd (
+  echo The netstandard facade was not found. Install the .NET Framework 4.8 targeting pack.
+  >> "%log%" echo ERROR: no netstandard.dll facade
+  goto :failed
+)
+>> "%log%" echo netstandard facade: !netstd!
+set "extraRefs=!extraRefs! /reference:"!netstd!" /reference:"work\nuget\Markdig.dll" /reference:Microsoft.CSharp.dll"
+set "resourceArgs=!resourceArgs! /resource:work\nuget\Markdig.dll,Markdig.dll"
+
+rem ---- a copy running from this project's exec cannot be replaced ------
+powershell -NoProfile -Command "$p = Get-Process -Name '%app%' -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path -like '%CD%\exec\*' }; if ($p) { exit 1 } else { exit 0 }"
+if errorlevel 1 (
+  echo exec\%app%.exe from this project is running, so it cannot be replaced.
+  echo Close it, then build again. An installed copy may stay open.
+  >> "%log%" echo ERROR: exec\%app%.exe is running; the build does not close it
+  goto :failed
+)
+
+rem ---- compile into exec -----------------------------------------------------
+set "icon="
+if exist "%app%.ico" set "icon=/win32icon:%app%.ico"
+set "manifest="
+if exist "%app%.manifest" set "manifest=/nowin32manifest /win32manifest:%app%.manifest"
+echo Compiling exec\%app%.exe
+"!csc!" /nologo /target:!cscTarget! /platform:x64 /optimize+ ^
+  /reference:System.dll ^
+  /reference:System.Core.dll ^
+  /reference:System.Data.dll ^
+  /reference:System.Drawing.dll ^
+  /reference:System.Windows.Forms.dll ^
+  /reference:System.Web.dll ^
+  /reference:System.Web.Extensions.dll ^
+  /reference:System.Net.Http.dll ^
+  /reference:System.Xml.dll ^
+  /reference:System.IO.Compression.dll ^
+  /reference:System.IO.Compression.FileSystem.dll ^
+  /reference:Microsoft.VisualBasic.dll ^
+  /reference:"!speech!" ^
+  /reference:"!uiaProv!" ^
+  /reference:"!uiaTypes!" ^
+  !extraRefs! !resourceArgs! !icon! !manifest! ^
+  /out:"exec\%app%.exe" ^
+  Version.cs %app%.cs !appSources! !homerSources! >> "%log%" 2>&1
+set "iCode=!errorlevel!"
+>> "%log%" echo Ran: csc, exit code !iCode!
+if not "!iCode!"=="0" (
+  echo The compile failed. The log has the compiler's messages.
+  goto :failed
+)
+echo Built exec\%app%.exe version !ver!
+>> "%log%" echo Built exec\%app%.exe version !ver!
+rem The program at the top, from the layout before exec: removed now that the
+rem new one exists. It is build output, never anything a person made.
+if exist "%app%.exe" del /q "%app%.exe" && >> "%log%" echo Removed the old top-level %app%.exe
+
+rem ---- the kit's tools this app uses, refreshed on every build ----------
+if not exist "scripts" mkdir "scripts"
+for %%F in (!kitTools!) do (
+  if exist "!homerDev!\scripts\%%F" (
+    copy /y "!homerDev!\scripts\%%F" "scripts\" >nul && >> "%log%" echo Refreshed scripts\%%F
+  ) else (
+    >> "%log%" echo NOT IN THE KIT: scripts\%%F
+    echo The kit has no scripts\%%F. Update HomerDev to !kitNeeded! or later.
+  )
+)
+for %%F in (!retiredTools!) do (
+  if exist "scripts\%%F" del /q "scripts\%%F" && >> "%log%" echo Removed retired scripts\%%F
+)
+
+rem ---- carried over from the layout before the kit (September 2026) -------
+rem Unzipping never deletes or renames, so the old files stay on disk. The
+rem ReadMe and License files take their standard capitals -- through git mv
+rem when git tracks the old spelling, since Windows' git treats the two as one
+rem file -- Announce is now help\Announce.md with the version history in
+rem help\History.md, and Camel_Type_C#.md is the kit's help\CamelType_CSharp.md.
+rem The old build log joins the others in logs.
+powershell -NoProfile -Command ^
+  "$lTracked = @(git ls-files 2>$null);" ^
+  "foreach ($sPair in @('README.md>ReadMe.md', 'readMe.htm>ReadMe.htm', 'license.htm>License.htm')) {" ^
+  "  $sOld, $sNew = $sPair.Split('>');" ^
+  "  if ($lTracked -ccontains $sOld) { git mv -f $sOld $sNew 2>&1 | Out-Null; 'git mv ' + $sOld + ' ' + $sNew + ', exit code ' + $LASTEXITCODE; continue }" ^
+  "  $f = Get-ChildItem -LiteralPath '.' -File | Where-Object { $_.Name -ceq $sOld };" ^
+  "  if (-not $f) { continue }" ^
+  "  Rename-Item -LiteralPath $sOld -NewName ($sNew + '.tmp'); Rename-Item -LiteralPath ($sNew + '.tmp') -NewName $sNew;" ^
+  "  'Renamed ' + $sOld + ' to ' + $sNew" ^
+  "}" ^
+  "'Capitals checked: ReadMe and License'" >> "%log%" 2>&1
+if exist "help\Announce.md" if exist "help\History.md" (
+  for %%F in (Announce.md Announce.htm) do if exist "%%F" del /q "%%F" && >> "%log%" echo Removed the old top-level %%F; help\Announce.md and help\History.md replace it
+)
+if exist "!homerDev!\help\CamelType_CSharp.md" if exist "Camel_Type_C#.md" del /q "Camel_Type_C#.md" && >> "%log%" echo Removed Camel_Type_C#.md; the kit's help\CamelType_CSharp.md replaces it
+if exist "build2htm.log" move /y "build2htm.log" "logs\build2htm-before-the-kit.log" >nul && >> "%log%" echo Moved the old build2htm.log into logs
+
+rem ---- documents ----------------------------------------------------------
+if not defined useDocs goto :docsDone
+set "pandoc="
+for /f "delims=" %%p in ('where pandoc 2^>nul') do if not defined pandoc set "pandoc=%%p"
+if not defined pandoc if exist "%ProgramFiles%\Pandoc\pandoc.exe" set "pandoc=%ProgramFiles%\Pandoc\pandoc.exe"
+if not defined pandoc if exist "%LOCALAPPDATA%\Pandoc\pandoc.exe" set "pandoc=%LOCALAPPDATA%\Pandoc\pandoc.exe"
+if not defined pandoc (
+  echo Installing pandoc, which writes the .htm copy of each document
+  winget install --id JohnMacFarlane.Pandoc --scope machine --silent --accept-source-agreements --accept-package-agreements >> "%log%" 2>&1
+  >> "%log%" echo Ran: winget install JohnMacFarlane.Pandoc, exit code !errorlevel!
+  if exist "%ProgramFiles%\Pandoc\pandoc.exe" set "pandoc=%ProgramFiles%\Pandoc\pandoc.exe"
+)
+if not defined pandoc (
+  echo Pandoc could not be installed, so no .htm was rebuilt.
+  >> "%log%" echo ERROR: no pandoc
+  goto :failed
+)
+>> "%log%" echo Pandoc: !pandoc!
+rem A .htm is written when it is missing or older than its .md, so a lost
+rem .htm is a non-event and an unchanged document is left alone.
+powershell -NoProfile -Command ^
+  "$n = 0;" ^
+  "$l = @(Get-ChildItem -LiteralPath '.' -Filter '*.md' -File) + @(Get-ChildItem -LiteralPath 'help' -Filter '*.md' -File -ErrorAction SilentlyContinue);" ^
+  "foreach ($m in $l) {" ^
+  "  $h = [IO.Path]::ChangeExtension($m.FullName, '.htm');" ^
+  "  if ((Test-Path -LiteralPath $h) -and ((Get-Item -LiteralPath $h).LastWriteTime -ge $m.LastWriteTime)) { continue }" ^
+  "  & '!pandoc!' -f markdown -t html5 --standalone --metadata ('title=' + $m.BaseName) -o $h $m.FullName;" ^
+  "  'Ran: pandoc ' + $m.Name + ', exit code ' + $LASTEXITCODE;" ^
+  "  if ($LASTEXITCODE -eq 0) { $n++ } else { $bad = 1 }" ^
+  "}" ^
+  "'Documents converted: ' + $n;" ^
+  "if ($bad) { exit 1 } else { exit 0 }" >> "%log%" 2>&1
+if errorlevel 1 (
+  echo Pandoc could not convert every document. The log names each one.
+  goto :failed
+)
+:docsDone
+
+rem ---- the project's own files in the Homer encoding ---------------------
+rem UTF-8 with a byte order mark and CRLF; .cmd and .bat CRLF without the
+rem mark. Pandoc writes neither. -build is an argument of its own: a bare
+rem call hands the tool THIS script's arguments through %%* (a cmd quirk).
+if exist "scripts\fixEncoding.cmd" (
+  call "scripts\fixEncoding.cmd" -build >> "%log%" 2>&1
+  >> "%log%" echo Ran: scripts\fixEncoding -build, exit code !errorlevel!
+)
+
+rem ---- spoken tutorials, when the app has any ---------------------------
+if exist "help\Tutorial_*.inix" (
+  set "tutorialsMissing="
+  for %%F in (help\Tutorial_*.inix) do if not exist "help\tutorials\%%~nF.mp3" set "tutorialsMissing=1"
+  if defined tutorialsMissing (
+    if exist "scripts\buildTutorials.cmd" (
+      echo Speaking the tutorials that have no audio yet
+      call "scripts\buildTutorials.cmd" -build
+      if errorlevel 1 echo Not every tutorial could be spoken. The tutorials log in logs\ says why.
+    ) else (
+      echo This app has walks but its kitTools do not name buildTutorials.
+    )
+  )
+)
+
+rem ---- installer ----------------------------------------------------------
+if not defined useInstaller goto :done
+rem EVERY FILE IN help\ AND EVERY scripts\install*.cmd MUST BE SHIPPED. The
+rem Source: lines are read, {#Name} tokens resolved from #define lines, and
+rem each file matched against them; recursesubdirs lets a line reach into
+rem subfolders. HomerScribe once shipped without ten help files and the
+rem shared half of its install scripts, and nothing said so. The PowerShell
+rem holds no double quote of its own ([char]34 stands in): cmd would take
+rem one as the end of the quoted chunk and eat the caret of [^...].
+powershell -NoProfile -Command ^
+  "$q = [char]34; $lIss = Get-Content -LiteralPath '%app%_setup.iss';" ^
+  "$dDef = @{}; foreach ($s in $lIss) { if ($s -match ('^#define\s+(\w+)\s+' + $q + '([^' + $q + ']*)' + $q)) { $dDef[$matches[1]] = $matches[2] } };" ^
+  "$lPat = @(); foreach ($s in $lIss) { if ($s -match ('^\s*Source:\s*' + $q + '([^' + $q + ']+)' + $q)) { $p = $matches[1]; foreach ($k in $dDef.Keys) { $p = $p.Replace('{#' + $k + '}', $dDef[$k]) };" ^
+  "  $sAny = '[^\\]*'; if ($s -match 'recursesubdirs') { $sAny = '.*' };" ^
+  "  $lPat += ('^' + [regex]::Escape($p).Replace('\*', $sAny).Replace('\?', '.') + '$') } };" ^
+  "$iRoot = (Get-Location).Path.Length + 1;" ^
+  "$lFiles = @(Get-ChildItem -LiteralPath 'help' -Recurse -File -ErrorAction SilentlyContinue) + @(Get-ChildItem -LiteralPath 'scripts' -Filter 'install*.cmd' -File -ErrorAction SilentlyContinue);" ^
+  "$iMissing = 0; foreach ($f in $lFiles) { $r = $f.FullName.Substring($iRoot); $bHit = $false; foreach ($p in $lPat) { if ($r -match $p) { $bHit = $true; break } };" ^
+  "  if (-not $bHit) { 'NOT IN THE INSTALLER: ' + $r; $iMissing++ } };" ^
+  "'Files checked against the installer: ' + $lFiles.Count + ', missing: ' + $iMissing;" ^
+  "exit $iMissing" >> "%log%" 2>&1
+if errorlevel 1 (
+  echo A file in help or an install script is not in %app%_setup.iss. The log names each one.
+  goto :failed
+)
+set "progFiles86=%ProgramFiles(x86)%"
+set "progFiles=%ProgramFiles%"
+set "iscc="
+if exist "!progFiles86!\Inno Setup 6\ISCC.exe" set "iscc=!progFiles86!\Inno Setup 6\ISCC.exe"
+if not defined iscc if exist "!progFiles!\Inno Setup 6\ISCC.exe" set "iscc=!progFiles!\Inno Setup 6\ISCC.exe"
+if not defined iscc (
+  echo Installing Inno Setup, which builds %app%_setup.exe
+  winget install --id JRSoftware.InnoSetup --silent --accept-source-agreements --accept-package-agreements >> "%log%" 2>&1
+  >> "%log%" echo Ran: winget install JRSoftware.InnoSetup, exit code !errorlevel!
+  if exist "!progFiles86!\Inno Setup 6\ISCC.exe" set "iscc=!progFiles86!\Inno Setup 6\ISCC.exe"
+  if not defined iscc if exist "!progFiles!\Inno Setup 6\ISCC.exe" set "iscc=!progFiles!\Inno Setup 6\ISCC.exe"
+)
+if not defined iscc (
+  echo Inno Setup could not be installed, so %app%_setup.exe was not built.
+  >> "%log%" echo ERROR: no ISCC.exe
+  goto :failed
+)
+>> "%log%" echo Inno Setup: !iscc!
+echo Building %app%_setup.exe
+"!iscc!" /DHomerDev="!homerDev!" "%app%_setup.iss" >> "%log%" 2>&1
+set "iCode=!errorlevel!"
+>> "%log%" echo Ran: ISCC %app%_setup.iss, exit code !iCode!
+if not "!iCode!"=="0" (
+  echo The installer build failed. The log has Inno Setup's output.
+  goto :failed
+)
+if not exist "%app%_setup.exe" (
+  echo Inno Setup returned 0 but wrote no %app%_setup.exe.
+  >> "%log%" echo ERROR: no %app%_setup.exe
+  goto :failed
+)
+echo Built %app%_setup.exe version !ver!
+>> "%log%" echo Built %app%_setup.exe version !ver!
+
+:done
+>> "%log%" echo Build succeeded %DATE% %TIME%
+echo Build succeeded. Next: exec\%app%.exe to try it, then scripts\push "message" and scripts\release.
 endlocal
+exit /b 0
+
+:failed
+>> "%log%" echo Build FAILED %DATE% %TIME%
+echo Build failed. The log is %log%
+endlocal
+exit /b 1
+
+
+:getNuGet
+rem -------------------------------------------------------------------
+rem Fetch one assembly out of one NuGet package into exec.
+rem   call :getNuGet <package id> <assembly file name>
+rem Straight from nuget.org, the newest .NET Framework build preferred.
+rem -------------------------------------------------------------------
+if exist "exec\%~2" goto :eof
+echo Fetching %~1 from NuGet
+>> "%log%" echo Fetching %~1 from NuGet
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+  "$ErrorActionPreference = 'Stop';" ^
+  "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
+  "$sTemp = Join-Path $env:TEMP ('nuget_' + [guid]::NewGuid().ToString('N'));" ^
+  "New-Item -ItemType Directory -Path $sTemp -Force | Out-Null;" ^
+  "$sPkg = Join-Path $sTemp 'package.zip';" ^
+  "Invoke-WebRequest -Uri ('https://www.nuget.org/api/v2/package/%~1') -OutFile $sPkg -UseBasicParsing;" ^
+  "Expand-Archive -LiteralPath $sPkg -DestinationPath $sTemp -Force;" ^
+  "$o = Get-ChildItem -Path (Join-Path $sTemp 'lib') -Recurse -Filter '%~2' | Where-Object { $_.FullName -match 'net4' } | Sort-Object FullName -Descending | Select-Object -First 1;" ^
+  "if (-not $o) { $o = Get-ChildItem -Path (Join-Path $sTemp 'lib') -Recurse -Filter '%~2' | Sort-Object FullName -Descending | Select-Object -First 1 };" ^
+  "if (-not $o) { throw 'No %~2 in the %~1 package.' };" ^
+  "Copy-Item -LiteralPath $o.FullName -Destination (Join-Path '%CD%\exec' '%~2') -Force;" ^
+  "Remove-Item -LiteralPath $sTemp -Recurse -Force -ErrorAction SilentlyContinue;" ^
+  "'%~2 taken from ' + $o.FullName" >> "%log%" 2>&1
+>> "%log%" echo Ran: fetch %~1, exit code !errorlevel!
+if not exist "exec\%~2" echo %~2 could not be fetched from NuGet. The log says why.
 goto :eof
 
-rem ---- say -----------------------------------------------------------
-rem One line, to the console and to the log. Anything worth telling the
-rem person running this is worth having in the file afterwards.
-rem --------------------------------------------------------------------
-:say
-echo %~1
->> "%sLog%" echo %~1
+:getNvdaClient
+rem -------------------------------------------------------------------
+rem NVDA's controller client, 64-bit, into work\nvda. NV Access publishes it
+rem beside each release as nvda_<version>_controllerClient.zip; since NVDA
+rem 2024.1 the DLL carries no 32 or 64 in its name. The version below is a
+rem known release (2025.3); the client's interface is stable across releases,
+rem so a newer NVDA speaks through it as well. A copy the project already
+rem has at its top, from the layout before, is taken instead of a download.
+rem -------------------------------------------------------------------
+if exist "work\nvda\nvdaControllerClient.dll" goto :eof
+if not exist "work\nvda" mkdir "work\nvda"
+if exist "nvdaControllerClient.dll" (
+  move /y "nvdaControllerClient.dll" "work\nvda\" >nul
+  >> "%log%" echo Moved the top-level nvdaControllerClient.dll into work\nvda
+  goto :eof
+)
+echo Downloading NVDA's controller client, about 3 MB
+>> "%log%" echo Fetching the NVDA controller client
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+  "$ErrorActionPreference = 'Stop';" ^
+  "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
+  "$sVer = '2025.3';" ^
+  "$sZip = Join-Path $env:TEMP ('nvdaClient_' + [guid]::NewGuid().ToString('N') + '.zip');" ^
+  "$sDir = $sZip + '.d';" ^
+  "Invoke-WebRequest -Uri ('https://download.nvaccess.org/releases/' + $sVer + '/nvda_' + $sVer + '_controllerClient.zip') -OutFile $sZip -UseBasicParsing;" ^
+  "Expand-Archive -LiteralPath $sZip -DestinationPath $sDir -Force;" ^
+  "$o = Get-ChildItem -Path $sDir -Recurse -Filter 'nvdaControllerClient*.dll' | Where-Object { $_.FullName -match '\\x64\\' } | Select-Object -First 1;" ^
+  "if (-not $o) { throw 'No x64 nvdaControllerClient DLL in the controller client zip.' };" ^
+  "Copy-Item -LiteralPath $o.FullName -Destination '%CD%\work\nvda\nvdaControllerClient.dll' -Force;" ^
+  "Remove-Item -LiteralPath $sZip, $sDir -Recurse -Force -ErrorAction SilentlyContinue;" ^
+  "'Taken from ' + $o.FullName" >> "%log%" 2>&1
+>> "%log%" echo Ran: fetch the NVDA controller client, exit code !errorlevel!
+if not exist "work\nvda\nvdaControllerClient.dll" echo NVDA's controller client could not be fetched. The log says why.
+goto :eof
+
+:seedVersion
+rem -------------------------------------------------------------------
+rem A MISSING version.txt IS MADE, NOT AN ERROR -- and not from 1.0.0 over
+rem an app that has released before, which would publish a release older
+rem than every installed copy. The number is the higher of seedVersion and
+rem one past the newest vN.N.N tag on origin. A number made here is new
+rem already, so this build does not step it again.
+rem -------------------------------------------------------------------
+set "ver="
+for /f "usebackq delims=" %%v in (`powershell -NoProfile -Command "$b = [version]'!seedVersion!'; try { foreach ($t in @(git ls-remote --tags origin 'v*' 2>$null)) { if ($t -match 'refs/tags/v(\d+)\.(\d+)\.?(\d*)') { $n = New-Object Version ([int]$matches[1]), ([int]$matches[2]), ([int]('0' + $matches[3]) + 1); if ($n -gt $b) { $b = $n } } } } catch { }; '{0}.{1}.{2}' -f $b.Major, $b.Minor, [Math]::Max($b.Build, 0)"`) do set "ver=%%v"
+if "!ver!"=="" (
+  echo version.txt is missing and no number could be made for it.
+  >> "%log%" echo ERROR: could not seed version.txt from !seedVersion!
+  goto :eof
+)
+> version.txt echo !ver!
+set "bSeeded=1"
+echo Made version.txt holding !ver!
+>> "%log%" echo Made version.txt holding !ver! (seed !seedVersion!, or one past the newest release tag)
+goto :eof
+
+:takeNextVersion
+rem -------------------------------------------------------------------
+rem Take the next UNUSED version: the last dotted part of !ver! plus one,
+rem stepping over any number that already carries a release tag on origin.
+rem One "git ls-remote" is the only network call; if it fails the plain
+rem increment is used and release remains the check it has always been.
+rem -------------------------------------------------------------------
+set "verOld=!ver!"
+set "sTagFile=%TEMP%\%app%_tags.txt"
+del "!sTagFile!" >nul 2>&1
+git ls-remote --tags origin "v*" > "!sTagFile!" 2>> "%log%"
+if errorlevel 1 >> "%log%" echo WARN: the released tags could not be read, so the next number is taken blindly.
+if errorlevel 1 del "!sTagFile!" >nul 2>&1
+
+:nextCandidate
+call :incrementVersion
+if not defined new goto :eof
+if not exist "!sTagFile!" goto :haveNextVersion
+findstr /e /c:"refs/tags/v!ver!" "!sTagFile!" >nul 2>&1
+if errorlevel 1 goto :haveNextVersion
+echo Version v!ver! is already released; stepping over it.
+>> "%log%" echo Version v!ver! is already released; stepping over it.
+goto :nextCandidate
+
+:haveNextVersion
+del "!sTagFile!" >nul 2>&1
+> version.txt echo !ver!
+echo Version !verOld! to !ver!
+>> "%log%" echo Version: !verOld! to !ver!
+goto :eof
+
+:incrementVersion
+set "p1=" & set "p2=" & set "p3=" & set "p4="
+set "new="
+for /f "tokens=1-4 delims=." %%a in ("!ver!") do (
+  set "p1=%%a" & set "p2=%%b" & set "p3=%%c" & set "p4=%%d"
+)
+if defined p4 (
+  set /a p4=p4+1
+  set "new=!p1!.!p2!.!p3!.!p4!"
+) else if defined p3 (
+  set /a p3=p3+1
+  set "new=!p1!.!p2!.!p3!"
+) else if defined p2 (
+  set "new=!p1!.!p2!.1"
+) else (
+  set "new=!p1!.0.1"
+)
+if not defined new (
+  echo Could not work out the next version from "!ver!".
+  >> "%log%" echo ERROR: could not work out the next version from "!ver!"
+  goto :eof
+)
+set "ver=!new!"
 goto :eof

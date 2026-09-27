@@ -1,0 +1,538 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Jamal Mazrui" />
+  <meta name="description" content="Convert Documents to Accessible HTML" />
+  <title>2htm</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2htm</h1>
+<p class="author">Jamal Mazrui</p>
+</header>
+<h1 id="htm-guide">2htm Guide</h1>
+<p>This is the full guide. For a quick start, see ReadMe.</p>
+<p><strong>Author:</strong> Jamal Mazrui <strong>Copyright:</strong> ©
+2026 Jamal Mazrui <strong>License:</strong> <a
+href="https://opensource.org/license/mit/">MIT</a> <strong>Project
+home:</strong> <a href="https://github.com/JamalMazrui/2htm"
+class="uri">https://github.com/JamalMazrui/2htm</a></p>
+<p><code>2htm</code> is a Windows tool that converts documents in
+several formats (Microsoft Word, Excel, PowerPoint, PDF, and Pandoc
+Markdown) into accessible HTML files. For each input file you give it,
+2htm writes a <code>.htm</code> companion file alongside the source. The
+output preserves headings, lists, tables, and image alternative text in
+a structure that screen readers and other assistive technologies can
+navigate.</p>
+<p>Like its companion tools <code>urlCheck</code> and
+<code>extCheck</code> (see the Announce file for a description of the
+family), <code>2htm</code> runs in two modes: a <strong>GUI
+mode</strong> (a small parameter dialog launched by double-clicking the
+program, pressing its desktop hotkey, or running with <code>-g</code>)
+and a <strong>command-line mode</strong> (any other invocation, suitable
+for batch files and pipelines). Both modes accept the same options.</p>
+<hr />
+<h2 id="what-you-need">What you need</h2>
+<ul>
+<li>Windows 10 or later (64-bit)</li>
+<li>Microsoft Word, Excel, or PowerPoint installed to convert the
+corresponding <code>.docx</code>, <code>.xlsx</code>, or
+<code>.pptx</code> files</li>
+<li>Word 2013 or later for <code>.pdf</code> files, which 2htm converts
+through Word’s PDF Reflow</li>
+<li>No Office installation needed for <code>.md</code> files</li>
+</ul>
+<p>You do <strong>not</strong> need to install .NET separately. The .NET
+Framework 4.8.1 used by <code>2htm</code> ships in-box with Windows 10
+(since version 22H2) and Windows 11.</p>
+<p><strong>Bitness note.</strong> <code>2htm</code> is built as a 64-bit
+program, and Microsoft Office automation requires the controller process
+and the installed Office to share the same bitness. Modern Office
+(Microsoft 365, Office 2019+, Office 2024) is 64-bit by default, so this
+matches the common case. If you have 32-bit Office on your machine,
+<code>2htm</code> will surface a clear error pointing at the bitness
+mismatch; you can either install 64-bit Office or rebuild
+<code>2htm</code> with <code>/platform:x86</code> (see Development
+below).</p>
+<hr />
+<h2 id="installing">Installing</h2>
+<p>Download <code>2htm_setup.exe</code> from the <a
+href="https://github.com/jamalmazrui/2htm/releases">2htm releases
+page</a> and run it. It needs administrator rights, because it installs
+for everyone on the computer. The setup wizard:</p>
+<ul>
+<li>Asks for the installation folder the first time (default:
+<code>C:\Program Files\2htm</code>). An update goes to the same folder
+without asking.</li>
+<li>Shows a short MIT license summary on the welcome page; the full
+license is installed as <code>License.htm</code>.</li>
+<li>Adds a Start-menu group and a desktop shortcut whose hotkey is
+<strong>Alt+Control+2</strong>. Pressing <strong>Alt+Control+2</strong>
+from anywhere in Windows opens the <code>2htm</code> dialog. (While Word
+has focus, Word keeps Alt+Control+2 for its Heading 2 style.)</li>
+<li>Adds a <strong>Convert via 2htm</strong> entry to the File Explorer
+right-click menu for all file types. Right-clicking a supported file (or
+pressing <strong>Shift+F10</strong>) and choosing this entry is the
+fastest way to convert one file; the result lands beside it. The access
+key is <strong>2</strong>, matching the desktop hotkey, so from a file
+in File Explorer the keys are <strong>Shift+F10</strong>, then
+<strong>2</strong>.</li>
+</ul>
+<p>The last page offers two checkboxes. <strong>Launch 2htm now</strong>
+is checked; <strong>Open the user guide</strong> is not. When you press
+Finish, a short results box says what was installed and where the logs
+are. 2htm starts after you close that box, so the box is never hidden
+behind it.</p>
+<p>The program itself is in the <code>exec</code> folder of the
+installation, and this guide and the other documents are in the
+<code>help</code> folder. <code>ReadMe.htm</code>,
+<code>License.htm</code> and <code>2htm.cmd</code>, which runs the
+program from a command prompt there, are at the top.</p>
+<h3 id="updating">Updating</h3>
+<p>In the dialog, press <strong>F11</strong>. 2htm asks GitHub whether a
+newer version exists. If one does, Yes is the default: press Enter and
+the new setup program is downloaded and started. If you already have the
+newest version, No is the default. If the check fails, for example with
+no internet connection, a message says so.</p>
+<hr />
+<h2 id="running-2htm">Running 2htm</h2>
+<h3 id="from-the-dialog-easiest">From the dialog (easiest)</h3>
+<p>Launch <code>2htm</code> from any of these:</p>
+<ul>
+<li>The desktop shortcut (or its <strong>Alt+Control+2</strong>
+hotkey)</li>
+<li>The Start-menu shortcut</li>
+<li>Double-clicking <code>2htm.exe</code> in the <code>exec</code>
+folder in File Explorer</li>
+</ul>
+<p>The parameter dialog has these controls. Each label has an underlined
+letter that you can press with <strong>Alt</strong> to jump straight to
+that control:</p>
+<ul>
+<li><strong>Source files</strong> [S] — a single file path, a wildcard
+pattern (e.g., <code>*.docx</code>), or several of either separated by
+spaces. A single path containing spaces does not need quotes — 2htm
+recognizes the entire trimmed field as one path when it points to an
+existing file or directory. Quotes are only needed when supplying
+multiple specs and at least one contains a space.</li>
+<li><strong>Browse source…</strong> [B] — pick a single source from a
+file picker</li>
+<li><strong>Output directory</strong> [O] — where the output is written.
+Blank means the current working directory.</li>
+<li><strong>Choose output…</strong> [C] — pick the output directory from
+a folder picker</li>
+<li><strong>Strip images</strong> [I] — drop image references from the
+output</li>
+<li><strong>Plain text</strong> [P] — produce plain-text
+<code>.txt</code> output instead of HTML</li>
+<li><strong>Force replacements</strong> [F] — overwrite an existing
+<code>&lt;basename&gt;.htm</code> instead of skipping the input. Without
+this, 2htm skips an input whose .htm already exists in the output
+directory.</li>
+<li><strong>View output</strong> [V] — open the output directory in File
+Explorer when the run is done</li>
+<li><strong>Log session</strong> [L] — also write a fresh
+<code>2htm.log</code> in the output directory (or current directory if
+no output directory is set). A session log is always kept in
+<code>%LOCALAPPDATA%\2htm\logs</code>.</li>
+<li><strong>Use configuration</strong> [U] — load these field values
+from the saved configuration at startup, and save them back when you
+press OK</li>
+<li><strong>Guide</strong> [G] — open this guide in your browser, then
+return to the dialog with everything as it was.</li>
+<li><strong>Help</strong> [H] — list every field with its tip, the
+dialog’s keys, and the version check. F1 also shows Help.</li>
+<li><strong>Default settings</strong> [D] — clear all fields, uncheck
+all boxes, and delete the saved configuration if any</li>
+<li><strong>OK</strong> / <strong>Cancel</strong> — start the run, or
+cancel without running. Enter is OK; Escape is Cancel.</li>
+</ul>
+<p>More keys work anywhere in the dialog: <strong>F1</strong> shows
+Help, <strong>F11</strong> checks the web for a newer version of 2htm
+(see Updating), <strong>Control+Enter</strong> is OK from any control,
+<strong>Shift+F1</strong> says the tip for the field you are on, and
+<strong>F7</strong> lists the dialog’s controls so you can move to one.
+The dialog is built with the Homer Lbc classes, so its text fields also
+have the Lbc editing keys, which Help lists.</p>
+<p><strong>Default settings</strong> and <strong>Guide</strong> return
+you to the dialog; Default settings first clears the fields and deletes
+any saved configuration.</p>
+<p>The Browse source and Choose output pickers open at the directory
+derived from the corresponding text field’s current value when that
+value points to an existing path; otherwise they open at your Documents
+folder. With <strong>Use configuration</strong> checked, those text
+fields are pre-populated from your last session, so the pickers
+naturally pick up where you left off.</p>
+<p>If you press OK with an output directory that does not yet exist,
+2htm prompts to create it (default Yes). Choosing No keeps the dialog
+open with focus on the output field so you can correct it.</p>
+<p>When all files have been processed, a final results dialog summarizes
+what was done.</p>
+<h3 id="from-the-command-line">From the command line</h3>
+<p>Open a Command Prompt in the 2htm program folder, or put that folder
+on your PATH, and run <code>2htm</code> with the source as an argument.
+<code>2htm.cmd</code> there runs the program in the <code>exec</code>
+folder.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a># Convert one file:</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>2htm report.docx</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a># Several files at once:</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>2htm *.docx *.md</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a># Files in different folders:</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>2htm docs\*.docx data\*.xlsx</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a># Plain text instead of HTML:</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>2htm <span class="at">-p</span> article.md</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a># Open the GUI:</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>2htm <span class="at">-g</span></span></code></pre></div>
+<p>When invoked without arguments from a GUI shell (Explorer
+double-click, Start-menu shortcut, desktop hotkey), <code>2htm</code>
+shows the dialog automatically. When invoked without arguments from a
+console shell, it prints help and exits. The <code>-g</code> flag forces
+GUI mode regardless.</p>
+<hr />
+<h2 id="command-line-options">Command-line options</h2>
+<ul>
+<li><code>-f</code>, <code>--force</code> — overwrite an existing
+<code>&lt;basename&gt;.htm</code> instead of skipping the input.</li>
+<li><code>-g</code>, <code>--gui-mode</code> — show the parameter
+dialog.</li>
+<li><code>-h</code>, <code>--help</code> — show usage and exit.</li>
+<li><code>-l</code>, <code>--log</code> — also write
+<code>2htm.log</code> (UTF-8 with BOM) in the output directory, replaced
+each session. A session log is always kept in
+<code>%LOCALAPPDATA%\2htm\logs</code>.</li>
+<li><code>-o &lt;folder&gt;</code>,
+<code>--output-dir &lt;folder&gt;</code> — write output to
+<code>&lt;folder&gt;</code> (made if missing); the default is the
+current directory.</li>
+<li><code>-p</code>, <code>--plain-text</code> — produce plain-text
+<code>.txt</code> output instead of HTML.</li>
+<li><code>-s</code>, <code>--strip-images</code> — drop image references
+from the output.</li>
+<li><code>-u</code>, <code>--use-configuration</code> — read saved
+settings from <code>%LOCALAPPDATA%\2htm\configs\2htm.inix</code>.</li>
+<li><code>-v</code>, <code>--version</code> — show the version and
+exit.</li>
+<li><code>--view-output</code> — after the run, open the output
+directory in File Explorer.</li>
+</ul>
+<p>Every option in the GUI corresponds one-to-one with a command-line
+flag, so a workflow prototyped in the dialog can be translated to a
+batch file without surprises.</p>
+<hr />
+<h2 id="supported-input-formats">Supported input formats</h2>
+<ul>
+<li><code>.docx</code> — Microsoft Word document</li>
+<li><code>.md</code> — Pandoc Markdown file</li>
+<li><code>.pdf</code> — PDF document</li>
+<li><code>.pptx</code> — Microsoft PowerPoint presentation</li>
+<li><code>.xlsx</code> — Microsoft Excel workbook</li>
+</ul>
+<p>—|—| | .docx | Microsoft Word document | | .xlsx | Microsoft Excel
+workbook | | .pptx | Microsoft PowerPoint presentation | | .pdf | PDF
+document | | .md | Pandoc Markdown file |</p>
+<hr />
+<h2 id="output">Output</h2>
+<p>For each file converted, an HTML file named
+<code>&lt;basename&gt;.htm</code> is written next to the input (or to
+the output directory if <code>-o</code> is given). The HTML preserves
+heading structure, lists, tables, and image alternative text. CSS is
+embedded inline so the file can be opened in any browser without
+external dependencies.</p>
+<p>In <strong>plain text</strong> mode (<code>-p</code> or the dialog’s
+Plain text checkbox), the output is a <code>.txt</code> file instead of
+<code>.htm</code>. Image lines are stripped and the text is normalized
+for use as input to a synthesizer or for paste-into-email scenarios.</p>
+<hr />
+<h2 id="configuration-file">Configuration file</h2>
+<p>When <strong>Use configuration</strong> is checked in the dialog (or
+<code>-u</code> is on the command line), <code>2htm</code> reads and
+writes its settings in:</p>
+<pre><code>%LOCALAPPDATA%\2htm\configs\2htm.inix</code></pre>
+<p>It stores the source field, the output directory, and the option
+checkboxes, one per line under a <code>[Settings]</code> heading, such
+as <code>ViewOutput=yes</code>. You can edit it in any text editor; a
+comment you add is kept when 2htm saves. <strong>Default
+settings</strong> in the dialog deletes the file.</p>
+<p>Settings saved by versions before 1.19, in
+<code>%LOCALAPPDATA%\2htm\2htm.ini</code>, are read when there is no
+<code>.inix</code> yet. The old file is removed the first time the new
+one is saved.</p>
+<hr />
+<h2 id="log-files">Log files</h2>
+<p>2htm always keeps a log of each session, whatever the options:</p>
+<pre><code>%LOCALAPPDATA%\2htm\logs\2htm-yyyyMMdd-HHmmss.log</code></pre>
+<p>Each run gets its own file, named for the moment it started, so
+sorting the folder by name also sorts it by time. The 30 newest are
+kept. The log starts with the version, where the program ran from, the
+Windows version, the working folder, the command line and every setting,
+then records each file converted and any error with its full details. If
+something goes wrong, zip the <code>logs</code> folder and send it.</p>
+<p><strong>Log session</strong> (or <code>-l</code>) additionally writes
+a fresh <code>2htm.log</code> in the output directory (or the current
+directory if none is set), so a log can travel with the output. Any
+prior <code>2htm.log</code> there is replaced.</p>
+<p>Both logs are UTF-8 with a byte-order mark, so Notepad opens them
+correctly.</p>
+<hr />
+<h2 id="notes">Notes</h2>
+<ul>
+<li>2htm output preserves heading structure, lists, tables, and image
+alternative text. The output is a single self-contained
+<code>.htm</code> file with CSS embedded inline; it can be opened in any
+browser without external dependencies.</li>
+<li>For <code>.docx</code>, <code>.xlsx</code>, and <code>.pptx</code>
+files, 2htm uses Microsoft Office’s COM automation. Office must be
+installed and runnable; modern (64-bit) Office is the common case.</li>
+<li>For <code>.md</code> files, 2htm uses the Markdig library (bundled
+inside the executable). No Office is needed.</li>
+<li>Plain text mode (<code>-p</code> or the dialog’s Plain text
+checkbox) produces a <code>.txt</code> file instead. Image lines are
+stripped and the text is normalized for use as input to a synthesizer or
+for paste-into-email scenarios.</li>
+</ul>
+<hr />
+<h2 id="uninstalling">Uninstalling</h2>
+<p>Use Installed apps in Windows Settings, or the Uninstall shortcut in
+the 2htm Start-menu group. The uninstaller removes the program, its logs
+and the File Explorer entry. Your saved settings,
+<code>configs\2htm.inix</code>, are left in place, as they always have
+been; delete them by hand if you want 2htm gone completely.</p>
+<hr />
+<h2 id="for-developers">For developers</h2>
+<p>How 2htm is built, released and structured is in Developer, in this
+folder.</p>
+<h2 id="license">License</h2>
+<p>MIT License. See <code>License.htm</code> at the top of the program
+folder.</p>
+</body>
+</html>

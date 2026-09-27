@@ -1,0 +1,300 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Jamal Mazrui" />
+  <title>Developer</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Developer</h1>
+<p class="author">Jamal Mazrui</p>
+</header>
+<h1 id="htm-developer-notes">2htm Developer Notes</h1>
+<p>How 2htm is built, released and laid out. Since 1.19.0 it is built on
+the Homer Development Kit (HomerDev), kit 1.43.4 or later, in
+<code>C:\HomerDev</code>.</p>
+<h2 id="the-project-folder">The project folder</h2>
+<p><code>C:\2htm</code> mirrors the installed tree:</p>
+<ul>
+<li>At the top: <code>2htm.cs</code> (the program),
+<code>build2htm.cmd</code>, <code>2htm_setup.iss</code>,
+<code>2htm.cmd</code>, <code>2htm.ico</code>, <code>accept.inix</code>,
+<code>RepoFiles.txt</code>, <code>LocalFiles.txt</code>,
+<code>ReadMe</code> and <code>License</code>.</li>
+<li><code>exec</code> — the built <code>2htm.exe</code>. Never in
+git.</li>
+<li><code>help</code> — this document and the others: <code>2htm</code>
+(the guide), <code>Announce</code>, <code>Developer</code>,
+<code>History</code>, <code>Hotkeys</code>, each as <code>.md</code> and
+<code>.htm</code>.</li>
+<li><code>logs</code> — one log per run of the build or any tool.</li>
+<li><code>scripts</code> — the kit’s tools, refreshed from
+<code>C:\HomerDev\scripts</code> by every build.</li>
+<li><code>work\nuget</code> — Markdig, fetched once. Never in git.</li>
+</ul>
+<p><code>version.txt</code> holds the version and lives only on this
+machine. The build writes <code>Version.cs</code> from it, and the
+installer reads it directly.</p>
+<h2 id="the-four-steps">The four steps</h2>
+<ol type="1">
+<li><code>build2htm</code> — steps the version
+(<code>build2htm nobump</code> keeps it), fetches Markdig if it is
+missing, compiles <code>exec\2htm.exe</code>, writes each
+<code>.htm</code> from its <code>.md</code>, puts the project’s files in
+the Homer encoding, checks that the installer ships every file in
+<code>help</code>, and builds <code>2htm_setup.exe</code>. Its log is
+<code>logs\2htm-build-yyyyMMdd-HHmmss.log</code>.</li>
+<li><code>scripts\push "message"</code> — rewrites the whitelist
+<code>.gitignore</code> from <code>RepoFiles.txt</code>, commits and
+pushes.</li>
+<li><code>scripts\tidy</code> and <code>scripts\tidy --do-it</code> —
+the periodic clean.</li>
+<li><code>scripts\release</code> — runs <code>scripts\check</code>, then
+tags the pushed commit with the version stamped in
+<code>2htm_setup.exe</code> and publishes the installer.</li>
+</ol>
+<p>Try the fresh build with <code>2htm -g</code> (the
+<code>2htm.cmd</code> at the top runs <code>exec\2htm.exe</code>).</p>
+<h2 id="the-compiler-the-kits-classes-and-markdig">The compiler, the
+kit’s classes and Markdig</h2>
+<p>The build finds the Roslyn C# compiler with <code>vswhere</code>, or
+installs the free Visual Studio Build Tools with winget; 2htm has always
+needed Roslyn.</p>
+<p>2htm compiles eight of the kit’s classes straight from
+<code>C:\HomerDev\CSharp</code>: Elevate, Inix, Lbc, Log, Paths, Say,
+Util and Web. Its dialog, <code>guiDialog.show</code>, is an LbcDialog,
+built the way urlFido’s is: bands for a field and its button, checkboxes
+below a separator, and <code>runWithButtons</code> with OK, Guide,
+Default settings and Cancel, looping back to the dialog after Guide,
+Default settings, or an output folder the user declined to create. Lbc
+needs Elevate, Inix, Log, Say and Util.</p>
+<ul>
+<li><code>Log</code> keeps the session log in
+<code>%LOCALAPPDATA%\2htm\logs</code>. 2htm’s own <code>logger</code>
+writes every line to it as well as to the optional
+<code>2htm.log</code>, and <code>Main</code> records anything
+<code>run</code> did not catch. Log needs Paths and Say.</li>
+<li><code>Paths.configs()</code> is where <code>2htm.inix</code> lives,
+and <code>Paths.installedFolder</code> is how Help finds
+<code>help\2htm.htm</code> from <code>exec</code>.</li>
+<li><code>InixCodec.writeValue</code> saves each setting in place.</li>
+<li><code>Elevate</code> answers F11 (and needs Web).</li>
+</ul>
+<p><strong>Markdig 0.18.3</strong> is fetched once into
+<code>work\nuget</code> (lib, else lib) and embedded as a resource,
+which <code>resolveEmbeddedAssembly</code> loads, so 2htm stays one
+file. <code>Main</code> registers that handler before anything else and
+must not itself reference a Markdig type, because the runtime resolves a
+method’s types as it compiles it; Log and Elevate do not touch Markdig.
+Markdig’s types are declared in <code>netstandard.dll</code>, so the
+build references the netstandard facade: without it csc reports CS0012
+against the Markdig call sites, which looks like a fault in the source
+and is not.</p>
+<h2 id="source-layout">Source layout</h2>
+<p>The whole program is one C# file: <code>2htm.cs</code>. It uses
+standard <code>System.Windows.Forms</code> for the parameter dialog, the
+COM <code>dynamic</code> keyword to drive Office, and the <a
+href="https://github.com/xoofx/markdig">Markdig</a> library (downloaded
+automatically by the build script) for Markdown rendering. PDF is
+converted through Word’s PDF Reflow, and PowerPoint through Office COM.
+The classes inside <code>2htm.cs</code>, in the <code>twoHtm</code>
+namespace, are arranged as a shared infrastructure layer
+(<code>comHelper</code>, <code>configManager</code>,
+<code>fileIntegrity</code>, <code>guiDialog</code>,
+<code>guiProgress</code>, <code>htmlWriter</code>, <code>logger</code>,
+<code>tempManager</code>) plus per-format converter classes, with a
+top-level <code>program</code> class that parses arguments, optionally
+shows the dialog, and dispatches.</p>
+<h2 id="threading-and-bitness">Threading and bitness</h2>
+<p><code>Main</code> is decorated with <code>[STAThread]</code>. This is
+required for two reasons:</p>
+<ul>
+<li>Office COM automation requires a single-threaded apartment. Without
+it, Word/Excel/PowerPoint COM servers can disconnect mid-operation with
+HRESULT 0x80010108 (RPC_E_DISCONNECTED) or 0x80010114
+(OLE_E_OBJNOTCONNECTED).</li>
+<li>WinForms common dialogs (<code>OpenFileDialog</code>,
+<code>FolderBrowserDialog</code>) require an STA thread.</li>
+</ul>
+<p>The build is <code>/platform:x64</code>. Office COM automation
+requires the controller process and the installed Office to share the
+same bitness. Modern Office is 64-bit by default; if a user has 32-bit
+Office, <code>comHelper.createApp</code> surfaces a clear error message
+pointing at the mismatch and recommending a 32-bit rebuild.</p>
+<h2 id="conventions">Conventions</h2>
+<ul>
+<li>Camel Type for C#, as
+<code>C:\HomerDev\help\CamelType_CSharp.md</code> describes. Constants
+added since the move to the kit carry the <code>c_</code> prefix. The
+<code>o</code> prefix is reserved for COM objects.</li>
+<li>2htm shares identifier names with urlCheck, urlFido and extCheck:
+<code>sProgramName</code>, <code>sProgramVersion</code>,
+<code>sConfigFileName</code>, <code>sLogFileName</code>,
+<code>sOutputDir</code>, the <code>iLayout*</code> constants, and the
+<code>logger</code> surface <code>open</code>, <code>close</code>,
+<code>info</code>, <code>warn</code>, <code>error</code>,
+<code>debug</code>.</li>
+</ul>
+</body>
+</html>

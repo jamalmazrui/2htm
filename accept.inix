@@ -1,0 +1,32 @@
+﻿; accept.inix -- what "done" means for 2htm, checked by scripts\check.
+; Each [check] runs a command in the project folder; Expect is its exit code
+; and Wants, when given, a string its output must contain.
+
+[check]
+Name   = the help names the configuration file
+Run    = exec\2htm.exe --help
+Expect = 0
+Wants  = 2htm.inix
+
+[check]
+Name   = the help names the log folder
+Run    = exec\2htm.exe --help
+Expect = 0
+Wants  = 2htm\logs
+
+[check]
+Name   = the program reports the version the build wrote
+Run    = exec\2htm.exe --version
+Expect = 0
+Wants  = 2htm
+
+[check]
+Name   = the command-line wrapper finds the program in exec
+Run    = 2htm.cmd --version
+Expect = 0
+Wants  = 2htm
+
+[check]
+Name   = the Explorer verb points at exec
+Run    = findstr /c:"{app}\exec\{#AppExeName}" 2htm_setup.iss
+Expect = 0
