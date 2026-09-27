@@ -28,5 +28,7 @@ Wants  = 2htm
 
 [check]
 Name   = the Explorer verb points at exec
-Run    = findstr /c:"{app}\exec\{#AppExeName}" 2htm_setup.iss
+; findstr reads a backslash as an escape even in /c: text, so each is doubled;
+; written singly, the search was for "{app}exec{#AppExeName}" and failed.
+Run    = findstr /l /c:"{app}\\exec\\{#AppExeName}" 2htm_setup.iss
 Expect = 0
