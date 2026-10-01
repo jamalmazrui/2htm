@@ -13,7 +13,7 @@
 //   JSON:       .json                 (native recursive-descent parser)
 //   Text:       .txt                  (native)
 //
-// Build with build2htm.cmd.
+// Build with build.cmd.
 //
 // Coding style: Camel Type (Hungarian prefix, lowerCamel throughout).
 // Keeps COM variables typed as `dynamic` throughout for late-bound

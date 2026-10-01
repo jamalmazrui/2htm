@@ -209,7 +209,7 @@ The build is `/platform:x64`. Office COM automation requires the controller proc
 Run the included script:
 
 ```cmd
-build2htm.cmd
+build.cmd
 ```
 
 It auto-detects the compiler, verifies the build environment, embeds the icon into `2htm.exe`, and produces the runtime distribution in `dist\`.

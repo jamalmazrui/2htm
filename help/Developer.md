@@ -11,7 +11,7 @@ How 2htm is built, released and laid out. Since 1.19.0 it is built on the Homer 
 
 `C:\2htm` mirrors the installed tree:
 
-- At the top: `2htm.cs` (the program), `build2htm.cmd`, `2htm_setup.iss`, `2htm.cmd`, `2htm.ico`, `accept.inix`, `RepoFiles.txt`, `LocalFiles.txt`, `ReadMe` and `License`.
+- At the top: `2htm.cs` (the program), `build.cmd`, `2htm_setup.iss`, `2htm.cmd`, `2htm.ico`, `accept.inix`, `RepoFiles.txt`, `LocalFiles.txt`, `ReadMe` and `License`.
 - `exec` — the built `2htm.exe`. Never in git.
 - `help` — this document and the others: `2htm` (the guide), `Announce`, `Developer`, `History`, `Hotkeys`, each as `.md` and `.htm`.
 - `logs` — one log per run of the build or any tool.
@@ -22,7 +22,7 @@ How 2htm is built, released and laid out. Since 1.19.0 it is built on the Homer 
 
 ## The four steps
 
-1. `build2htm` — steps the version (`build2htm nobump` keeps it), fetches Markdig if it is missing, compiles `exec\2htm.exe`, writes each `.htm` from its `.md`, puts the project's files in the Homer encoding, checks that the installer ships every file in `help`, and builds `2htm_setup.exe`. Its log is `logs\2htm-build-yyyyMMdd-HHmmss.log`.
+1. `build` — steps the version (`build nobump` keeps it), fetches Markdig if it is missing, compiles `exec\2htm.exe`, writes each `.htm` from its `.md`, puts the project's files in the Homer encoding, checks that the installer ships every file in `help`, and builds `2htm_setup.exe`. Its log is `logs\2htm-build-yyyyMMdd-HHmmss.log`.
 2. `scripts\push "message"` — rewrites the whitelist `.gitignore` from `RepoFiles.txt`, commits and pushes.
 3. `scripts\tidy` and `scripts\tidy --do-it` — the periodic clean.
 4. `scripts\release` — runs `scripts\check`, then tags the pushed commit with the version stamped in `2htm_setup.exe` and publishes the installer.

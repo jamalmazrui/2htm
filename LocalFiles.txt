@@ -4,7 +4,7 @@
 # as never pushed. One path or pattern a line; a trailing slash means a folder.
 
 # The built program, the installer, and Markdig fetched from NuGet: all made by
-# build2htm, none of them authored.
+# build, none of them authored.
 2htm_setup.exe
 exec/
 work/
