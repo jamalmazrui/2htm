@@ -5,6 +5,20 @@ author: "Jamal Mazrui"
 
 # 2htm History
 
+## 8 October 2026 -- an audit by another AI
+
+ChatGPT audited 2htm and reported 38 findings. Checked against the code, these held and are fixed:
+
+- **A failed reconversion keeps the earlier output.** On any failure the destination was deleted, and with --force that was the previous good output. It is now moved aside first, put back if the conversion fails, and removed only after success.
+- **Office documents of your own are safe.** When Office stopped answering, 2htm killed every Word, Excel or PowerPoint without a window, which could include yours. It now records the Office processes it starts, and kills only those.
+- **One output, one source.** report.docx and report.md both became report.htm, and the later silently replaced the first; and a conversion could replace another file being converted. Each output now belongs to one source, and the other is skipped and reported.
+- **Output goes beside its source, as the guide says.** With no output folder given, output went to the current folder, so a shortcut started in Documents put it there, away from the file converted. The guide's lines that said the current folder are corrected.
+- **A missing input is not a success.** A missing file, a pattern matching nothing, or a skipped collision now ends the run with the partial-failure code, not success.
+- **A stale copy retired.** A folder named 2htm-main held an old copy of the project, committed by accident; the build removes it.
+- **Kit tools** updated from HomerDev 1.63.3.
+
+Left for later, as larger changes: a deadline for a conversion that hangs; the post-install launch that does not drop elevation; and the conversion quality findings -- Excel formulas and headers, PowerPoint order and charts, Word encoding and styles -- each of which needs real Office documents to test.
+
 ## Version 1.19.1 (September 2026)
 
 - **Setup.** The Results box at the end of setup is titled "2htm Setup Results", and the finish page uses the Homer wording: the verb first, no "recommended", and "Launch 2htm (desktop hotkey ...)".

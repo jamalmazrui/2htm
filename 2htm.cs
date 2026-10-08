@@ -641,7 +641,7 @@ namespace twoHtm
 
                     logger.info("Done. " + iConverted + " converted, " +
                         iSkippedExisting + " skipped, " + iFailed + " failed.");
-                    iExitCode = iFailed == 0 ? iExitOk : iExitPartial;
+                    iExitCode = (iFailed == 0 && iInputErrors == 0) ? iExitOk : iExitPartial;
 
                     // --view-output: open the output directory in
                     // the shell, but only if at least one file was
@@ -982,6 +982,11 @@ namespace twoHtm
                 ".txt"
             };
 
+        // INPUTS THAT COULD NOT BE USED (8 October 2026, from an audit by another AI):
+        // a missing file, an empty match or a collision was reported and then forgotten,
+        // so a batch with one good file and one missing one still ended in success.
+        static int iInputErrors = 0;
+
         private static List<string> expandWildcards(string[] asArgs)
         {
             var hsResult = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -1008,24 +1013,24 @@ namespace twoHtm
                 string sPattern = Path.GetFileName(sArg);
                 if (string.IsNullOrEmpty(sDir)) sDir = Directory.GetCurrentDirectory();
                 if (!Directory.Exists(sDir)) {
-                    Console.Error.WriteLine("Directory not found: " + sDir);
+                    Console.Error.WriteLine("Directory not found: " + sDir); iInputErrors = iInputErrors + 1;
                     continue;
                 }
                 if (sPattern.IndexOfAny(new[] { '*', '?' }) < 0) {
                     string sFull = Path.GetFullPath(sArg);
                     if (File.Exists(sFull) && !isLockFile(sFull)) hsResult.Add(sFull);
                     else if (!File.Exists(sFull))
-                        Console.Error.WriteLine("File not found: " + sArg);
+                        Console.Error.WriteLine("File not found: " + sArg); iInputErrors = iInputErrors + 1;
                 } else {
                     string[] aMatches;
                     try {
                         aMatches = Directory.GetFiles(sDir, sPattern);
                     } catch (Exception ex) {
-                        Console.Error.WriteLine("Cannot enumerate '" + sArg + "': " + ex.Message);
+                        Console.Error.WriteLine("Cannot enumerate '" + sArg + "': " + ex.Message); iInputErrors = iInputErrors + 1;
                         continue;
                     }
                     if (aMatches.Length == 0)
-                        Console.Error.WriteLine("No files match: " + sArg);
+                        Console.Error.WriteLine("No files match: " + sArg); iInputErrors = iInputErrors + 1;
                     foreach (var sMatch in aMatches) {
                         if (isLockFile(sMatch)) continue;
                         // For a bare-directory expansion, skip files
@@ -1061,8 +1066,11 @@ namespace twoHtm
         private static string computeOutputPath(string sInPath)
         {
             string sOutExt = bPlainText ? ".txt" : ".htm";
+            // BESIDE ITS SOURCE, AS THE GUIDE SAYS (8 October 2026, from an audit by another
+            // AI): with no output folder given, output went to the current folder, so a
+            // shortcut started in Documents put it there, away from the file converted.
             string sEffectiveOutputDir = string.IsNullOrEmpty(sOutputDir)
-                ? Directory.GetCurrentDirectory()
+                ? Path.GetDirectoryName(Path.GetFullPath(sInPath))
                 : sOutputDir;
             return Path.Combine(sEffectiveOutputDir,
                 Path.GetFileNameWithoutExtension(sInPath) + sOutExt);
@@ -1097,6 +1105,13 @@ namespace twoHtm
         {
             lsToConvert = new List<string>();
             lsSkippedExisting = new List<string>();
+            // ONE OUTPUT, ONE SOURCE (8 October 2026, from an audit by another AI):
+            // report.docx and report.md both became report.htm, and the later one
+            // silently replaced the first; and a conversion could replace another
+            // input. Each destination is now claimed once, and never another input.
+            var dClaimed = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var setInputs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var sOne in lsFiles) { try { setInputs.Add(Path.GetFullPath(sOne)); } catch { } }
             foreach (var sFile in lsFiles) {
                 string sExt = Path.GetExtension(sFile).ToLowerInvariant();
                 if (!hsSupportedExts.Contains(sExt)) {
@@ -1111,6 +1126,20 @@ namespace twoHtm
                     logger.info("Skipped (cannot overwrite input with its own output): " + sFile);
                     continue;
                 }
+                string sOutFull = Path.GetFullPath(sOutPath);
+                if (dClaimed.ContainsKey(sOutFull)) {
+                    logger.info("Skipped (" + Path.GetFileName(sOutPath) + " is already the output of " + dClaimed[sOutFull] + "): " + sFile);
+                    Console.Error.WriteLine("Skipped " + sFile + ": its output, " + Path.GetFileName(sOutPath) + ", is already the output of " + dClaimed[sOutFull] + ".");
+                    iInputErrors = iInputErrors + 1;
+                    continue;
+                }
+                if (setInputs.Contains(sOutFull)) {
+                    logger.info("Skipped (its output " + sOutPath + " is another file being converted): " + sFile);
+                    Console.Error.WriteLine("Skipped " + sFile + ": its output would replace " + Path.GetFileName(sOutPath) + ", which is also being converted.");
+                    iInputErrors = iInputErrors + 1;
+                    continue;
+                }
+                dClaimed[sOutFull] = Path.GetFileName(sFile);
                 if (File.Exists(sOutPath) && !bForce) {
                     lsSkippedExisting.Add(sFile);
                     logger.info("Skipped (" + Path.GetFileName(sOutPath) +
@@ -1150,6 +1179,16 @@ namespace twoHtm
             // behind, then rethrow. We never want to leave a stale
             // or half-written output file that would mislead the
             // user into thinking conversion succeeded.
+            // THE OLD OUTPUT IS KEPT UNTIL THE NEW ONE EXISTS (8 October 2026, from an
+            // audit by another AI): on any failure the destination was deleted, and with
+            // --force that was the previous good output. It is moved aside first, put
+            // back if this conversion fails, and removed only after success.
+            string sAside = "";
+            if (File.Exists(sOutPath)) {
+                sAside = sOutPath + ".previous";
+                if (File.Exists(sAside)) File.Delete(sAside);
+                File.Move(sOutPath, sAside);
+            }
             bool bSucceeded = false;
             try {
                 if (bPlainText) {
@@ -1169,6 +1208,12 @@ namespace twoHtm
                     } catch (Exception ex) {
                         logger.info("Could not delete partial output " + sOutPath + ": " + ex.Message);
                     }
+                    if (sAside != "" && File.Exists(sAside) && !File.Exists(sOutPath)) {
+                        try { File.Move(sAside, sOutPath); logger.info("Put back the earlier output: " + sOutPath); }
+                        catch (Exception ex) { logger.info("Could not put back the earlier output " + sAside + ": " + ex.Message); }
+                    }
+                } else if (sAside != "") {
+                    try { File.Delete(sAside); } catch (Exception ex) { logger.info("Could not remove " + sAside + ": " + ex.Message); }
                 }
             }
         }
@@ -2540,7 +2585,20 @@ namespace twoHtm
                 throw new InvalidOperationException(
                     "Office component '" + sProgId + "' is not installed or not registered. " +
                     "This file cannot be converted without it.");
+            // OWNED OFFICE PROCESSES (8 October 2026, from an audit by another AI):
+            // recovery killed every windowless Word, Excel or PowerPoint, though a
+            // missing window does not make a process ours. The processes this call
+            // starts are recorded, and only they are ever killed.
+            string sProcessName = officeProcessName(sProgId);
+            var setBefore = new HashSet<int>();
+            if (sProcessName != "") foreach (Process oBefore in Process.GetProcessesByName(sProcessName)) { setBefore.Add(oBefore.Id); oBefore.Dispose(); }
             dynamic oApp = Activator.CreateInstance(type);
+            if (sProcessName != "") {
+                foreach (Process oAfter in Process.GetProcessesByName(sProcessName)) {
+                    if (!setBefore.Contains(oAfter.Id)) lock (setOwnedOffice) setOwnedOffice.Add(oAfter.Id);
+                    oAfter.Dispose();
+                }
+            }
             silenceAlerts(sProgId, oApp);
             return oApp;
         }
@@ -2669,12 +2727,26 @@ namespace twoHtm
             catch { }
         }
 
+        // The Office processes 2htm itself started; recovery kills no other.
+        static HashSet<int> setOwnedOffice = new HashSet<int>();
+
+        static string officeProcessName(string sProgId)
+        {
+            string sLower = (sProgId ?? "").ToLowerInvariant();
+            if (sLower.StartsWith("word.")) return "WINWORD";
+            if (sLower.StartsWith("excel.")) return "EXCEL";
+            if (sLower.StartsWith("powerpoint.")) return "POWERPNT";
+            return "";
+        }
+
         public static void killOrphanOfficeProcesses(string sProcessName)
         {
             try {
                 foreach (Process process in Process.GetProcessesByName(sProcessName)) {
                     try {
-                        if (process.MainWindowHandle == IntPtr.Zero) {
+                        bool bOwned;
+                        lock (setOwnedOffice) bOwned = setOwnedOffice.Contains(process.Id);
+                        if (bOwned && process.MainWindowHandle == IntPtr.Zero) {
                             process.Kill();
                             process.WaitForExit(3000);
                         }

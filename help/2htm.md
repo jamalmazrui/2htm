@@ -65,7 +65,7 @@ The parameter dialog has these controls. Each label has an underlined letter tha
 
 - **Source files** [S] — a single file path, a wildcard pattern (e.g., `*.docx`), or several of either separated by spaces. A single path containing spaces does not need quotes — 2htm recognizes the entire trimmed field as one path when it points to an existing file or directory. Quotes are only needed when supplying multiple specs and at least one contains a space.
 - **Browse source...** [B] — pick a single source from a file picker
-- **Output directory** [O] — where the output is written. Blank means the current working directory.
+- **Output directory** [O] — where the output is written. Blank means beside each source file, in its own folder.
 - **Choose output...** [C] — pick the output directory from a folder picker
 - **Strip images** [I] — drop image references from the output
 - **Plain text** [P] — produce plain-text `.txt` output instead of HTML
@@ -121,7 +121,7 @@ When invoked without arguments from a GUI shell (Explorer double-click, Start-me
 - `-g`, `--gui-mode` — show the parameter dialog.
 - `-h`, `--help` — show usage and exit.
 - `-l`, `--log` — also write `2htm.log` (UTF-8 with BOM) in the output directory, replaced each session. A session log is always kept in `%LOCALAPPDATA%\2htm\logs`.
-- `-o <folder>`, `--output-dir <folder>` — write output to `<folder>` (made if missing); the default is the current directory.
+- `-o <folder>`, `--output-dir <folder>` — write output to `<folder>` (made if missing); the default is beside each source file, in its own folder.
 - `-p`, `--plain-text` — produce plain-text `.txt` output instead of HTML.
 - `-s`, `--strip-images` — drop image references from the output.
 - `-u`, `--use-configuration` — read saved settings from `%LOCALAPPDATA%\2htm\configs\2htm.inix`.

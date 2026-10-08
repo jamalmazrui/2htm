@@ -171,6 +171,41 @@
 <p class="author">Jamal Mazrui</p>
 </header>
 <h1 id="htm-history">2htm History</h1>
+<h2 id="october-2026-an-audit-by-another-ai">8 October 2026 – an audit
+by another AI</h2>
+<p>ChatGPT audited 2htm and reported 38 findings. Checked against the
+code, these held and are fixed:</p>
+<ul>
+<li><strong>A failed reconversion keeps the earlier output.</strong> On
+any failure the destination was deleted, and with –force that was the
+previous good output. It is now moved aside first, put back if the
+conversion fails, and removed only after success.</li>
+<li><strong>Office documents of your own are safe.</strong> When Office
+stopped answering, 2htm killed every Word, Excel or PowerPoint without a
+window, which could include yours. It now records the Office processes
+it starts, and kills only those.</li>
+<li><strong>One output, one source.</strong> report.docx and report.md
+both became report.htm, and the later silently replaced the first; and a
+conversion could replace another file being converted. Each output now
+belongs to one source, and the other is skipped and reported.</li>
+<li><strong>Output goes beside its source, as the guide says.</strong>
+With no output folder given, output went to the current folder, so a
+shortcut started in Documents put it there, away from the file
+converted. The guide’s lines that said the current folder are
+corrected.</li>
+<li><strong>A missing input is not a success.</strong> A missing file, a
+pattern matching nothing, or a skipped collision now ends the run with
+the partial-failure code, not success.</li>
+<li><strong>A stale copy retired.</strong> A folder named 2htm-main held
+an old copy of the project, committed by accident; the build removes
+it.</li>
+<li><strong>Kit tools</strong> updated from HomerDev 1.63.3.</li>
+</ul>
+<p>Left for later, as larger changes: a deadline for a conversion that
+hangs; the post-install launch that does not drop elevation; and the
+conversion quality findings – Excel formulas and headers, PowerPoint
+order and charts, Word encoding and styles – each of which needs real
+Office documents to test.</p>
 <h2 id="version-1.19.1-september-2026">Version 1.19.1 (September
 2026)</h2>
 <ul>

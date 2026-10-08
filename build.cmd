@@ -136,6 +136,15 @@ for /f "delims=" %%v in ('ver') do >> "%log%" echo Windows: %%v
 >> "%log%" echo Settings: useDocs=!useDocs! useInstaller=!useInstaller! useVersionSteps=!useVersionSteps!
 echo Building %app%. The log is %log%
 
+rem ---- a stale copy retired ---------------------------------------
+rem A FOLDER NAMED 2htm-main HELD AN OLD COPY OF THE PROJECT, from 3 October
+rem 2026, committed by accident (found 8 October 2026, from an audit by another
+rem AI). It is removed, and logged, so the next push takes it out of the
+rem repository too.
+if exist "2htm-main\2htm.cs" (
+  rd /s /q "2htm-main" && >> "%log%" echo Retired the stale 2htm-main folder, an old copy of the project
+)
+
 rem ---- the Homer Development Kit -------------------------------------
 set "homerDev="
 if defined HomerDev if exist "%HomerDev%\exec\CSharp\Lbc.cs" set "homerDev=%HomerDev%"
