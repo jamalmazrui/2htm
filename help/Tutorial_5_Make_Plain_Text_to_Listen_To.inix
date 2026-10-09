@@ -1,0 +1,139 @@
+﻿; Tutorial_5_Make_Plain_Text_to_Listen_To.inix -- make plain text to listen to
+
+[about]
+Title=5 - Make Plain Text to Listen To
+Intro=Converting a document to plain text, with the pictures left out, for a speech synthesizer, a braille display, or an email.
+Setup=A document of your own; any of the supported kinds.
+Homework=Make plain text of one document, and paste it into an email.
+
+[step]
+
+Say=One want: a document as clean text, to listen to in a synthesizer program on a walk, or to paste into an email without formatting.
+Key=
+
+[step]
+
+Say=I open the dialog and put the document's path in Source files.
+Key=Alt+Control+2
+Hear=2htm dialog
+Hear=Source files edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Plain text, P, makes a text file instead of a web page.
+Key=Alt+P
+Hear=Plain text check box, not checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Space checks it.
+Key=Space
+Hear=checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Strip images, I, leaves out the lines that stood for pictures, which read as noise when listened to.
+Key=Alt+I
+Hear=Strip images check box, not checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Space checks it too.
+Key=Space
+Hear=checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter converts. The result is a text file with the same name, ending in dot t x t.
+Key=Enter
+Hear=1 file converted
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Plain text keeps the words and their order, paragraph by paragraph; headings become lines of their own, and tables become rows of text.
+Key=
+
+[step]
+
+Say=I open the text file in Notepad. The first line is the title.
+Key=
+Hear=Annual Report dot t x t - Notepad
+Hear=Annual Report
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Down Arrow reads on, line by line, with nothing between me and the words.
+Key=Down Arrow
+Hear=Summary
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Control plus A selects all of it and Control plus C copies it, ready to paste into an email.
+Key=Control+A
+Hear=selected
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The same file can go to a text-to-speech program, which reads it aloud as an audio book of the document.
+Key=
+
+[step]
+
+Say=Or to a braille display, where clean text without formatting marks reads more easily.
+Key=
+
+[step]
+
+Say=Use configuration, U, remembers these boxes, so the next time the dialog opens ready for plain text.
+Key=Alt+U
+Hear=Use configuration check box, checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=To go back to web pages, clear Plain text; Default settings, D, clears every box at once.
+Key=
+
+[step]
+
+Say=The text file is written in UTF-8, so accented letters and symbols arrive intact in any modern program.
+Key=
+
+[step]
+
+Say=Each paragraph is one line, so a text reader that pauses at line ends pauses at paragraph ends, not mid-sentence.
+Key=
+
+[step]
+
+Say=A heading stands on a line of its own, with a blank line around it, so a listener hears where a section begins.
+Key=
+
+[step]
+
+Say=List items keep their marks, a dash for a bullet and a number for a numbered list, so their order is still heard.
+Key=
+
+[step]
+
+Say=Plain text of a whole folder works the same way: one text file for each document, ready to join into one long reading.
+Key=
+
+[step]
+
+Say=Plain text is the form to choose whenever the words matter and the layout does not.
+Key=
+
+[step]
+
+Say=One document, two forms: a web page to navigate, or plain text to hear or paste. The next walk converts slides and spreadsheets.
+Key=

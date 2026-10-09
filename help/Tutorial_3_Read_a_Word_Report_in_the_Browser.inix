@@ -1,0 +1,167 @@
+﻿; Tutorial_3_Read_a_Word_Report_in_the_Browser.inix -- read a word report in the browser
+
+[about]
+Title=3 - Read a Word Report in the Browser
+Intro=Converting a long Word report into a web page, then reading it by headings, lists and tables in the browser.
+Setup=A long Word document of your own, and Microsoft Word installed.
+Homework=Convert a report of your own, then press H in the browser to hear its headings in order.
+
+[step]
+
+Say=One want: a forty-page Word report that I can skim by heading, the way I skim a web page, without Word's own interface in the way.
+Key=
+
+[step]
+
+Say=I open the dialog. The focus is on Source files.
+Key=Alt+Control+2
+Hear=2htm dialog
+Hear=Source files edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Browse source opens a file picker, rather than typing the path.
+Key=Alt+B
+Hear=Open dialog
+Hear=File name edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I type the start of the report's name and press Enter. Its full path is now in Source files.
+Key=Enter
+Hear=Source files edit
+Hear=C colon backslash Documents backslash Annual Report dot docx
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I tick View output, so the folder opens when the page is ready.
+Key=Alt+V
+Hear=View output check box, checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter converts. Word reads the document in the background, so nothing appears on screen.
+Key=Enter
+Hear=Converting Annual Report dot docx
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A short box reports the result.
+Key=
+Hear=1 file converted
+Hear=OK button
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter closes it, and File Explorer opens on the folder, on the new web page, Annual Report dot h t m.
+Key=Enter
+Hear=Annual Report dot h t m
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter opens it in the browser, where the screen reader is in its browse mode, ready to read.
+Key=Enter
+Hear=Annual Report, heading level 1
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=H moves to the next heading, so the report's outline is heard one section at a time.
+Key=H
+Hear=Summary, heading level 2
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=H again.
+Key=H
+Hear=Findings, heading level 2
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Insert plus F6 lists every heading, the quickest way to jump to the section I want.
+Key=Insert+F6
+Hear=Headings list
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape returns to the page. T moves to the next table, which keeps its rows and columns, so table keys read each cell with its header.
+Key=T
+Hear=table with 4 columns and 6 rows
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Lists keep their shape too: L moves to the next list and the reader says how many items it holds.
+Key=L
+Hear=list with 5 items
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=And pictures keep the descriptions written in Word, so a chart says what the author wrote for it.
+Key=G
+Hear=graphic, Sales by quarter, rising each quarter
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The page is one file, with its look built in, so it can be emailed, kept or opened offline without anything else.
+Key=
+
+[step]
+
+Say=Converting again later, after the report changes, needs Force replacements, or 2htm keeps the page it already made.
+Key=Alt+F
+Hear=Force replacements check box, checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Links in the report stay links. K moves to the next one, and Enter follows it, whether it points into the report or out to the web.
+Key=K
+Hear=link, Appendix A
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A link to a heading inside the report jumps there, which turns a long table of contents into a real one.
+Key=Enter
+Hear=Appendix A, heading level 2
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Alt plus Left Arrow comes back, as in any browser.
+Key=Alt+Left Arrow
+Hear=link, Appendix A
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The page's title, read when it opens and in the window's title bar, is the document's own title, so a list of open pages says what each one is.
+Key=
+
+[step]
+
+Say=Footnotes become a list at the end, each linked from its number in the text and back again.
+Key=
+
+[step]
+
+Say=Converting a report before a meeting means reading it at your own pace, by structure, rather than page by page in Word.
+Key=
+
+[step]
+
+Say=A long report, read like a web page, by headings, tables and lists. The next walk makes a PDF readable.
+Key=

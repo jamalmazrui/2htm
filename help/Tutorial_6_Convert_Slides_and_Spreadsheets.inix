@@ -1,0 +1,140 @@
+﻿; Tutorial_6_Convert_Slides_and_Spreadsheets.inix -- convert slides and spreadsheets
+
+[about]
+Title=6 - Convert Slides and Spreadsheets
+Intro=Converting PowerPoint slides and Excel workbooks into web pages, and how each is laid out for reading.
+Setup=A presentation or a workbook of your own, and Microsoft Office installed.
+Homework=Convert a slide deck, then move through it by heading, one slide at a time.
+
+[step]
+
+Say=One want: the slides from a talk I missed, and the budget workbook shared with it, both readable without opening PowerPoint or Excel.
+Key=
+
+[step]
+
+Say=I open the dialog. Source files can hold several files at once, separated by spaces.
+Key=Alt+Control+2
+Hear=2htm dialog
+Hear=Source files edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I type both names, each in quotation marks because they contain spaces.
+Key=
+Hear=quote Talk dot pptx quote quote Budget dot xlsx quote
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter converts both. PowerPoint and Excel read them in the background.
+Key=Enter
+Hear=2 files converted
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I open the slides' page. Each slide is a section with its title as a heading.
+Key=
+Hear=Talk, heading level 1
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=H moves slide by slide.
+Key=H
+Hear=Slide 2, Our goals, heading level 2
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Under each heading come the slide's words, then its speaker notes, so what the presenter said is there too.
+Key=Down Arrow
+Hear=Notes: start with the year in review
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Pictures on a slide read their descriptions, if the author wrote them.
+Key=G
+Hear=graphic, Map of the new offices
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Now the workbook's page. Each sheet becomes a section with the sheet's name as its heading.
+Key=
+Hear=Budget, heading level 1
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Under it, the sheet's cells are a table, so the reader's table keys move by row and column, and each cell is read with its column's heading.
+Key=T
+Hear=table with 5 columns and 12 rows
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Alt plus Control plus Down Arrow moves down a column.
+Key=Alt+Control+Down Arrow
+Hear=Amount, 1,200
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Formulas arrive as the values they show, which is what a reader of the page wants.
+Key=
+
+[step]
+
+Say=A very wide sheet reads best with the screen reader's table commands, rather than line by line.
+Key=
+
+[step]
+
+Say=A chart in a slide reads the description its author wrote; with none, it reads as a graphic with no name, which is worth telling the author.
+Key=
+
+[step]
+
+Say=Slides with several text boxes keep them in reading order, the order a screen reader meets them in PowerPoint itself.
+Key=
+
+[step]
+
+Say=A workbook's hidden sheets are not converted, so the page holds only what its author shows.
+Key=
+
+[step]
+
+Say=Merged cells keep their place in the table, so a heading spread across several columns still sits above them.
+Key=
+
+[step]
+
+Say=Very long sheets make long tables; the reader's table commands, such as moving to the first or last row, save a long walk.
+Key=
+
+[step]
+
+Say=A deck converted the night before a talk can be studied on a phone, where opening PowerPoint is harder.
+Key=
+
+[step]
+
+Say=A presentation's title slide becomes the page's first heading, so the page opens by saying what talk it is.
+Key=
+
+[step]
+
+Say=And a workbook's sheets keep their order, so Shift plus H, back by heading, retraces the sheets in the order the author made them.
+Key=Shift+H
+Hear=Budget, heading level 1
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Slides by heading, sheets as tables: two kinds of Office file, read without Office open. The next walk converts a whole folder.
+Key=

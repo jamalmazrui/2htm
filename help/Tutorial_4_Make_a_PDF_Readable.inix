@@ -1,0 +1,136 @@
+﻿; Tutorial_4_Make_a_PDF_Readable.inix -- make a pdf readable
+
+[about]
+Title=4 - Make a PDF Readable
+Intro=Converting a PDF into a web page whose text can be read, searched and copied, and what to expect from a scanned one.
+Setup=A PDF of your own, such as a statement or a manual.
+Homework=Convert a PDF, then search the web page for one word with Control+F.
+
+[step]
+
+Say=One want: a PDF manual whose text I can read line by line and search, instead of a viewer that reads it in pieces.
+Key=
+
+[step]
+
+Say=I open the dialog and type the PDF's path in Source files. Typing works as well as browsing.
+Key=Alt+Control+2
+Hear=2htm dialog
+Hear=Source files edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter converts. No other program is needed for a PDF; 2htm reads it itself.
+Key=Enter
+Hear=Converting Manual dot pdf
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The result box confirms it.
+Key=
+Hear=1 file converted
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I open the new page in the browser. The text arrives as paragraphs, in reading order.
+Key=
+Hear=Manual, heading level 1
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A PDF does not always mark its headings the way a Word document does, so a page may have fewer headings; paragraphs and lines are still there to read.
+Key=
+
+[step]
+
+Say=Control plus F, the browser's find, searches the whole manual at once.
+Key=Control+F
+Hear=Find on page, edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I type warranty and press Enter. The browser lands on the first match.
+Key=Enter
+Hear=warranty, 1 of 3
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape closes the find box, and the reading cursor is at that place.
+Key=Escape
+Hear=The warranty covers parts and labor for two years.
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Text can be selected and copied as on any web page, which a PDF viewer often makes hard: Shift with Down Arrow selects, Control plus C copies.
+Key=Shift+Down Arrow
+Hear=The warranty covers parts and labor for two years. selected
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A planned misstep: a scanned PDF, which is a picture of each page with no text inside it.
+Key=
+Hear=Converting Scan dot pdf
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The page that results is nearly empty, because there was no text to take.
+Key=
+Hear=Scan, heading level 1
+Hear=blank
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A scanned page needs text recognition first. HomerScribe and other tools read such pages; then 2htm can convert the text they find.
+Key=
+
+[step]
+
+Say=A quick test tells the two apart: if the browser's find cannot find a word you can see in the PDF, the PDF is a scan.
+Key=
+
+[step]
+
+Say=A long PDF becomes one long page. Control plus End jumps to its end, and Control plus Home back to the top.
+Key=Control+End
+Hear=End of page
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The browser remembers your place while the page stays open, so a manual can be read in sittings.
+Key=
+
+[step]
+
+Say=To keep one section, select it from its heading to the next, and paste it into a document of its own.
+Key=
+
+[step]
+
+Say=Page numbers printed in the PDF arrive as ordinary lines of text, so the page of a passage can still be found when someone asks for it.
+Key=
+
+[step]
+
+Say=Tables in a PDF are drawn rather than described, so they may arrive as lines of text rather than a table; the words are all there.
+Key=
+
+[step]
+
+Say=When a PDF must stay a PDF, the converted page is still a quick way to read and search it first.
+Key=
+
+[step]
+
+Say=For a PDF with text, one Enter makes it readable and searchable. The next walk makes plain text to listen to.
+Key=

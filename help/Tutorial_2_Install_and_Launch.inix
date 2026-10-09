@@ -1,0 +1,150 @@
+﻿; Tutorial_2_Install_and_Launch.inix -- install and launch
+
+[about]
+Title=2 - Install and Launch
+Intro=Installing 2htm for everyone on the computer, the desktop key that opens it, and the File Explorer entry that converts one file.
+Setup=2htm_setup.exe downloaded from the 2htm releases page on GitHub.
+Homework=After installing, right-click a document in File Explorer and find Convert via 2htm.
+
+[step]
+
+Say=One want: 2htm on this computer, ready from the desktop and from File Explorer, in one sitting.
+Key=
+
+[step]
+
+Say=I open the downloaded setup program. It installs for everyone on the computer, so Windows asks for administrator rights; I say yes.
+Key=Enter
+Hear=Setup - 2htm dialog
+Hear=Welcome to the 2htm Setup Wizard
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The welcome page summarizes the license: 2htm is free and open source, under the MIT license. Enter takes Next.
+Key=Enter
+Hear=Select Destination Location
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The first time, it asks for a folder; the default in Program Files is right. An update goes to the same place without asking.
+Key=Enter
+Hear=Ready to Install
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter again, and it copies the program and its documents.
+Key=Enter
+Hear=Installing
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The last page offers to launch 2htm now, already checked, and to open the user guide.
+Key=
+Hear=Launch 2htm now check box, checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I press Finish. A short box says what was installed and where the logs are.
+Key=Enter
+Hear=2htm setup complete
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=When I close that box, 2htm starts, ready on Source files.
+Key=Enter
+Hear=2htm dialog
+Hear=Source files edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Setup added three ways to start. The first is the desktop shortcut whose key is Alt plus Control plus 2, which opens the dialog from anywhere.
+Key=
+
+[step]
+
+Say=The second is the Start menu, where 2htm has a group with the program, the guide and the uninstaller.
+Key=
+
+[step]
+
+Say=The third is in File Explorer. I close the dialog and go to a Word document there.
+Key=Escape
+Hear=Desktop
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Shift plus F10 opens the context menu for the file I am on.
+Key=Shift+F10
+Hear=Context menu
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The number 2 is Convert via 2htm. It converts this one file at once, and the web page lands beside it.
+Key=2
+Hear=2htm: 1 file converted
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Office must be installed to convert Word, PowerPoint and Excel files, since 2htm asks Office to read them. PDF and Markdown files need nothing else.
+Key=
+
+[step]
+
+Say=Keeping 2htm current takes one key: in the dialog, F11 asks GitHub whether a newer version is out, and Enter installs it when there is.
+Key=F11
+Hear=Checking for a newer version
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=If this copy is the newest, No is the default, and Enter returns to the dialog.
+Key=Enter
+Hear=2htm dialog
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Your settings and logs live in your own folders, so an update never touches them, and uninstalling leaves your converted pages where you saved them.
+Key=
+
+[step]
+
+Say=The program itself sits in the exec folder of the installation, beside its documents in the help folder, so the guide is there even without the dialog open.
+Key=
+
+[step]
+
+Say=Each run writes a session log in your own application data, kept whatever the dialog says, so a problem can always be traced afterwards.
+Key=
+
+[step]
+
+Say=If setup ever stops partway, its own log says why, and running the setup again finishes the job.
+Key=
+
+[step]
+
+Say=To remove 2htm, use Installed apps in Windows Settings, or the uninstaller in its Start menu group.
+Key=
+Hear=2htm, Uninstall button
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Your converted pages are never removed with it, since they are wherever you saved them.
+Key=
+
+[step]
+
+Say=Installed, launched three ways, and kept current with F11. The next walk converts a real document.
+Key=

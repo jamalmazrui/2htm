@@ -1,0 +1,128 @@
+﻿; Tutorial_8_Convert_from_Explorer_and_the_Command_Line.inix -- convert from explorer and the command line
+
+[about]
+Title=8 - Convert from Explorer and the Command Line
+Intro=Converting without the dialog: from File Explorer's context menu, and from a command prompt or batch file, with the same options.
+Setup=A document in File Explorer, and a command prompt.
+Homework=Write a one-line batch file that converts a folder into a Pages folder, and run it.
+
+[step]
+
+Say=One want: to convert a document the moment I find it, and to convert a folder every week without opening anything.
+Key=
+
+[step]
+
+Say=In File Explorer, I am on a document.
+Key=
+Hear=Notes dot docx
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Shift plus F10 opens its context menu.
+Key=Shift+F10
+Hear=Context menu
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=2 is Convert via 2htm, and the page appears beside the document.
+Key=2
+Hear=2htm: 1 file converted
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=At a command prompt, 2htm followed by a file's name converts it.
+Key=
+Hear=2htm Notes dot docx
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Every box in the dialog has an option. Dash p makes plain text; dash s strips images; dash f replaces existing pages; dash o sends output to a folder.
+Key=
+
+[step]
+
+Say=So one line converts a whole folder into a Pages folder, replacing last week's pages.
+Key=
+Hear=2htm dash f dash o Pages C colon backslash Meetings backslash October
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Quotation marks keep a path with spaces in one piece.
+Key=
+
+[step]
+
+Say=Saved as a batch file, that line runs in a moment, or on a schedule with Windows Task Scheduler.
+Key=
+
+[step]
+
+Say=Dash u reads the settings saved by the dialog's Use configuration box, so a workflow tried in the dialog runs the same from a batch file.
+Key=
+
+[step]
+
+Say=Dash l writes the session log beside the output; a log is always kept in your own application data as well.
+Key=
+
+[step]
+
+Say=When it finishes, 2htm returns an exit code a batch file can test: zero when every file converted, one when a file could not be, or none were found.
+Key=
+Hear=if errorlevel 1 echo Some files were not converted
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Dash h lists every option, and dash v says the version.
+Key=
+Hear=2htm dash h
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Dash g opens the dialog, for anyone who starts at the prompt but prefers the fields.
+Key=
+
+[step]
+
+Say=Patterns work at the prompt as in the dialog: star dot pdf converts every PDF in the current folder.
+Key=
+Hear=2htm star dot pdf
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Several patterns can be given at once, separated by spaces, to convert two kinds of file in one run.
+Key=
+
+[step]
+
+Say=A Task Scheduler entry that runs the batch file each Monday morning keeps a folder of pages current with no effort.
+Key=
+
+[step]
+
+Say=Dash dash view output opens the output folder at the end, as the dialog's box does.
+Key=
+
+[step]
+
+Say=Running 2htm with no arguments at all opens the dialog, so a shortcut to the program works without options.
+Key=
+
+[step]
+
+Say=Everything learned in the dialog carries over to the prompt, and back again.
+Key=
+
+[step]
+
+Say=From the menu, from a prompt, or on a schedule: the same conversions wherever the work is. The last walk gathers it all together.
+Key=

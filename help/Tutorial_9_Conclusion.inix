@@ -1,0 +1,81 @@
+﻿; Tutorial_9_Conclusion.inix -- conclusion
+
+[about]
+Title=9 - Conclusion
+Intro=What the walks covered, a glossary in two voices, and every way to get help with 2htm.
+Setup=Nothing to set up; this walk only listens.
+Homework=Convert the document you read most often, and keep its web page.
+
+[step]
+
+Say=That is 2htm. Here is what each walk gave you.
+Key=
+
+[step]
+
+Say=Walk one, the dialog and a letter for everything. Walk two, installing and the three ways to start. Walks three to six: a Word report, a PDF, plain text, and slides and spreadsheets.
+Key=
+
+[step]
+
+Say=Walk seven, a whole folder at once. Walk eight, File Explorer and the command line.
+Key=
+
+[step]
+
+Say=Now a short glossary. I say the term; the other voice says what it means.
+Key=
+
+[step]
+
+Say=Web page.
+Key=
+Hear=A document a browser shows, with headings, lists and tables a screen reader can move through by key.
+
+[step]
+
+Say=Plain text.
+Key=
+Hear=Words alone, with no formatting, for listening, braille or pasting into an email.
+
+[step]
+
+Say=Heading.
+Key=
+Hear=A title in the document's outline; the H key moves from one to the next.
+
+[step]
+
+Say=Scanned PDF.
+Key=
+Hear=A PDF made of pictures of pages, with no text inside until text recognition reads it.
+
+[step]
+
+Say=Output directory.
+Key=
+Hear=The folder where converted files are written; blank means beside each document.
+
+[step]
+
+Say=Help is never more than a key away. In the dialog, F1 shows Help, and Shift plus F1 says the tip for the control you are on.
+Key=F1
+Hear=2htm Help dialog
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=F7 lists the dialog's controls. Guide, Alt plus G, opens the full guide and returns to the dialog as you left it.
+Key=Alt+G
+Hear=Guide button
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=F11 checks for a newer version, and the 2htm page on GitHub has the latest release and a place to report a problem.
+Key=
+
+[step]
+
+Say=Thank you for listening. Happy converting.
+Key=

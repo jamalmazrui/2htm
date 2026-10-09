@@ -1,0 +1,103 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+  <channel>
+    <title>Homer Tools Walkthroughs</title>
+    <link>Tutorials.htm</link>
+    <description></description>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 09 Oct 2026 03:29:03 +0000</lastBuildDate>
+    <itunes:author></itunes:author>
+    <itunes:explicit>false</itunes:explicit>
+    <itunes:category text="Technology"/>
+    <item>
+      <title>0 - Overview</title>
+      <description>Nothing to set up; this walk only listens. Full transcript: Tutorials.htm#0-0-overview</description>
+      <link>Tutorials.htm#0-0-overview</link>
+      <guid isPermaLink="false">homer-tutorial_0_overview</guid>
+      <enclosure url="tutorials/0_Overview.mp3" length="686531" type="audio/mpeg"/>
+      <itunes:duration>00:01:36</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>1 - User Interface</title>
+      <description>2htm installed; the dialog open with Alt+Control+2. Full transcript: Tutorials.htm#0a-1-user-interface</description>
+      <link>Tutorials.htm#0a-1-user-interface</link>
+      <guid isPermaLink="false">homer-tutorial_1_user_interface</guid>
+      <enclosure url="tutorials/1_User_Interface.mp3" length="1334825" type="audio/mpeg"/>
+      <itunes:duration>00:03:14</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>2 - Install and Launch</title>
+      <description>2htm_setup.exe downloaded from the 2htm releases page on GitHub. Full transcript: Tutorials.htm#0b-2-install-and-launch</description>
+      <link>Tutorials.htm#0b-2-install-and-launch</link>
+      <guid isPermaLink="false">homer-tutorial_2_install_and_launch</guid>
+      <enclosure url="tutorials/2_Install_and_Launch.mp3" length="1315040" type="audio/mpeg"/>
+      <itunes:duration>00:03:07</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>3 - Read a Word Report in the Browser</title>
+      <description>A long Word document of your own, and Microsoft Word installed. Full transcript: Tutorials.htm#0c-3-read-a-word-report-in-the-browser</description>
+      <link>Tutorials.htm#0c-3-read-a-word-report-in-the-browser</link>
+      <guid isPermaLink="false">homer-tutorial_3_read_a_word_report_in_the_browser</guid>
+      <enclosure url="tutorials/3_Read_a_Word_Report_in_the_Browser.mp3" length="1346742" type="audio/mpeg"/>
+      <itunes:duration>00:03:15</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>4 - Make a PDF Readable</title>
+      <description>A PDF of your own, such as a statement or a manual. Full transcript: Tutorials.htm#0d-4-make-a-pdf-readable</description>
+      <link>Tutorials.htm#0d-4-make-a-pdf-readable</link>
+      <guid isPermaLink="false">homer-tutorial_4_make_a_pdf_readable</guid>
+      <enclosure url="tutorials/4_Make_a_PDF_Readable.mp3" length="1143125" type="audio/mpeg"/>
+      <itunes:duration>00:02:42</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>5 - Make Plain Text to Listen To</title>
+      <description>A document of your own; any of the supported kinds. Full transcript: Tutorials.htm#0e-5-make-plain-text-to-listen-to</description>
+      <link>Tutorials.htm#0e-5-make-plain-text-to-listen-to</link>
+      <guid isPermaLink="false">homer-tutorial_5_make_plain_text_to_listen_to</guid>
+      <enclosure url="tutorials/5_Make_Plain_Text_to_Listen_To.mp3" length="1072487" type="audio/mpeg"/>
+      <itunes:duration>00:02:32</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>6 - Convert Slides and Spreadsheets</title>
+      <description>A presentation or a workbook of your own, and Microsoft Office installed. Full transcript: Tutorials.htm#0f-6-convert-slides-and-spreadsheets</description>
+      <link>Tutorials.htm#0f-6-convert-slides-and-spreadsheets</link>
+      <guid isPermaLink="false">homer-tutorial_6_convert_slides_and_spreadsheets</guid>
+      <enclosure url="tutorials/6_Convert_Slides_and_Spreadsheets.mp3" length="1129490" type="audio/mpeg"/>
+      <itunes:duration>00:02:42</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>7 - Convert a Whole Folder</title>
+      <description>A folder holding several documents, such as meeting papers. Full transcript: Tutorials.htm#0g-7-convert-a-whole-folder</description>
+      <link>Tutorials.htm#0g-7-convert-a-whole-folder</link>
+      <guid isPermaLink="false">homer-tutorial_7_convert_a_whole_folder</guid>
+      <enclosure url="tutorials/7_Convert_a_Whole_Folder.mp3" length="1214113" type="audio/mpeg"/>
+      <itunes:duration>00:02:51</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>8 - Convert from Explorer and the Command Line</title>
+      <description>A document in File Explorer, and a command prompt. Full transcript: Tutorials.htm#0h-8-convert-from-explorer-and-the-command-line</description>
+      <link>Tutorials.htm#0h-8-convert-from-explorer-and-the-command-line</link>
+      <guid isPermaLink="false">homer-tutorial_8_convert_from_explorer_and_the_command_line</guid>
+      <enclosure url="tutorials/8_Convert_from_Explorer_and_the_Command_Line.mp3" length="1022712" type="audio/mpeg"/>
+      <itunes:duration>00:02:23</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>9 - Conclusion</title>
+      <description>Nothing to set up; this walk only listens. Full transcript: Tutorials.htm#0i-9-conclusion</description>
+      <link>Tutorials.htm#0i-9-conclusion</link>
+      <guid isPermaLink="false">homer-tutorial_9_conclusion</guid>
+      <enclosure url="tutorials/9_Conclusion.mp3" length="600024" type="audio/mpeg"/>
+      <itunes:duration>00:01:29</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+  </channel>
+</rss>

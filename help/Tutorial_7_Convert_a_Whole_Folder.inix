@@ -1,0 +1,143 @@
+﻿; Tutorial_7_Convert_a_Whole_Folder.inix -- convert a whole folder
+
+[about]
+Title=7 - Convert a Whole Folder
+Intro=Converting every document in a folder at once, keeping the pages together, and keeping a log of the run.
+Setup=A folder holding several documents, such as meeting papers.
+Homework=Convert a folder twice, the second time without Force replacements, and hear the documents already converted skipped.
+
+[step]
+
+Say=One want: every document from a week of meetings, converted in one run, the pages kept together in their own folder.
+Key=
+
+[step]
+
+Say=I open the dialog. In Source files, a folder's path is enough: 2htm converts every document in it that it knows how to read.
+Key=Alt+Control+2
+Hear=2htm dialog
+Hear=Source files edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I type the folder's path.
+Key=
+Hear=C colon backslash Meetings backslash October
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A pattern narrows it: star dot docx would take only the Word documents.
+Key=
+
+[step]
+
+Say=I want the pages in a folder of their own, so I go to Output directory.
+Key=Alt+O
+Hear=Output directory edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I type a new folder, Pages, beside the meeting folder.
+Key=
+Hear=C colon backslash Meetings backslash Pages
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Log session, L, keeps a log of the whole run beside the pages.
+Key=Alt+L
+Hear=Log session check box, checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=View output, V, opens the Pages folder at the end.
+Key=Alt+V
+Hear=View output check box, checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter. The Pages folder does not exist yet, so 2htm asks before making it; Yes is the default.
+Key=Enter
+Hear=Create the output directory?
+Hear=Yes button
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter, and the run begins. A small window counts the files, so a long run is never silent.
+Key=Enter
+Hear=Converting 3 of 9: Minutes dot docx
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The result box gives the totals.
+Key=
+Hear=9 files converted
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=If two documents share a name, such as Agenda dot docx and Agenda dot pdf, the second page takes its kind into its name, so neither replaces the other.
+Key=
+
+[step]
+
+Say=Running again tomorrow skips the documents whose pages exist, so only new ones are converted; Force replacements converts them all again.
+Key=
+
+[step]
+
+Say=If one document cannot be read, such as a file locked by a password, the others still convert, and the result names the one that failed.
+Key=
+Hear=8 files converted, 1 failed
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Use configuration remembers these folders and boxes, so tomorrow's run is one key.
+Key=Alt+U
+Hear=Use configuration check box, checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Subfolders are not searched unless named, so a run converts only what you meant; name each subfolder, or use a pattern, to include them.
+Key=
+
+[step]
+
+Say=The log is a plain text file listing every document, what became of it, and any error in full, which is what to send if something seems wrong.
+Key=
+
+[step]
+
+Say=The progress window can be left alone; the run carries on, and its count says how far it has come.
+Key=
+Hear=Converting 7 of 9: Budget dot xlsx
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Opening the Pages folder lists the converted pages with the same names as their documents, so finding one is a matter of its first letter.
+Key=
+
+[step]
+
+Say=Office files are converted one at a time, in Office's own hidden copy, so Word or Excel already open for your own work is left alone.
+Key=
+
+[step]
+
+Say=A long run can be stopped from the progress window; documents finished so far keep their pages.
+Key=
+
+[step]
+
+Say=A week's papers, converted together, one folder of pages. The last task walk does it from File Explorer and the command line.
+Key=

@@ -1,0 +1,157 @@
+﻿; Tutorial_1_User_Interface.inix -- user interface
+
+[about]
+Title=1 - User Interface
+Intro=The 2htm dialog: its fields, its underlined letters, and the keys that work anywhere in it, each shown as the reader speaks it.
+Setup=2htm installed; the dialog open with Alt+Control+2.
+Homework=Open the dialog, press F7, choose a control from the list, then press Shift+F1 there to hear its tip.
+
+[step]
+
+Say=One want: to move around the 2htm dialog without hunting. Everything in it can be reached by a letter.
+Key=
+
+[step]
+
+Say=I press the desktop key for 2htm. The dialog opens on its first field.
+Key=Alt+Control+2
+Hear=2htm dialog
+Hear=Source files edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Source files names what to convert: one file, a folder, a pattern such as star dot docx, or several with spaces between. Its letter is S.
+Key=
+
+[step]
+
+Say=Tab moves to the next control, a button that opens a file picker.
+Key=Tab
+Hear=Browse source button
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Every label has an underlined letter, and Alt with that letter jumps straight to it. Output directory is O.
+Key=Alt+O
+Hear=Output directory edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Left blank, each web page is written beside its document. Choose output, C, picks a folder instead of typing one.
+Key=
+
+[step]
+
+Say=Then the check boxes. Force replacements, F, replaces a web page already made; without it, a document whose page exists is skipped.
+Key=Alt+F
+Hear=Force replacements check box, not checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Plain text, P, makes a text file instead of a web page.
+Key=Alt+P
+Hear=Plain text check box, not checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Strip images, I, leaves out the pictures.
+Key=Alt+I
+Hear=Strip images check box, not checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=View output, V, opens the folder when the run is done; Log session, L, writes a log beside the output; Use configuration, U, remembers these choices for next time.
+Key=
+
+[step]
+
+Say=Space checks a box and Space again clears it.
+Key=Space
+Hear=checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Not sure what something does? Shift plus F1 says the tip for the control you are on.
+Key=Shift+F1
+Hear=Strip images: leave pictures out of the output
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=F1 shows Help: every control with its tip, and every key.
+Key=F1
+Hear=2htm Help dialog
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape closes Help and returns to the same place.
+Key=Escape
+Hear=Strip images check box, checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Space clears the box again, as I found it.
+Key=Space
+Hear=not checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=F7 lists every control in the dialog; choose one and press Enter to move there.
+Key=F7
+Hear=Controls list
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I choose Source files.
+Key=Enter
+Hear=Source files edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter starts converting from any field, and Control plus Enter does the same from any control. Escape closes the dialog without converting.
+Key=Tab
+Hear=Browse source button
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Two more buttons sit at the end. Guide, G, opens the full guide in the browser and returns here; Default settings, D, clears every field and box.
+Key=Alt+G
+Hear=Guide button
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The text fields remember your answers. In Source files, Up Arrow brings back what you typed last time, and earlier answers above it.
+Key=Up Arrow
+Hear=C colon backslash Documents backslash Annual Report dot docx
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Down Arrow returns toward an empty field, so a fresh entry is a key or two away.
+Key=Down Arrow
+Hear=Source files edit, blank
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Every label you hear is the control's own name, read once by the screen reader; 2htm adds speech only for what the reader cannot know, such as progress during a long run.
+Key=
+
+[step]
+
+Say=That is the whole dialog: what to convert, where it goes, five boxes, and a key for everything. The next walk installs 2htm.
+Key=

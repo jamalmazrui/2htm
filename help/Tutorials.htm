@@ -1,0 +1,1420 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Tutorials</title>
+  <style>
+    html {
+      line-height: 1.5;
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 1em;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      font-size: 85%;
+      margin: 0;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Tutorials</h1>
+</header>
+<h1 id="tutorials">Tutorials</h1>
+<h2 id="contents">Contents</h2>
+<ul>
+<li><a href="#0-overview">0 - Overview</a></li>
+<li><a href="#1-user-interface">1 - User Interface</a></li>
+<li><a href="#2-install-and-launch">2 - Install and Launch</a></li>
+<li><a href="#3-read-a-word-report-in-the-browser">3 - Read a Word
+Report in the Browser</a></li>
+<li><a href="#4-make-a-pdf-readable">4 - Make a PDF Readable</a></li>
+<li><a href="#5-make-plain-text-to-listen-to">5 - Make Plain Text to
+Listen To</a></li>
+<li><a href="#6-convert-slides-and-spreadsheets">6 - Convert Slides and
+Spreadsheets</a></li>
+<li><a href="#7-convert-a-whole-folder">7 - Convert a Whole
+Folder</a></li>
+<li><a href="#8-convert-from-explorer-and-the-command-line">8 - Convert
+from Explorer and the Command Line</a></li>
+<li><a href="#9-conclusion">9 - Conclusion</a></li>
+<li><a href="#1-where-to-go-next">1. Where to Go Next</a></li>
+</ul>
+<!-- walkthrough: written by makeTutorials.py, do not edit between the markers -->
+<h2 id="overview">0 - Overview</h2>
+<p>What 2htm is, the ways to run it, and the ten walks that teach
+it.</p>
+<p><strong>Before you start:</strong> Nothing to set up; this walk only
+listens.</p>
+<h3 id="step-1">Step 1</h3>
+<p>Welcome. This is the first of ten short walks through 2htm. I am the
+host; the other voice is the screen reader, speaking as it would on your
+own computer.</p>
+<h3 id="step-2-insertup-arrow">Step 2: Insert+Up Arrow</h3>
+<p>Two reader keys help in every walk. If a line goes by too fast,
+Insert plus Up Arrow says it again.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Source files edit</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-3-inserttab">Step 3: Insert+Tab</h3>
+<p>And whenever you are unsure where you are, Insert plus Tab says what
+has the focus: its name, its kind and its value.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Source files edit, blank</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-4">Step 4</h3>
+<p>2htm converts documents into web pages that read well with a screen
+reader: Word documents, PDF files, PowerPoint slides, Excel workbooks
+and Markdown.</p>
+<h3 id="step-5">Step 5</h3>
+<p>A web page keeps the document’s headings, lists and tables, so you
+move through it with the same keys as any web page: H for the next
+heading, T for a table, L for a list.</p>
+<h3 id="step-6">Step 6</h3>
+<p>It can make plain text instead, for listening with a speech
+synthesizer or pasting into an email, with the pictures left out.</p>
+<h3 id="step-7">Step 7</h3>
+<p>There are three ways to run it: a small dialog opened from the
+desktop, an entry in File Explorer’s context menu, and the command line
+for many files at once.</p>
+<h3 id="step-8">Step 8</h3>
+<p>Here are the walks. One, the dialog. Two, installing. Three, a Word
+report in the browser. Four, a PDF made readable. Five, plain text to
+listen to.</p>
+<h3 id="step-9">Step 9</h3>
+<p>Six, slides and spreadsheets. Seven, a whole folder at once. Eight,
+File Explorer and the command line. Nine, the conclusion, a glossary,
+and where to find help.</p>
+<h3 id="step-10">Step 10</h3>
+<p>Each walk is a few minutes long and builds on the ones before it, so
+they are best heard in order the first time. Walk one comes next.</p>
+<p><strong>Something to try:</strong> Think of one document you would
+rather read in a browser. Walks three to six convert one like it.</p>
+<h2 id="user-interface">1 - User Interface</h2>
+<p>The 2htm dialog: its fields, its underlined letters, and the keys
+that work anywhere in it, each shown as the reader speaks it.</p>
+<p><strong>Before you start:</strong> 2htm installed; the dialog open
+with Alt+Control+2.</p>
+<h3 id="step-1-1">Step 1</h3>
+<p>One want: to move around the 2htm dialog without hunting. Everything
+in it can be reached by a letter.</p>
+<h3 id="step-2-altcontrol2">Step 2: Alt+Control+2</h3>
+<p>I press the desktop key for 2htm. The dialog opens on its first
+field.</p>
+<p>Screen reader:</p>
+<ul>
+<li>2htm dialog</li>
+<li>Source files edit</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-3">Step 3</h3>
+<p>Source files names what to convert: one file, a folder, a pattern
+such as star dot docx, or several with spaces between. Its letter is
+S.</p>
+<h3 id="step-4-tab">Step 4: Tab</h3>
+<p>Tab moves to the next control, a button that opens a file picker.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Browse source button</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-5-alto">Step 5: Alt+O</h3>
+<p>Every label has an underlined letter, and Alt with that letter jumps
+straight to it. Output directory is O.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Output directory edit</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-6-1">Step 6</h3>
+<p>Left blank, each web page is written beside its document. Choose
+output, C, picks a folder instead of typing one.</p>
+<h3 id="step-7-altf">Step 7: Alt+F</h3>
+<p>Then the check boxes. Force replacements, F, replaces a web page
+already made; without it, a document whose page exists is skipped.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Force replacements check box, not checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-8-altp">Step 8: Alt+P</h3>
+<p>Plain text, P, makes a text file instead of a web page.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Plain text check box, not checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-9-alti">Step 9: Alt+I</h3>
+<p>Strip images, I, leaves out the pictures.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Strip images check box, not checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-10-1">Step 10</h3>
+<p>View output, V, opens the folder when the run is done; Log session,
+L, writes a log beside the output; Use configuration, U, remembers these
+choices for next time.</p>
+<h3 id="step-11-space">Step 11: Space</h3>
+<p>Space checks a box and Space again clears it.</p>
+<p>Screen reader:</p>
+<ul>
+<li>checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-12-shiftf1">Step 12: Shift+F1</h3>
+<p>Not sure what something does? Shift plus F1 says the tip for the
+control you are on.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Strip images: leave pictures out of the output</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-13-f1">Step 13: F1</h3>
+<p>F1 shows Help: every control with its tip, and every key.</p>
+<p>Screen reader:</p>
+<ul>
+<li>2htm Help dialog</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-14-escape">Step 14: Escape</h3>
+<p>Escape closes Help and returns to the same place.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Strip images check box, checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-15-space">Step 15: Space</h3>
+<p>Space clears the box again, as I found it.</p>
+<p>Screen reader:</p>
+<ul>
+<li>not checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-16-f7">Step 16: F7</h3>
+<p>F7 lists every control in the dialog; choose one and press Enter to
+move there.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Controls list</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-17-enter">Step 17: Enter</h3>
+<p>I choose Source files.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Source files edit</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-18-tab">Step 18: Tab</h3>
+<p>Enter starts converting from any field, and Control plus Enter does
+the same from any control. Escape closes the dialog without
+converting.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Browse source button</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-19-altg">Step 19: Alt+G</h3>
+<p>Two more buttons sit at the end. Guide, G, opens the full guide in
+the browser and returns here; Default settings, D, clears every field
+and box.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Guide button</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-20-up-arrow">Step 20: Up Arrow</h3>
+<p>The text fields remember your answers. In Source files, Up Arrow
+brings back what you typed last time, and earlier answers above it.</p>
+<p>Screen reader:</p>
+<ul>
+<li>C colon backslash Documents backslash Annual Report dot docx</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-21-down-arrow">Step 21: Down Arrow</h3>
+<p>Down Arrow returns toward an empty field, so a fresh entry is a key
+or two away.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Source files edit, blank</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-22">Step 22</h3>
+<p>Every label you hear is the control’s own name, read once by the
+screen reader; 2htm adds speech only for what the reader cannot know,
+such as progress during a long run.</p>
+<h3 id="step-23">Step 23</h3>
+<p>That is the whole dialog: what to convert, where it goes, five boxes,
+and a key for everything. The next walk installs 2htm.</p>
+<p><strong>Something to try:</strong> Open the dialog, press F7, choose
+a control from the list, then press Shift+F1 there to hear its tip.</p>
+<h2 id="install-and-launch">2 - Install and Launch</h2>
+<p>Installing 2htm for everyone on the computer, the desktop key that
+opens it, and the File Explorer entry that converts one file.</p>
+<p><strong>Before you start:</strong> 2htm_setup.exe downloaded from the
+2htm releases page on GitHub.</p>
+<h3 id="step-1-2">Step 1</h3>
+<p>One want: 2htm on this computer, ready from the desktop and from File
+Explorer, in one sitting.</p>
+<h3 id="step-2-enter">Step 2: Enter</h3>
+<p>I open the downloaded setup program. It installs for everyone on the
+computer, so Windows asks for administrator rights; I say yes.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Setup - 2htm dialog</li>
+<li>Welcome to the 2htm Setup Wizard</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-3-enter">Step 3: Enter</h3>
+<p>The welcome page summarizes the license: 2htm is free and open
+source, under the MIT license. Enter takes Next.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Select Destination Location</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-4-enter">Step 4: Enter</h3>
+<p>The first time, it asks for a folder; the default in Program Files is
+right. An update goes to the same place without asking.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Ready to Install</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-5-enter">Step 5: Enter</h3>
+<p>Enter again, and it copies the program and its documents.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Installing</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-6-2">Step 6</h3>
+<p>The last page offers to launch 2htm now, already checked, and to open
+the user guide.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Launch 2htm now check box, checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-7-enter">Step 7: Enter</h3>
+<p>I press Finish. A short box says what was installed and where the
+logs are.</p>
+<p>Screen reader:</p>
+<ul>
+<li>2htm setup complete</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-8-enter">Step 8: Enter</h3>
+<p>When I close that box, 2htm starts, ready on Source files.</p>
+<p>Screen reader:</p>
+<ul>
+<li>2htm dialog</li>
+<li>Source files edit</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-9-1">Step 9</h3>
+<p>Setup added three ways to start. The first is the desktop shortcut
+whose key is Alt plus Control plus 2, which opens the dialog from
+anywhere.</p>
+<h3 id="step-10-2">Step 10</h3>
+<p>The second is the Start menu, where 2htm has a group with the
+program, the guide and the uninstaller.</p>
+<h3 id="step-11-escape">Step 11: Escape</h3>
+<p>The third is in File Explorer. I close the dialog and go to a Word
+document there.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Desktop</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-12-shiftf10">Step 12: Shift+F10</h3>
+<p>Shift plus F10 opens the context menu for the file I am on.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Context menu</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-13-2">Step 13: 2</h3>
+<p>The number 2 is Convert via 2htm. It converts this one file at once,
+and the web page lands beside it.</p>
+<p>Screen reader:</p>
+<ul>
+<li>2htm: 1 file converted</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-14">Step 14</h3>
+<p>Office must be installed to convert Word, PowerPoint and Excel files,
+since 2htm asks Office to read them. PDF and Markdown files need nothing
+else.</p>
+<h3 id="step-15-f11">Step 15: F11</h3>
+<p>Keeping 2htm current takes one key: in the dialog, F11 asks GitHub
+whether a newer version is out, and Enter installs it when there is.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Checking for a newer version</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-16-enter">Step 16: Enter</h3>
+<p>If this copy is the newest, No is the default, and Enter returns to
+the dialog.</p>
+<p>Screen reader:</p>
+<ul>
+<li>2htm dialog</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-17">Step 17</h3>
+<p>Your settings and logs live in your own folders, so an update never
+touches them, and uninstalling leaves your converted pages where you
+saved them.</p>
+<h3 id="step-18">Step 18</h3>
+<p>The program itself sits in the exec folder of the installation,
+beside its documents in the help folder, so the guide is there even
+without the dialog open.</p>
+<h3 id="step-19">Step 19</h3>
+<p>Each run writes a session log in your own application data, kept
+whatever the dialog says, so a problem can always be traced
+afterwards.</p>
+<h3 id="step-20">Step 20</h3>
+<p>If setup ever stops partway, its own log says why, and running the
+setup again finishes the job.</p>
+<h3 id="step-21">Step 21</h3>
+<p>To remove 2htm, use Installed apps in Windows Settings, or the
+uninstaller in its Start menu group.</p>
+<p>Screen reader:</p>
+<ul>
+<li>2htm, Uninstall button</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-22-1">Step 22</h3>
+<p>Your converted pages are never removed with it, since they are
+wherever you saved them.</p>
+<h3 id="step-23-1">Step 23</h3>
+<p>Installed, launched three ways, and kept current with F11. The next
+walk converts a real document.</p>
+<p><strong>Something to try:</strong> After installing, right-click a
+document in File Explorer and find Convert via 2htm.</p>
+<h2 id="read-a-word-report-in-the-browser">3 - Read a Word Report in the
+Browser</h2>
+<p>Converting a long Word report into a web page, then reading it by
+headings, lists and tables in the browser.</p>
+<p><strong>Before you start:</strong> A long Word document of your own,
+and Microsoft Word installed.</p>
+<h3 id="step-1-3">Step 1</h3>
+<p>One want: a forty-page Word report that I can skim by heading, the
+way I skim a web page, without Word’s own interface in the way.</p>
+<h3 id="step-2-altcontrol2-1">Step 2: Alt+Control+2</h3>
+<p>I open the dialog. The focus is on Source files.</p>
+<p>Screen reader:</p>
+<ul>
+<li>2htm dialog</li>
+<li>Source files edit</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-3-altb">Step 3: Alt+B</h3>
+<p>Browse source opens a file picker, rather than typing the path.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Open dialog</li>
+<li>File name edit</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-4-enter-1">Step 4: Enter</h3>
+<p>I type the start of the report’s name and press Enter. Its full path
+is now in Source files.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Source files edit</li>
+<li>C colon backslash Documents backslash Annual Report dot docx</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-5-altv">Step 5: Alt+V</h3>
+<p>I tick View output, so the folder opens when the page is ready.</p>
+<p>Screen reader:</p>
+<ul>
+<li>View output check box, checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-6-enter">Step 6: Enter</h3>
+<p>Enter converts. Word reads the document in the background, so nothing
+appears on screen.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Converting Annual Report dot docx</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-7-1">Step 7</h3>
+<p>A short box reports the result.</p>
+<p>Screen reader:</p>
+<ul>
+<li>1 file converted</li>
+<li>OK button</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-8-enter-1">Step 8: Enter</h3>
+<p>Enter closes it, and File Explorer opens on the folder, on the new
+web page, Annual Report dot h t m.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Annual Report dot h t m</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-9-enter">Step 9: Enter</h3>
+<p>Enter opens it in the browser, where the screen reader is in its
+browse mode, ready to read.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Annual Report, heading level 1</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-10-h">Step 10: H</h3>
+<p>H moves to the next heading, so the report’s outline is heard one
+section at a time.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Summary, heading level 2</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-11-h">Step 11: H</h3>
+<p>H again.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Findings, heading level 2</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-12-insertf6">Step 12: Insert+F6</h3>
+<p>Insert plus F6 lists every heading, the quickest way to jump to the
+section I want.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Headings list</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-13-t">Step 13: T</h3>
+<p>Escape returns to the page. T moves to the next table, which keeps
+its rows and columns, so table keys read each cell with its header.</p>
+<p>Screen reader:</p>
+<ul>
+<li>table with 4 columns and 6 rows</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-14-l">Step 14: L</h3>
+<p>Lists keep their shape too: L moves to the next list and the reader
+says how many items it holds.</p>
+<p>Screen reader:</p>
+<ul>
+<li>list with 5 items</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-15-g">Step 15: G</h3>
+<p>And pictures keep the descriptions written in Word, so a chart says
+what the author wrote for it.</p>
+<p>Screen reader:</p>
+<ul>
+<li>graphic, Sales by quarter, rising each quarter</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-16">Step 16</h3>
+<p>The page is one file, with its look built in, so it can be emailed,
+kept or opened offline without anything else.</p>
+<h3 id="step-17-altf">Step 17: Alt+F</h3>
+<p>Converting again later, after the report changes, needs Force
+replacements, or 2htm keeps the page it already made.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Force replacements check box, checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-18-k">Step 18: K</h3>
+<p>Links in the report stay links. K moves to the next one, and Enter
+follows it, whether it points into the report or out to the web.</p>
+<p>Screen reader:</p>
+<ul>
+<li>link, Appendix A</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-19-enter">Step 19: Enter</h3>
+<p>A link to a heading inside the report jumps there, which turns a long
+table of contents into a real one.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Appendix A, heading level 2</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-20-altleft-arrow">Step 20: Alt+Left Arrow</h3>
+<p>Alt plus Left Arrow comes back, as in any browser.</p>
+<p>Screen reader:</p>
+<ul>
+<li>link, Appendix A</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-21-1">Step 21</h3>
+<p>The page’s title, read when it opens and in the window’s title bar,
+is the document’s own title, so a list of open pages says what each one
+is.</p>
+<h3 id="step-22-2">Step 22</h3>
+<p>Footnotes become a list at the end, each linked from its number in
+the text and back again.</p>
+<h3 id="step-23-2">Step 23</h3>
+<p>Converting a report before a meeting means reading it at your own
+pace, by structure, rather than page by page in Word.</p>
+<h3 id="step-24">Step 24</h3>
+<p>A long report, read like a web page, by headings, tables and lists.
+The next walk makes a PDF readable.</p>
+<p><strong>Something to try:</strong> Convert a report of your own, then
+press H in the browser to hear its headings in order.</p>
+<h2 id="make-a-pdf-readable">4 - Make a PDF Readable</h2>
+<p>Converting a PDF into a web page whose text can be read, searched and
+copied, and what to expect from a scanned one.</p>
+<p><strong>Before you start:</strong> A PDF of your own, such as a
+statement or a manual.</p>
+<h3 id="step-1-4">Step 1</h3>
+<p>One want: a PDF manual whose text I can read line by line and search,
+instead of a viewer that reads it in pieces.</p>
+<h3 id="step-2-altcontrol2-2">Step 2: Alt+Control+2</h3>
+<p>I open the dialog and type the PDF’s path in Source files. Typing
+works as well as browsing.</p>
+<p>Screen reader:</p>
+<ul>
+<li>2htm dialog</li>
+<li>Source files edit</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-3-enter-1">Step 3: Enter</h3>
+<p>Enter converts. No other program is needed for a PDF; 2htm reads it
+itself.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Converting Manual dot pdf</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-4-1">Step 4</h3>
+<p>The result box confirms it.</p>
+<p>Screen reader:</p>
+<ul>
+<li>1 file converted</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-5-1">Step 5</h3>
+<p>I open the new page in the browser. The text arrives as paragraphs,
+in reading order.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Manual, heading level 1</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-6-3">Step 6</h3>
+<p>A PDF does not always mark its headings the way a Word document does,
+so a page may have fewer headings; paragraphs and lines are still there
+to read.</p>
+<h3 id="step-7-controlf">Step 7: Control+F</h3>
+<p>Control plus F, the browser’s find, searches the whole manual at
+once.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Find on page, edit</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-8-enter-2">Step 8: Enter</h3>
+<p>I type warranty and press Enter. The browser lands on the first
+match.</p>
+<p>Screen reader:</p>
+<ul>
+<li>warranty, 1 of 3</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-9-escape">Step 9: Escape</h3>
+<p>Escape closes the find box, and the reading cursor is at that
+place.</p>
+<p>Screen reader:</p>
+<ul>
+<li>The warranty covers parts and labor for two years.</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-10-shiftdown-arrow">Step 10: Shift+Down Arrow</h3>
+<p>Text can be selected and copied as on any web page, which a PDF
+viewer often makes hard: Shift with Down Arrow selects, Control plus C
+copies.</p>
+<p>Screen reader:</p>
+<ul>
+<li>The warranty covers parts and labor for two years. selected</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-11">Step 11</h3>
+<p>A planned misstep: a scanned PDF, which is a picture of each page
+with no text inside it.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Converting Scan dot pdf</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-12">Step 12</h3>
+<p>The page that results is nearly empty, because there was no text to
+take.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Scan, heading level 1</li>
+<li>blank</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-13">Step 13</h3>
+<p>A scanned page needs text recognition first. HomerScribe and other
+tools read such pages; then 2htm can convert the text they find.</p>
+<h3 id="step-14-1">Step 14</h3>
+<p>A quick test tells the two apart: if the browser’s find cannot find a
+word you can see in the PDF, the PDF is a scan.</p>
+<h3 id="step-15-controlend">Step 15: Control+End</h3>
+<p>A long PDF becomes one long page. Control plus End jumps to its end,
+and Control plus Home back to the top.</p>
+<p>Screen reader:</p>
+<ul>
+<li>End of page</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-16-1">Step 16</h3>
+<p>The browser remembers your place while the page stays open, so a
+manual can be read in sittings.</p>
+<h3 id="step-17-1">Step 17</h3>
+<p>To keep one section, select it from its heading to the next, and
+paste it into a document of its own.</p>
+<h3 id="step-18-1">Step 18</h3>
+<p>Page numbers printed in the PDF arrive as ordinary lines of text, so
+the page of a passage can still be found when someone asks for it.</p>
+<h3 id="step-19-1">Step 19</h3>
+<p>Tables in a PDF are drawn rather than described, so they may arrive
+as lines of text rather than a table; the words are all there.</p>
+<h3 id="step-20-1">Step 20</h3>
+<p>When a PDF must stay a PDF, the converted page is still a quick way
+to read and search it first.</p>
+<h3 id="step-21-2">Step 21</h3>
+<p>For a PDF with text, one Enter makes it readable and searchable. The
+next walk makes plain text to listen to.</p>
+<p><strong>Something to try:</strong> Convert a PDF, then search the web
+page for one word with Control+F.</p>
+<h2 id="make-plain-text-to-listen-to">5 - Make Plain Text to Listen
+To</h2>
+<p>Converting a document to plain text, with the pictures left out, for
+a speech synthesizer, a braille display, or an email.</p>
+<p><strong>Before you start:</strong> A document of your own; any of the
+supported kinds.</p>
+<h3 id="step-1-5">Step 1</h3>
+<p>One want: a document as clean text, to listen to in a synthesizer
+program on a walk, or to paste into an email without formatting.</p>
+<h3 id="step-2-altcontrol2-3">Step 2: Alt+Control+2</h3>
+<p>I open the dialog and put the document’s path in Source files.</p>
+<p>Screen reader:</p>
+<ul>
+<li>2htm dialog</li>
+<li>Source files edit</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-3-altp">Step 3: Alt+P</h3>
+<p>Plain text, P, makes a text file instead of a web page.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Plain text check box, not checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-4-space">Step 4: Space</h3>
+<p>Space checks it.</p>
+<p>Screen reader:</p>
+<ul>
+<li>checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-5-alti">Step 5: Alt+I</h3>
+<p>Strip images, I, leaves out the lines that stood for pictures, which
+read as noise when listened to.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Strip images check box, not checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-6-space">Step 6: Space</h3>
+<p>Space checks it too.</p>
+<p>Screen reader:</p>
+<ul>
+<li>checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-7-enter-1">Step 7: Enter</h3>
+<p>Enter converts. The result is a text file with the same name, ending
+in dot t x t.</p>
+<p>Screen reader:</p>
+<ul>
+<li>1 file converted</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-8-1">Step 8</h3>
+<p>Plain text keeps the words and their order, paragraph by paragraph;
+headings become lines of their own, and tables become rows of text.</p>
+<h3 id="step-9-2">Step 9</h3>
+<p>I open the text file in Notepad. The first line is the title.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Annual Report dot t x t - Notepad</li>
+<li>Annual Report</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-10-down-arrow">Step 10: Down Arrow</h3>
+<p>Down Arrow reads on, line by line, with nothing between me and the
+words.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Summary</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-11-controla">Step 11: Control+A</h3>
+<p>Control plus A selects all of it and Control plus C copies it, ready
+to paste into an email.</p>
+<p>Screen reader:</p>
+<ul>
+<li>selected</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-12-1">Step 12</h3>
+<p>The same file can go to a text-to-speech program, which reads it
+aloud as an audio book of the document.</p>
+<h3 id="step-13-1">Step 13</h3>
+<p>Or to a braille display, where clean text without formatting marks
+reads more easily.</p>
+<h3 id="step-14-altu">Step 14: Alt+U</h3>
+<p>Use configuration, U, remembers these boxes, so the next time the
+dialog opens ready for plain text.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Use configuration check box, checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-15">Step 15</h3>
+<p>To go back to web pages, clear Plain text; Default settings, D,
+clears every box at once.</p>
+<h3 id="step-16-2">Step 16</h3>
+<p>The text file is written in UTF-8, so accented letters and symbols
+arrive intact in any modern program.</p>
+<h3 id="step-17-2">Step 17</h3>
+<p>Each paragraph is one line, so a text reader that pauses at line ends
+pauses at paragraph ends, not mid-sentence.</p>
+<h3 id="step-18-2">Step 18</h3>
+<p>A heading stands on a line of its own, with a blank line around it,
+so a listener hears where a section begins.</p>
+<h3 id="step-19-2">Step 19</h3>
+<p>List items keep their marks, a dash for a bullet and a number for a
+numbered list, so their order is still heard.</p>
+<h3 id="step-20-2">Step 20</h3>
+<p>Plain text of a whole folder works the same way: one text file for
+each document, ready to join into one long reading.</p>
+<h3 id="step-21-3">Step 21</h3>
+<p>Plain text is the form to choose whenever the words matter and the
+layout does not.</p>
+<h3 id="step-22-3">Step 22</h3>
+<p>One document, two forms: a web page to navigate, or plain text to
+hear or paste. The next walk converts slides and spreadsheets.</p>
+<p><strong>Something to try:</strong> Make plain text of one document,
+and paste it into an email.</p>
+<h2 id="convert-slides-and-spreadsheets">6 - Convert Slides and
+Spreadsheets</h2>
+<p>Converting PowerPoint slides and Excel workbooks into web pages, and
+how each is laid out for reading.</p>
+<p><strong>Before you start:</strong> A presentation or a workbook of
+your own, and Microsoft Office installed.</p>
+<h3 id="step-1-6">Step 1</h3>
+<p>One want: the slides from a talk I missed, and the budget workbook
+shared with it, both readable without opening PowerPoint or Excel.</p>
+<h3 id="step-2-altcontrol2-4">Step 2: Alt+Control+2</h3>
+<p>I open the dialog. Source files can hold several files at once,
+separated by spaces.</p>
+<p>Screen reader:</p>
+<ul>
+<li>2htm dialog</li>
+<li>Source files edit</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-3-1">Step 3</h3>
+<p>I type both names, each in quotation marks because they contain
+spaces.</p>
+<p>Screen reader:</p>
+<ul>
+<li>quote Talk dot pptx quote quote Budget dot xlsx quote</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-4-enter-2">Step 4: Enter</h3>
+<p>Enter converts both. PowerPoint and Excel read them in the
+background.</p>
+<p>Screen reader:</p>
+<ul>
+<li>2 files converted</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-5-2">Step 5</h3>
+<p>I open the slides’ page. Each slide is a section with its title as a
+heading.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Talk, heading level 1</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-6-h">Step 6: H</h3>
+<p>H moves slide by slide.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Slide 2, Our goals, heading level 2</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-7-down-arrow">Step 7: Down Arrow</h3>
+<p>Under each heading come the slide’s words, then its speaker notes, so
+what the presenter said is there too.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Notes: start with the year in review</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-8-g">Step 8: G</h3>
+<p>Pictures on a slide read their descriptions, if the author wrote
+them.</p>
+<p>Screen reader:</p>
+<ul>
+<li>graphic, Map of the new offices</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-9-3">Step 9</h3>
+<p>Now the workbook’s page. Each sheet becomes a section with the
+sheet’s name as its heading.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Budget, heading level 1</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-10-t">Step 10: T</h3>
+<p>Under it, the sheet’s cells are a table, so the reader’s table keys
+move by row and column, and each cell is read with its column’s
+heading.</p>
+<p>Screen reader:</p>
+<ul>
+<li>table with 5 columns and 12 rows</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-11-altcontroldown-arrow">Step 11: Alt+Control+Down
+Arrow</h3>
+<p>Alt plus Control plus Down Arrow moves down a column.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Amount, 1,200</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-12-2">Step 12</h3>
+<p>Formulas arrive as the values they show, which is what a reader of
+the page wants.</p>
+<h3 id="step-13-3">Step 13</h3>
+<p>A very wide sheet reads best with the screen reader’s table commands,
+rather than line by line.</p>
+<h3 id="step-14-2">Step 14</h3>
+<p>A chart in a slide reads the description its author wrote; with none,
+it reads as a graphic with no name, which is worth telling the
+author.</p>
+<h3 id="step-15-1">Step 15</h3>
+<p>Slides with several text boxes keep them in reading order, the order
+a screen reader meets them in PowerPoint itself.</p>
+<h3 id="step-16-3">Step 16</h3>
+<p>A workbook’s hidden sheets are not converted, so the page holds only
+what its author shows.</p>
+<h3 id="step-17-3">Step 17</h3>
+<p>Merged cells keep their place in the table, so a heading spread
+across several columns still sits above them.</p>
+<h3 id="step-18-3">Step 18</h3>
+<p>Very long sheets make long tables; the reader’s table commands, such
+as moving to the first or last row, save a long walk.</p>
+<h3 id="step-19-3">Step 19</h3>
+<p>A deck converted the night before a talk can be studied on a phone,
+where opening PowerPoint is harder.</p>
+<h3 id="step-20-3">Step 20</h3>
+<p>A presentation’s title slide becomes the page’s first heading, so the
+page opens by saying what talk it is.</p>
+<h3 id="step-21-shifth">Step 21: Shift+H</h3>
+<p>And a workbook’s sheets keep their order, so Shift plus H, back by
+heading, retraces the sheets in the order the author made them.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Budget, heading level 1</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-22-4">Step 22</h3>
+<p>Slides by heading, sheets as tables: two kinds of Office file, read
+without Office open. The next walk converts a whole folder.</p>
+<p><strong>Something to try:</strong> Convert a slide deck, then move
+through it by heading, one slide at a time.</p>
+<h2 id="convert-a-whole-folder">7 - Convert a Whole Folder</h2>
+<p>Converting every document in a folder at once, keeping the pages
+together, and keeping a log of the run.</p>
+<p><strong>Before you start:</strong> A folder holding several
+documents, such as meeting papers.</p>
+<h3 id="step-1-7">Step 1</h3>
+<p>One want: every document from a week of meetings, converted in one
+run, the pages kept together in their own folder.</p>
+<h3 id="step-2-altcontrol2-5">Step 2: Alt+Control+2</h3>
+<p>I open the dialog. In Source files, a folder’s path is enough: 2htm
+converts every document in it that it knows how to read.</p>
+<p>Screen reader:</p>
+<ul>
+<li>2htm dialog</li>
+<li>Source files edit</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-3-2">Step 3</h3>
+<p>I type the folder’s path.</p>
+<p>Screen reader:</p>
+<ul>
+<li>C colon backslash Meetings backslash October</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-4-2">Step 4</h3>
+<p>A pattern narrows it: star dot docx would take only the Word
+documents.</p>
+<h3 id="step-5-alto-1">Step 5: Alt+O</h3>
+<p>I want the pages in a folder of their own, so I go to Output
+directory.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Output directory edit</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-6-4">Step 6</h3>
+<p>I type a new folder, Pages, beside the meeting folder.</p>
+<p>Screen reader:</p>
+<ul>
+<li>C colon backslash Meetings backslash Pages</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-7-altl">Step 7: Alt+L</h3>
+<p>Log session, L, keeps a log of the whole run beside the pages.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Log session check box, checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-8-altv">Step 8: Alt+V</h3>
+<p>View output, V, opens the Pages folder at the end.</p>
+<p>Screen reader:</p>
+<ul>
+<li>View output check box, checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-9-enter-1">Step 9: Enter</h3>
+<p>Enter. The Pages folder does not exist yet, so 2htm asks before
+making it; Yes is the default.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Create the output directory?</li>
+<li>Yes button</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-10-enter">Step 10: Enter</h3>
+<p>Enter, and the run begins. A small window counts the files, so a long
+run is never silent.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Converting 3 of 9: Minutes dot docx</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-11-1">Step 11</h3>
+<p>The result box gives the totals.</p>
+<p>Screen reader:</p>
+<ul>
+<li>9 files converted</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-12-3">Step 12</h3>
+<p>If two documents share a name, such as Agenda dot docx and Agenda dot
+pdf, the second page takes its kind into its name, so neither replaces
+the other.</p>
+<h3 id="step-13-4">Step 13</h3>
+<p>Running again tomorrow skips the documents whose pages exist, so only
+new ones are converted; Force replacements converts them all again.</p>
+<h3 id="step-14-3">Step 14</h3>
+<p>If one document cannot be read, such as a file locked by a password,
+the others still convert, and the result names the one that failed.</p>
+<p>Screen reader:</p>
+<ul>
+<li>8 files converted, 1 failed</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-15-altu">Step 15: Alt+U</h3>
+<p>Use configuration remembers these folders and boxes, so tomorrow’s
+run is one key.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Use configuration check box, checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-16-4">Step 16</h3>
+<p>Subfolders are not searched unless named, so a run converts only what
+you meant; name each subfolder, or use a pattern, to include them.</p>
+<h3 id="step-17-4">Step 17</h3>
+<p>The log is a plain text file listing every document, what became of
+it, and any error in full, which is what to send if something seems
+wrong.</p>
+<h3 id="step-18-4">Step 18</h3>
+<p>The progress window can be left alone; the run carries on, and its
+count says how far it has come.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Converting 7 of 9: Budget dot xlsx</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-19-4">Step 19</h3>
+<p>Opening the Pages folder lists the converted pages with the same
+names as their documents, so finding one is a matter of its first
+letter.</p>
+<h3 id="step-20-4">Step 20</h3>
+<p>Office files are converted one at a time, in Office’s own hidden
+copy, so Word or Excel already open for your own work is left alone.</p>
+<h3 id="step-21-4">Step 21</h3>
+<p>A long run can be stopped from the progress window; documents
+finished so far keep their pages.</p>
+<h3 id="step-22-5">Step 22</h3>
+<p>A week’s papers, converted together, one folder of pages. The last
+task walk does it from File Explorer and the command line.</p>
+<p><strong>Something to try:</strong> Convert a folder twice, the second
+time without Force replacements, and hear the documents already
+converted skipped.</p>
+<h2 id="convert-from-explorer-and-the-command-line">8 - Convert from
+Explorer and the Command Line</h2>
+<p>Converting without the dialog: from File Explorer’s context menu, and
+from a command prompt or batch file, with the same options.</p>
+<p><strong>Before you start:</strong> A document in File Explorer, and a
+command prompt.</p>
+<h3 id="step-1-8">Step 1</h3>
+<p>One want: to convert a document the moment I find it, and to convert
+a folder every week without opening anything.</p>
+<h3 id="step-2">Step 2</h3>
+<p>In File Explorer, I am on a document.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Notes dot docx</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-3-shiftf10">Step 3: Shift+F10</h3>
+<p>Shift plus F10 opens its context menu.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Context menu</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-4-2-1">Step 4: 2</h3>
+<p>2 is Convert via 2htm, and the page appears beside the document.</p>
+<p>Screen reader:</p>
+<ul>
+<li>2htm: 1 file converted</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-5-3">Step 5</h3>
+<p>At a command prompt, 2htm followed by a file’s name converts it.</p>
+<p>Screen reader:</p>
+<ul>
+<li>2htm Notes dot docx</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-6-5">Step 6</h3>
+<p>Every box in the dialog has an option. Dash p makes plain text; dash
+s strips images; dash f replaces existing pages; dash o sends output to
+a folder.</p>
+<h3 id="step-7-2">Step 7</h3>
+<p>So one line converts a whole folder into a Pages folder, replacing
+last week’s pages.</p>
+<p>Screen reader:</p>
+<ul>
+<li>2htm dash f dash o Pages C colon backslash Meetings backslash
+October</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-8-2">Step 8</h3>
+<p>Quotation marks keep a path with spaces in one piece.</p>
+<h3 id="step-9-4">Step 9</h3>
+<p>Saved as a batch file, that line runs in a moment, or on a schedule
+with Windows Task Scheduler.</p>
+<h3 id="step-10-3">Step 10</h3>
+<p>Dash u reads the settings saved by the dialog’s Use configuration
+box, so a workflow tried in the dialog runs the same from a batch
+file.</p>
+<h3 id="step-11-2">Step 11</h3>
+<p>Dash l writes the session log beside the output; a log is always kept
+in your own application data as well.</p>
+<h3 id="step-12-4">Step 12</h3>
+<p>When it finishes, 2htm returns an exit code a batch file can test:
+zero when every file converted, one when a file could not be, or none
+were found.</p>
+<p>Screen reader:</p>
+<ul>
+<li>if errorlevel 1 echo Some files were not converted</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-13-5">Step 13</h3>
+<p>Dash h lists every option, and dash v says the version.</p>
+<p>Screen reader:</p>
+<ul>
+<li>2htm dash h</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-14-4">Step 14</h3>
+<p>Dash g opens the dialog, for anyone who starts at the prompt but
+prefers the fields.</p>
+<h3 id="step-15-2">Step 15</h3>
+<p>Patterns work at the prompt as in the dialog: star dot pdf converts
+every PDF in the current folder.</p>
+<p>Screen reader:</p>
+<ul>
+<li>2htm star dot pdf</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-16-5">Step 16</h3>
+<p>Several patterns can be given at once, separated by spaces, to
+convert two kinds of file in one run.</p>
+<h3 id="step-17-5">Step 17</h3>
+<p>A Task Scheduler entry that runs the batch file each Monday morning
+keeps a folder of pages current with no effort.</p>
+<h3 id="step-18-5">Step 18</h3>
+<p>Dash dash view output opens the output folder at the end, as the
+dialog’s box does.</p>
+<h3 id="step-19-5">Step 19</h3>
+<p>Running 2htm with no arguments at all opens the dialog, so a shortcut
+to the program works without options.</p>
+<h3 id="step-20-5">Step 20</h3>
+<p>Everything learned in the dialog carries over to the prompt, and back
+again.</p>
+<h3 id="step-21-5">Step 21</h3>
+<p>From the menu, from a prompt, or on a schedule: the same conversions
+wherever the work is. The last walk gathers it all together.</p>
+<p><strong>Something to try:</strong> Write a one-line batch file that
+converts a folder into a Pages folder, and run it.</p>
+<h2 id="conclusion">9 - Conclusion</h2>
+<p>What the walks covered, a glossary in two voices, and every way to
+get help with 2htm.</p>
+<p><strong>Before you start:</strong> Nothing to set up; this walk only
+listens.</p>
+<h3 id="step-1-9">Step 1</h3>
+<p>That is 2htm. Here is what each walk gave you.</p>
+<h3 id="step-2-1">Step 2</h3>
+<p>Walk one, the dialog and a letter for everything. Walk two,
+installing and the three ways to start. Walks three to six: a Word
+report, a PDF, plain text, and slides and spreadsheets.</p>
+<h3 id="step-3-3">Step 3</h3>
+<p>Walk seven, a whole folder at once. Walk eight, File Explorer and the
+command line.</p>
+<h3 id="step-4-3">Step 4</h3>
+<p>Now a short glossary. I say the term; the other voice says what it
+means.</p>
+<h3 id="step-5-4">Step 5</h3>
+<p>Web page.</p>
+<p>Screen reader:</p>
+<ul>
+<li>A document a browser shows, with headings, lists and tables a screen
+reader can move through by key.</li>
+</ul>
+<h3 id="step-6-6">Step 6</h3>
+<p>Plain text.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Words alone, with no formatting, for listening, braille or pasting
+into an email.</li>
+</ul>
+<h3 id="step-7-3">Step 7</h3>
+<p>Heading.</p>
+<p>Screen reader:</p>
+<ul>
+<li>A title in the document’s outline; the H key moves from one to the
+next.</li>
+</ul>
+<h3 id="step-8-3">Step 8</h3>
+<p>Scanned PDF.</p>
+<p>Screen reader:</p>
+<ul>
+<li>A PDF made of pictures of pages, with no text inside until text
+recognition reads it.</li>
+</ul>
+<h3 id="step-9-5">Step 9</h3>
+<p>Output directory.</p>
+<p>Screen reader:</p>
+<ul>
+<li>The folder where converted files are written; blank means beside
+each document.</li>
+</ul>
+<h3 id="step-10-f1">Step 10: F1</h3>
+<p>Help is never more than a key away. In the dialog, F1 shows Help, and
+Shift plus F1 says the tip for the control you are on.</p>
+<p>Screen reader:</p>
+<ul>
+<li>2htm Help dialog</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-11-altg">Step 11: Alt+G</h3>
+<p>F7 lists the dialog’s controls. Guide, Alt plus G, opens the full
+guide and returns to the dialog as you left it.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Guide button</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-12-5">Step 12</h3>
+<p>F11 checks for a newer version, and the 2htm page on GitHub has the
+latest release and a place to report a problem.</p>
+<h3 id="step-13-6">Step 13</h3>
+<p>Thank you for listening. Happy converting.</p>
+<p><strong>Something to try:</strong> Convert the document you read most
+often, and keep its web page.</p>
+<!-- walkthrough ends -->
+<h2 id="where-to-go-next">1. Where to Go Next</h2>
+<p>Press F1 for the guide, Alt+Shift+H for the hotkey list, and Alt+F10
+for every command in one window.</p>
+</body>
+</html>

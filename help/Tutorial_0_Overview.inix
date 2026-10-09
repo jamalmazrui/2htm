@@ -1,0 +1,61 @@
+﻿; Tutorial_0_Overview.inix -- overview
+
+[about]
+Title=0 - Overview
+Intro=What 2htm is, the ways to run it, and the ten walks that teach it.
+Setup=Nothing to set up; this walk only listens.
+Homework=Think of one document you would rather read in a browser. Walks three to six convert one like it.
+
+[step]
+
+Say=Welcome. This is the first of ten short walks through 2htm. I am the host; the other voice is the screen reader, speaking as it would on your own computer.
+Key=
+
+[step]
+
+Say=Two reader keys help in every walk. If a line goes by too fast, Insert plus Up Arrow says it again.
+Key=Insert+Up Arrow
+Hear=Source files edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=And whenever you are unsure where you are, Insert plus Tab says what has the focus: its name, its kind and its value.
+Key=Insert+Tab
+Hear=Source files edit, blank
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=2htm converts documents into web pages that read well with a screen reader: Word documents, PDF files, PowerPoint slides, Excel workbooks and Markdown.
+Key=
+
+[step]
+
+Say=A web page keeps the document's headings, lists and tables, so you move through it with the same keys as any web page: H for the next heading, T for a table, L for a list.
+Key=
+
+[step]
+
+Say=It can make plain text instead, for listening with a speech synthesizer or pasting into an email, with the pictures left out.
+Key=
+
+[step]
+
+Say=There are three ways to run it: a small dialog opened from the desktop, an entry in File Explorer's context menu, and the command line for many files at once.
+Key=
+
+[step]
+
+Say=Here are the walks. One, the dialog. Two, installing. Three, a Word report in the browser. Four, a PDF made readable. Five, plain text to listen to.
+Key=
+
+[step]
+
+Say=Six, slides and spreadsheets. Seven, a whole folder at once. Eight, File Explorer and the command line. Nine, the conclusion, a glossary, and where to find help.
+Key=
+
+[step]
+
+Say=Each walk is a few minutes long and builds on the ones before it, so they are best heard in order the first time. Walk one comes next.
+Key=
