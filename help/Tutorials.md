@@ -101,6 +101,24 @@
 - [7 - Convert a Whole Folder](#7-convert-a-whole-folder)
 - [8 - Convert from Explorer and the Command Line](#8-convert-from-explorer-and-the-command-line)
 - [9 - Conclusion](#9-conclusion)
+- [1 - User Interface](#1-user-interface)
+- [2 - Install and Launch](#2-install-and-launch)
+- [3 - Read a Word Report in the Browser](#3-read-a-word-report-in-the-browser)
+- [4 - Make a PDF Readable](#4-make-a-pdf-readable)
+- [5 - Make Plain Text to Listen To](#5-make-plain-text-to-listen-to)
+- [6 - Convert Slides and Spreadsheets](#6-convert-slides-and-spreadsheets)
+- [7 - Convert a Whole Folder](#7-convert-a-whole-folder)
+- [8 - Convert from Explorer and the Command Line](#8-convert-from-explorer-and-the-command-line)
+- [9 - Conclusion](#9-conclusion)
+- [1 - User Interface](#1-user-interface)
+- [2 - Install and Launch](#2-install-and-launch)
+- [3 - Read a Word Report in the Browser](#3-read-a-word-report-in-the-browser)
+- [4 - Make a PDF Readable](#4-make-a-pdf-readable)
+- [5 - Make Plain Text to Listen To](#5-make-plain-text-to-listen-to)
+- [6 - Convert Slides and Spreadsheets](#6-convert-slides-and-spreadsheets)
+- [7 - Convert a Whole Folder](#7-convert-a-whole-folder)
+- [8 - Convert from Explorer and the Command Line](#8-convert-from-explorer-and-the-command-line)
+- [9 - Conclusion](#9-conclusion)
 - [0 - Overview](#0-overview)
 - [1 - User Interface](#1-user-interface)
 - [2 - Install and Launch](#2-install-and-launch)
@@ -127,49 +145,57 @@ Welcome. This is the first of ten short walks through 2htm. I am the host; the o
 
 ### Step 2: Insert+Up Arrow
 
-Two reader keys help in every walk. If a line goes by too fast, Insert plus Up Arrow says it again.
+You know your screen reader's own keys already, and three of them are worth remembering whenever you feel lost or unsure. Insert plus Up Arrow says the line you are on again.
 
 Screen reader:
 
 - Source files edit
 
-Confirm the wording with a live run: buildTutorials -live.
-
 ### Step 3: Insert+Tab
 
-And whenever you are unsure where you are, Insert plus Tab says what has the focus: its name, its kind and its value.
+Insert plus Tab says what has the focus: its name, its role, and its value or state.
 
 Screen reader:
 
 - Source files edit, blank
 
-Confirm the wording with a live run: buildTutorials -live.
+### Step 4: Insert+T
 
-### Step 4
+Insert plus T says the title of the window.
 
-2htm converts documents into web pages that read well with a screen reader: Word documents, PDF files, PowerPoint slides, Excel workbooks and Markdown.
+Screen reader:
+
+- 2htm
 
 ### Step 5
 
-A web page keeps the document's headings, lists and tables, so you move through it with the same keys as any web page: H for the next heading, T for a table, L for a list.
+If you set your screen reader to use Caps Lock in place of Insert, Caps Lock works the same way for all three.
 
 ### Step 6
 
-It can make plain text instead, for listening with a speech synthesizer or pasting into an email, with the pictures left out.
+2htm converts documents into web pages that read well with a screen reader: Word documents, PDF files, PowerPoint slides, Excel workbooks and Markdown.
 
 ### Step 7
 
-There are three ways to run it: a small dialog opened from the desktop, an entry in File Explorer's context menu, and the command line for many files at once.
+A web page keeps the document's headings, lists and tables, so you move through it with the same keys as any web page: H for the next heading, T for a table, L for a list.
 
 ### Step 8
 
-Here are the walks. One, the dialog. Two, installing. Three, a Word report in the browser. Four, a PDF made readable. Five, plain text to listen to.
+It can make plain text instead, for listening with a speech synthesizer or pasting into an email, with the pictures left out.
 
 ### Step 9
 
-Six, slides and spreadsheets. Seven, a whole folder at once. Eight, File Explorer and the command line. Nine, the conclusion, a glossary, and where to find help.
+There are three ways to run it: a small dialog opened from the desktop, an entry in File Explorer's context menu, and the command line for many files at once.
 
 ### Step 10
+
+Here are the walks. One, the dialog. Two, installing. Three, a Word report in the browser. Four, a PDF made readable. Five, plain text to listen to.
+
+### Step 11
+
+Six, slides and spreadsheets. Seven, a whole folder at once. Eight, File Explorer and the command line. Nine, the conclusion, a glossary, and where to find help.
+
+### Step 12
 
 Each walk is a few minutes long and builds on the ones before it, so they are best heard in order the first time. Walk one comes next.
 
