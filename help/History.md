@@ -5,6 +5,10 @@ author: "Jamal Mazrui"
 
 # 2htm History
 
+## 14 October 2026 -- an Office conversion with a deadline
+
+- **A document Office cannot finish no longer holds 2htm.** An Office call that never returned stopped 2htm with it: no retry, no report. Each attempt now runs on its own thread and has 10 minutes; past that, only the Word, Excel or PowerPoint processes 2htm itself started are ended, so Office windows you had open are left alone, and 2htm says the file was stopped. A timeout is not retried, since a document that hung once would most likely hang again (from an audit by another AI).
+
 ## 14 October 2026 -- recovery copies kept, and the program started as you
 
 - **Each conversion keeps its own recovery copy.** The earlier output was moved aside as `<output>.previous`, and an existing one was deleted first, so a second failed conversion erased the first one's recovery copy. Each conversion now gets a dated name of its own, and a failed restore is logged as a warning naming where the copy is (from an audit by another AI).

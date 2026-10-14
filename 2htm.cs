@@ -2806,13 +2806,62 @@ namespace twoHtm
         // Retry only for transient RPC failures. Deterministic failures
         // propagate after the first attempt. Returns the 1-based attempt
         // number that succeeded, so the caller can log it.
+        // AN OFFICE CALL HAS A DEADLINE (14 October 2026, from an audit by another AI). An Office
+        // call that never returned held 2htm with it: no retry, no cancel, no report. Each attempt
+        // now runs on its own single-threaded apartment, as Office requires, and the caller waits
+        // this long. Past it, only the Office processes 2htm itself started are ended, which makes
+        // the stuck call fail; Office windows the person has open are never touched, since they
+        // were not started by 2htm. A timeout is not retried: a document that hung once would
+        // most likely hang again.
+        public const int iOfficeMinutes = 10;
+
+        static void runWithDeadline(Action action, string sProcessName)
+        {
+            Exception exInner = null;
+            Thread thread = new Thread(() => {
+                try { action(); }
+                catch (Exception ex) { exInner = ex; }
+            });
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.IsBackground = true;
+            thread.Start();
+            if (!thread.Join(iOfficeMinutes * 60 * 1000)) {
+                logger.warn(sProcessName + " was still working after " + iOfficeMinutes + " minutes; ending the copies 2htm started");
+                killOwnedOfficeProcesses(sProcessName);
+                thread.Join(30000);
+                throw new TimeoutException((sProcessName == "WINWORD" ? "Word" : sProcessName == "EXCEL" ? "Excel" : sProcessName == "POWERPNT" ? "PowerPoint" : sProcessName)
+                    + " was still working on this file after " + iOfficeMinutes + " minutes, so it was stopped. Office windows you had open were left alone.");
+            }
+            if (exInner != null) System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(exInner).Throw();
+        }
+
+        // Ends every Office process of this name that 2htm itself started, whether or not it has a
+        // window: a stuck one may. Processes 2htm did not start are never touched.
+        public static void killOwnedOfficeProcesses(string sProcessName)
+        {
+            try {
+                foreach (Process process in Process.GetProcessesByName(sProcessName)) {
+                    try {
+                        bool bOwned;
+                        lock (setOwnedOffice) bOwned = setOwnedOffice.Contains(process.Id);
+                        if (bOwned) {
+                            process.Kill();
+                            process.WaitForExit(5000);
+                            logger.info("Ended " + sProcessName + " process " + process.Id + ", which 2htm had started");
+                        }
+                    } catch { }
+                    finally { process.Dispose(); }
+                }
+            } catch { }
+        }
+
         public static int retryOfficeOp(Action action, string sProcessName, int iMaxAttempts = 3)
         {
             int iAttempt = 0;
             int iWaitMs = 1500;
             while (true) {
                 iAttempt++;
-                try { action(); return iAttempt; }
+                try { runWithDeadline(action, sProcessName); return iAttempt; }
                 catch (Exception ex) when (isRpcFailure(ex) && iAttempt < iMaxAttempts) {
                     // Retry is normal recovery; log only, no console
                     // chatter to keep per-file output concise.
