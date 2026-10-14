@@ -57,8 +57,8 @@ namespace twoHtm
         public const string sConfigFileName = "2htm.inix";
         // The GitHub owner whose 2htm releases F11 asks about, and the
         // settings file of the versions before 1.19.
-        public const string c_sGitHubOwner = "jamalmazrui";
-        public const string c_sLegacyConfigFileName = "2htm.ini";
+        public const string sGitHubOwner = "jamalmazrui";
+        public const string sLegacyConfigFileName = "2htm.ini";
         public const string sLogFileName = "2htm.log";
 
         // Global flags set by command-line switches. All converters
@@ -166,7 +166,7 @@ namespace twoHtm
             // beside the output as well. Neither Log nor Elevate touches
             // Markdig, so Main still references no embedded assembly.
             Log.start(sProgramName);
-            Elevate.configure(c_sGitHubOwner, sProgramName, sProgramVersion);
+            Elevate.configure(sGitHubOwner, sProgramName, sProgramVersion);
             int iExit = iExitFatal;
             try {
                 iExit = run(asArgs);
@@ -5541,7 +5541,7 @@ namespace twoHtm
         // %LOCALAPPDATA%\2htm, is read while no .inix exists, its
         // snake_case names read as today's, and it is removed the first
         // time the new file is saved.
-        const string c_sSettingsSection = "Settings";
+        const string sSettingsSection = "Settings";
 
         public static string getConfigDir()
         {
@@ -5557,7 +5557,7 @@ namespace twoHtm
         {
             string sAppData = Environment.GetFolderPath(
                 Environment.SpecialFolder.LocalApplicationData);
-            return Path.Combine(Path.Combine(sAppData, program.sConfigDirName), program.c_sLegacyConfigFileName);
+            return Path.Combine(Path.Combine(sAppData, program.sConfigDirName), program.sLegacyConfigFileName);
         }
 
         public static bool configExists()
@@ -5655,18 +5655,18 @@ namespace twoHtm
                     var sb = new StringBuilder();
                     sb.AppendLine("; 2htm settings, written when Use configuration is checked at OK.");
                     sb.AppendLine("; Delete this file to reset, or press Default settings in the dialog.");
-                    sb.AppendLine("[" + c_sSettingsSection + "]");
+                    sb.AppendLine("[" + sSettingsSection + "]");
                     File.WriteAllText(sPath, sb.ToString(), new UTF8Encoding(true));
                 }
                 // InixCodec.writeValue changes one value in place, leaving
                 // every comment and every other key where it was.
-                InixCodec.writeValue(sPath, c_sSettingsSection, "SourceFiles", sSource ?? "");
-                InixCodec.writeValue(sPath, c_sSettingsSection, "OutputDirectory", sOutputDir ?? "");
-                InixCodec.writeValue(sPath, c_sSettingsSection, "StripImages", bStrip ? "yes" : "no");
-                InixCodec.writeValue(sPath, c_sSettingsSection, "PlainText", bPlain ? "yes" : "no");
-                InixCodec.writeValue(sPath, c_sSettingsSection, "ForceReplacements", bForce ? "yes" : "no");
-                InixCodec.writeValue(sPath, c_sSettingsSection, "ViewOutput", bView ? "yes" : "no");
-                InixCodec.writeValue(sPath, c_sSettingsSection, "LogSession", bLog ? "yes" : "no");
+                InixCodec.writeValue(sPath, sSettingsSection, "SourceFiles", sSource ?? "");
+                InixCodec.writeValue(sPath, sSettingsSection, "OutputDirectory", sOutputDir ?? "");
+                InixCodec.writeValue(sPath, sSettingsSection, "StripImages", bStrip ? "yes" : "no");
+                InixCodec.writeValue(sPath, sSettingsSection, "PlainText", bPlain ? "yes" : "no");
+                InixCodec.writeValue(sPath, sSettingsSection, "ForceReplacements", bForce ? "yes" : "no");
+                InixCodec.writeValue(sPath, sSettingsSection, "ViewOutput", bView ? "yes" : "no");
+                InixCodec.writeValue(sPath, sSettingsSection, "LogSession", bLog ? "yes" : "no");
                 logger.info("Saved configuration to " + sPath);
                 if (File.Exists(getLegacyPath())) {
                     File.Delete(getLegacyPath());
