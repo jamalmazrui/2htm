@@ -18,24 +18,23 @@ The full list of changes is in History.
 
 ## About the companion accessibility tools
 
-`urlCheck`, `extCheck`, and `2htm` are a small family of free, MIT-licensed Windows command-line tools written by Jamal Mazrui and shared on GitHub. Each is distributed as a single-file, independent binary executable that runs without an installation step, without a runtime dependency, and without anything in the registry.
+urlCheck, extCheck and 2htm are three free Windows tools for accessibility work. Jamal Mazrui wrote them and shares them on GitHub under the MIT license.
 
-- [`urlCheck`](https://github.com/JamalMazrui/urlCheck) — drives Microsoft Edge through Playwright and runs axe-core on each page, producing per-page reports plus a session-level Accessibility Conformance Report (`ACR.xlsx` and `ACR.docx`) covering all 86 WCAG 2.2 success criteria.
-- [`extCheck`](https://github.com/JamalMazrui/extCheck) — checks the accessibility of `.docx`, `.xlsx`, `.pptx`, and `.md` files, writing per-file CSV reports of issues found by an extensible rule registry.
-- [`2htm`](https://github.com/JamalMazrui/2htm) — converts Office documents and other text formats to clean, accessible HTML using Microsoft's own conversion engines, with options for plain text and image stripping.
+- [urlCheck](https://github.com/JamalMazrui/urlCheck) checks web pages. It opens each page in Microsoft Edge, tests it with axe-core and writes a report for the page. It also writes an Accessibility Conformance Report, as `ACR.xlsx` and `ACR.docx`, that covers all 86 success criteria of WCAG 2.2.
+- [extCheck](https://github.com/JamalMazrui/extCheck) checks Word, Excel, PowerPoint and Markdown files. It writes a report of the problems in each file, found by a set of rules that can grow.
+- [2htm](https://github.com/JamalMazrui/2htm) turns Office documents and other files into clean, accessible web pages, using Microsoft's own conversion. It can also write plain text, or leave out the images.
 
-The three programs share a deliberately consistent interface and a set of friendly features intended to make them equally usable for the typical Windows user (working through a GUI dialog) and for developers automating tasks (working through the command line). Because the same options are available either way, the same scan or conversion can be reproduced from a script or scheduled task exactly as it was performed by hand.
+The three tools work the same way in the dialog and on the command line. Every option is in both, with the same name and the same default, so a task done by hand can be repeated exactly from a script.
 
-Common features:
+What they share:
 
-- **Fully accessible CLI and GUI**, following platform conventions for accessible interfaces. Every GUI control has a unique mnemonic hotkey; tab order is logical; status, progress, and result messages are announced consistently to screen readers; help text is available in both modes.
-- **Equivalent CLI and GUI behavior.** Every option exposed by one mode is exposed by the other, with the same spelling and the same defaults.
-- **Familiar across the family.** The three programs use the same control names, dialog layout, and command-line flag spellings wherever the underlying concept is the same. A user who has learned one is immediately at home in the other two — no re-learning.
-- **Optional installer for users who prefer a Windows-native install flow.** Each program ships with a small Inno Setup installer (`<program>_setup.exe`) that puts the executable in Program Files, registers a global desktop hotkey (mnemonic to the program name: Alt+Control+2 for 2htm, Alt+Control+X for extCheck, Alt+Control+Shift+U for urlCheck, Alt+Control+U for urlFido), adds a Start Menu entry, and installs the documentation. Users who prefer no installer can run the executable directly from the .zip.
-- **Multiple sources in a single command.** A single invocation accepts any number of files, wildcards, folders, URLs, or list files, processed sequentially.
-- **Opt-in configuration recall.** When checked, the program remembers the most recent dialog values to a configuration file under `%LOCALAPPDATA%`, so a frequent task is one click away on the next run.
-- **Real-time progress in CLI mode; structured summary in GUI mode.** The console shows files and URLs as they are processed, with a short error reason on failure; the GUI message box at the end of the session shows a categorized list of what was completed, failed, or skipped.
-- **Force-replacement and skip-existing behavior.** By default, prior outputs are preserved and re-runs skip work already done. A force flag overrides this for a clean re-run.
-- **Optional session log.** A diagnostic log can be written next to the program's outputs for after-the-fact review.
+- **Accessible in both modes.** Every control in the dialog has its own Alt key, the tab order makes sense, and screen readers announce progress and results. Help is there in both modes.
+- **Learn one, know all three.** The tools use the same control names, the same dialog layout and the same command-line options wherever they do the same thing.
+- **An installer if you want one.** Each tool has a setup program. It puts the tool in Program Files, adds it to the Start menu, installs its guides and sets a desktop hotkey: Alt+Control+2 for 2htm, Alt+Control+X for extCheck, Alt+Control+Shift+U for urlCheck and Alt+Control+U for urlFido. You can also run a tool without installing it.
+- **Many sources at once.** One command can take any number of files, wildcards, folders, web addresses or lists, and handles them one after another.
+- **Settings kept, if you choose.** A tool can remember your last choices in the dialog, so a task you do often takes one step.
+- **Progress as it happens.** The command line names each file or page as it goes, with a short reason when one fails. The dialog ends with a list of what was done, what failed and what was skipped.
+- **Earlier results kept.** A second run keeps earlier results and skips work already done. The force option starts fresh.
+- **A session log if you want one,** to look back at what happened.
 
-All three are released under the [MIT license](https://opensource.org/license/mit/) — a short, permissive open-source license that permits use, modification, and redistribution for any purpose, including commercial use, with the only requirement being that the original copyright notice and license text are preserved in copies of the software.
+All three are free under the [MIT license](https://opensource.org/license/mit/). It lets anyone use, change and share the tools, even in business, as long as the copyright notice and the license stay with every copy.

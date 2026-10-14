@@ -1,15 +1,21 @@
 ﻿<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
+  <meta name="generator" content="pandoc 3.12.1" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <meta name="author" content="Jamal Mazrui" />
   <title>Announce</title>
   <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
     html {
       color: #1a1a1a;
+      color: light-dark(#1a1a1a, #fdfdfd);
       background-color: #fdfdfd;
+      background-color: light-dark(#fdfdfd, #1a1a1a);
+      color-scheme: light dark;
     }
     body {
       margin: 0 auto;
@@ -34,12 +40,16 @@
     }
     @media print {
       html {
-        background-color: white;
+        color-scheme: light only;
       }
-      body {
+      html, body, pre, code {
         background-color: transparent;
+      }
+      body, a, a:visited, blockquote {
         color: black;
-        font-size: 12pt;
+      }
+      pre, code {
+        padding: 0;
       }
       p, h2, h3 {
         orphans: 3;
@@ -52,13 +62,14 @@
     p {
       margin: 1em 0;
     }
-    a {
-      color: #1a1a1a;
-    }
-    a:visited {
-      color: #1a1a1a;
+    a, a:visited {
+      color: inherit;
     }
     img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
       max-width: 100%;
     }
     h1, h2, h3, h4, h5, h6 {
@@ -81,10 +92,14 @@
     blockquote {
       margin: 1em 0 1em 1.7em;
       padding-left: 1em;
-      border-left: 2px solid #e6e6e6;
+      border-left: 2px solid;
+      border-color: #e6e6e6;
+      border-color: light-dark(#e6e6e6, #4c4c4c);
       color: #606060;
+      color: light-dark(#606060, #b6b6b6);
     }
     code {
+      white-space: pre-wrap;
       font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
       font-size: 85%;
       margin: 0;
@@ -104,8 +119,8 @@
      overflow: visible;
     }
     hr {
-      background-color: #1a1a1a;
       border: none;
+      border-top: 1px solid currentColor;
       height: 1px;
       margin: 1em 0;
     }
@@ -122,11 +137,11 @@
     }
     tbody {
       margin-top: 0.5em;
-      border-top: 1px solid #1a1a1a;
-      border-bottom: 1px solid #1a1a1a;
+      border-top: 1px solid currentColor;
+      border-bottom: 1px solid currentColor;
     }
     th {
-      border-top: 1px solid #1a1a1a;
+      border-top: 1px solid currentColor;
       padding: 0.25em 0.5em 0.25em 0.5em;
     }
     td {
@@ -148,10 +163,13 @@
     #TOC a:not(:hover) {
       text-decoration: none;
     }
-    code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
     /* The extra [class] is a hack that increases specificity enough to
        override a similar rule in reveal.js */
@@ -162,7 +180,6 @@
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
   </style>
 </head>
 <body>
@@ -194,82 +211,60 @@ starts.</li>
 <p>The full list of changes is in History.</p>
 <h2 id="about-the-companion-accessibility-tools">About the companion
 accessibility tools</h2>
-<p><code>urlCheck</code>, <code>extCheck</code>, and <code>2htm</code>
-are a small family of free, MIT-licensed Windows command-line tools
-written by Jamal Mazrui and shared on GitHub. Each is distributed as a
-single-file, independent binary executable that runs without an
-installation step, without a runtime dependency, and without anything in
-the registry.</p>
+<p>urlCheck, extCheck and 2htm are three free Windows tools for
+accessibility work. Jamal Mazrui wrote them and shares them on GitHub
+under the MIT license.</p>
 <ul>
-<li><a
-href="https://github.com/JamalMazrui/urlCheck"><code>urlCheck</code></a>
-— drives Microsoft Edge through Playwright and runs axe-core on each
-page, producing per-page reports plus a session-level Accessibility
-Conformance Report (<code>ACR.xlsx</code> and <code>ACR.docx</code>)
-covering all 86 WCAG 2.2 success criteria.</li>
-<li><a
-href="https://github.com/JamalMazrui/extCheck"><code>extCheck</code></a>
-— checks the accessibility of <code>.docx</code>, <code>.xlsx</code>,
-<code>.pptx</code>, and <code>.md</code> files, writing per-file CSV
-reports of issues found by an extensible rule registry.</li>
-<li><a href="https://github.com/JamalMazrui/2htm"><code>2htm</code></a>
-— converts Office documents and other text formats to clean, accessible
-HTML using Microsoft’s own conversion engines, with options for plain
-text and image stripping.</li>
+<li><a href="https://github.com/JamalMazrui/urlCheck">urlCheck</a>
+checks web pages. It opens each page in Microsoft Edge, tests it with
+axe-core and writes a report for the page. It also writes an
+Accessibility Conformance Report, as <code>ACR.xlsx</code> and
+<code>ACR.docx</code>, that covers all 86 success criteria of WCAG
+2.2.</li>
+<li><a href="https://github.com/JamalMazrui/extCheck">extCheck</a>
+checks Word, Excel, PowerPoint and Markdown files. It writes a report of
+the problems in each file, found by a set of rules that can grow.</li>
+<li><a href="https://github.com/JamalMazrui/2htm">2htm</a> turns Office
+documents and other files into clean, accessible web pages, using
+Microsoft’s own conversion. It can also write plain text, or leave out
+the images.</li>
 </ul>
-<p>The three programs share a deliberately consistent interface and a
-set of friendly features intended to make them equally usable for the
-typical Windows user (working through a GUI dialog) and for developers
-automating tasks (working through the command line). Because the same
-options are available either way, the same scan or conversion can be
-reproduced from a script or scheduled task exactly as it was performed
-by hand.</p>
-<p>Common features:</p>
+<p>The three tools work the same way in the dialog and on the command
+line. Every option is in both, with the same name and the same default,
+so a task done by hand can be repeated exactly from a script.</p>
+<p>What they share:</p>
 <ul>
-<li><strong>Fully accessible CLI and GUI</strong>, following platform
-conventions for accessible interfaces. Every GUI control has a unique
-mnemonic hotkey; tab order is logical; status, progress, and result
-messages are announced consistently to screen readers; help text is
-available in both modes.</li>
-<li><strong>Equivalent CLI and GUI behavior.</strong> Every option
-exposed by one mode is exposed by the other, with the same spelling and
-the same defaults.</li>
-<li><strong>Familiar across the family.</strong> The three programs use
-the same control names, dialog layout, and command-line flag spellings
-wherever the underlying concept is the same. A user who has learned one
-is immediately at home in the other two — no re-learning.</li>
-<li><strong>Optional installer for users who prefer a Windows-native
-install flow.</strong> Each program ships with a small Inno Setup
-installer (<code>&lt;program&gt;_setup.exe</code>) that puts the
-executable in Program Files, registers a global desktop hotkey (mnemonic
-to the program name: Alt+Control+2 for 2htm, Alt+Control+X for extCheck,
-Alt+Control+Shift+U for urlCheck, Alt+Control+U for urlFido), adds a
-Start Menu entry, and installs the documentation. Users who prefer no
-installer can run the executable directly from the .zip.</li>
-<li><strong>Multiple sources in a single command.</strong> A single
-invocation accepts any number of files, wildcards, folders, URLs, or
-list files, processed sequentially.</li>
-<li><strong>Opt-in configuration recall.</strong> When checked, the
-program remembers the most recent dialog values to a configuration file
-under <code>%LOCALAPPDATA%</code>, so a frequent task is one click away
-on the next run.</li>
-<li><strong>Real-time progress in CLI mode; structured summary in GUI
-mode.</strong> The console shows files and URLs as they are processed,
-with a short error reason on failure; the GUI message box at the end of
-the session shows a categorized list of what was completed, failed, or
+<li><strong>Accessible in both modes.</strong> Every control in the
+dialog has its own Alt key, the tab order makes sense, and screen
+readers announce progress and results. Help is there in both modes.</li>
+<li><strong>Learn one, know all three.</strong> The tools use the same
+control names, the same dialog layout and the same command-line options
+wherever they do the same thing.</li>
+<li><strong>An installer if you want one.</strong> Each tool has a setup
+program. It puts the tool in Program Files, adds it to the Start menu,
+installs its guides and sets a desktop hotkey: Alt+Control+2 for 2htm,
+Alt+Control+X for extCheck, Alt+Control+Shift+U for urlCheck and
+Alt+Control+U for urlFido. You can also run a tool without installing
+it.</li>
+<li><strong>Many sources at once.</strong> One command can take any
+number of files, wildcards, folders, web addresses or lists, and handles
+them one after another.</li>
+<li><strong>Settings kept, if you choose.</strong> A tool can remember
+your last choices in the dialog, so a task you do often takes one
+step.</li>
+<li><strong>Progress as it happens.</strong> The command line names each
+file or page as it goes, with a short reason when one fails. The dialog
+ends with a list of what was done, what failed and what was
 skipped.</li>
-<li><strong>Force-replacement and skip-existing behavior.</strong> By
-default, prior outputs are preserved and re-runs skip work already done.
-A force flag overrides this for a clean re-run.</li>
-<li><strong>Optional session log.</strong> A diagnostic log can be
-written next to the program’s outputs for after-the-fact review.</li>
+<li><strong>Earlier results kept.</strong> A second run keeps earlier
+results and skips work already done. The force option starts fresh.</li>
+<li><strong>A session log if you want one,</strong> to look back at what
+happened.</li>
 </ul>
-<p>All three are released under the <a
-href="https://opensource.org/license/mit/">MIT license</a> — a short,
-permissive open-source license that permits use, modification, and
-redistribution for any purpose, including commercial use, with the only
-requirement being that the original copyright notice and license text
-are preserved in copies of the software.</p>
+<p>All three are free under the <a
+href="https://opensource.org/license/mit/">MIT license</a>. It lets
+anyone use, change and share the tools, even in business, as long as the
+copyright notice and the license stay with every copy.</p>
 </main>
 </body>
 </html>
