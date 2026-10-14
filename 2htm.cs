@@ -1185,8 +1185,11 @@ namespace twoHtm
             // back if this conversion fails, and removed only after success.
             string sAside = "";
             if (File.Exists(sOutPath)) {
-                sAside = sOutPath + ".previous";
-                if (File.Exists(sAside)) File.Delete(sAside);
+                // A RECOVERY NAME OF ITS OWN (14 October 2026, from an audit by another
+                // AI): it was always "<output>.previous", and an existing one was
+                // deleted first, so a second failed conversion erased the first one's
+                // recovery copy. Each conversion now gets a name that does not exist yet.
+                sAside = Homer.Util.recoveryPath(sOutPath);
                 File.Move(sOutPath, sAside);
             }
             bool bSucceeded = false;
@@ -1210,7 +1213,7 @@ namespace twoHtm
                     }
                     if (sAside != "" && File.Exists(sAside) && !File.Exists(sOutPath)) {
                         try { File.Move(sAside, sOutPath); logger.info("Put back the earlier output: " + sOutPath); }
-                        catch (Exception ex) { logger.info("Could not put back the earlier output " + sAside + ": " + ex.Message); }
+                        catch (Exception ex) { logger.warn("Could not put back the earlier output; it is kept at " + sAside + ": " + ex.Message); }
                     }
                 } else if (sAside != "") {
                     try { File.Delete(sAside); } catch (Exception ex) { logger.info("Could not remove " + sAside + ": " + ex.Message); }

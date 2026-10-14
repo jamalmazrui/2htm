@@ -5,6 +5,11 @@ author: "Jamal Mazrui"
 
 # 2htm History
 
+## 14 October 2026 -- recovery copies kept, and the program started as you
+
+- **Each conversion keeps its own recovery copy.** The earlier output was moved aside as `<output>.previous`, and an existing one was deleted first, so a second failed conversion erased the first one's recovery copy. Each conversion now gets a dated name of its own, and a failed restore is logged as a warning naming where the copy is (from an audit by another AI).
+- **Setup starts 2htm as you,** not with the installer's administrator rights, and creates its logs folder before leaving the launch marker, which a first install never wrote.
+
 ## 9 October 2026 -- spoken tutorials
 
 **Ten spoken walks, in the Homer pattern of ten.** Walk 0 is an overview and table of contents; 1, the user interface, each control shown as the screen reader speaks it; 2, installing; 3 to 8, tasks around concrete wants -- a long Word report read in the browser, a PDF made readable, plain text to listen to, slides and spreadsheets, a whole folder, and File Explorer and the command line; and 9, the conclusion, with a glossary in two voices and every way to get help. Each task walk is predicted at three minutes or more by the kit's measured model, and every key and feature it teaches was checked against this guide. The build speaks them; the installer ships them and their audio; the repository carries both.
