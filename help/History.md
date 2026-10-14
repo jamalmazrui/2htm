@@ -5,6 +5,11 @@ author: "Jamal Mazrui"
 
 # 2htm History
 
+## 14 October 2026 -- the developer guide brought up to date
+
+- **The four steps are in the order they run:** build, tidy, push, release, as build_release runs them; the guide listed push before tidy (from an audit by another AI).
+- **The developer guide names the kit's classes where they are,** in C:\HomerDev\exec\CSharp; it still named C:\HomerDev\CSharp, a folder the kit no longer has (from an audit by another AI).
+
 ## 14 October 2026 -- contents lists, and plainer guides
 
 - **Every help page has a contents list.** The build ran Pandoc without --toc, so a long guide had no list of its sections. Pages are now built with one, and a page that lacks one is built again once to gain it.

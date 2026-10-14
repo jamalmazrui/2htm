@@ -22,9 +22,11 @@ How 2htm is built, released and laid out. Since 1.19.0 it is built on the Homer 
 
 ## The four steps
 
+`build_release` runs all four, in this order, and stops at the first that fails.
+
 1. `build` — steps the version (`build nobump` keeps it), fetches Markdig if it is missing, compiles `exec\2htm.exe`, writes each `.htm` from its `.md`, puts the project's files in the Homer encoding, checks that the installer ships every file in `help`, and builds `2htm_setup.exe`. Its log is `logs\2htm-build-yyyyMMdd-HHmmss.log`.
-2. `scripts\push "message"` — rewrites the whitelist `.gitignore` from `RepoFiles.txt`, commits and pushes.
-3. `scripts\tidy` and `scripts\tidy --do-it` — the periodic clean.
+2. `scripts\tidy` and `scripts\tidy --do-it` — the periodic clean.
+3. `scripts\push "message"` — rewrites the whitelist `.gitignore` from `RepoFiles.txt`, commits and pushes.
 4. `scripts\release` — runs `scripts\check`, then tags the pushed commit with the version stamped in `2htm_setup.exe` and publishes the installer.
 
 Try the fresh build with `2htm -g` (the `2htm.cmd` at the top runs `exec\2htm.exe`).
@@ -33,7 +35,7 @@ Try the fresh build with `2htm -g` (the `2htm.cmd` at the top runs `exec\2htm.ex
 
 The build finds the Roslyn C# compiler with `vswhere`, or installs the free Visual Studio Build Tools with winget; 2htm has always needed Roslyn.
 
-2htm compiles eight of the kit's classes straight from `C:\HomerDev\CSharp`: Elevate, Inix, Lbc, Log, Paths, Say, Util and Web. Its dialog, `guiDialog.show`, is an LbcDialog, built the way urlFido's is: bands for a field and its button, checkboxes below a separator, and `runWithButtons` with OK, Guide, Default settings and Cancel, looping back to the dialog after Guide, Default settings, or an output folder the user declined to create. Lbc needs Elevate, Inix, Log, Say and Util.
+2htm compiles eight of the kit's classes straight from `C:\HomerDev\exec\CSharp`: Elevate, Inix, Lbc, Log, Paths, Say, Util and Web. Its dialog, `guiDialog.show`, is an LbcDialog, built the way urlFido's is: bands for a field and its button, checkboxes below a separator, and `runWithButtons` with OK, Guide, Default settings and Cancel, looping back to the dialog after Guide, Default settings, or an output folder the user declined to create. Lbc needs Elevate, Inix, Log, Say and Util.
 
 - `Log` keeps the session log in `%LOCALAPPDATA%\2htm\logs`. 2htm's own `logger` writes every line to it as well as to the optional `2htm.log`, and `Main` records anything `run` did not catch. Log needs Paths and Say.
 - `Paths.configs()` is where `2htm.inix` lives, and `Paths.installedFolder` is how Help finds `help\2htm.htm` from `exec`.
