@@ -190,6 +190,12 @@
 <ul>
 <li><a href="#htm-history" id="toc-htm-history">2htm History</a>
 <ul>
+<li><a href="#october-2026-it-builds-again"
+id="toc-october-2026-it-builds-again">14 October 2026 – it builds
+again</a></li>
+<li><a href="#october-2026-a-stopped-office-worker-is-proved-stopped"
+id="toc-october-2026-a-stopped-office-worker-is-proved-stopped">14
+October 2026 – a stopped Office worker is proved stopped</a></li>
 <li><a href="#october-2026-the-developer-guide-brought-up-to-date"
 id="toc-october-2026-the-developer-guide-brought-up-to-date">14 October
 2026 – the developer guide brought up to date</a></li>
@@ -231,6 +237,23 @@ versions</a></li>
 </nav>
 <main>
 <h1 id="htm-history">2htm History</h1>
+<h2 id="october-2026-it-builds-again">14 October 2026 – it builds
+again</h2>
+<ul>
+<li><strong>The build failed on a name out of reach:</strong> the guard
+against a stuck Office worker ended the run with iExitFatal, which
+belongs to the program class, not the one the guard is in. It now says
+program.iExitFatal (from an audit by another AI).</li>
+</ul>
+<h2 id="october-2026-a-stopped-office-worker-is-proved-stopped">14
+October 2026 – a stopped Office worker is proved stopped</h2>
+<ul>
+<li><strong>If Office’s worker is still running after Office is ended,
+the run ends.</strong> The wait for the worker was not checked, so one
+still running could write after its file was put back. If it has not
+ended 30 seconds after Office is ended, 2htm logs why and stops, which
+ends the worker with it (from a second audit by another AI).</li>
+</ul>
 <h2 id="october-2026-the-developer-guide-brought-up-to-date">14 October
 2026 – the developer guide brought up to date</h2>
 <ul>

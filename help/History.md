@@ -5,6 +5,14 @@ author: "Jamal Mazrui"
 
 # 2htm History
 
+## 14 October 2026 -- it builds again
+
+- **The build failed on a name out of reach:** the guard against a stuck Office worker ended the run with iExitFatal, which belongs to the program class, not the one the guard is in. It now says program.iExitFatal (from an audit by another AI).
+
+## 14 October 2026 -- a stopped Office worker is proved stopped
+
+- **If Office's worker is still running after Office is ended, the run ends.** The wait for the worker was not checked, so one still running could write after its file was put back. If it has not ended 30 seconds after Office is ended, 2htm logs why and stops, which ends the worker with it (from a second audit by another AI).
+
 ## 14 October 2026 -- the developer guide brought up to date
 
 - **The four steps are in the order they run:** build, tidy, push, release, as build_release runs them; the guide listed push before tidy (from an audit by another AI).

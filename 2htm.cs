@@ -2828,7 +2828,16 @@ namespace twoHtm
             if (!thread.Join(iOfficeMinutes * 60 * 1000)) {
                 logger.warn(sProcessName + " was still working after " + iOfficeMinutes + " minutes; ending the copies 2htm started");
                 killOwnedOfficeProcesses(sProcessName);
-                thread.Join(30000);
+                // A STOPPED WORKER IS PROVED STOPPED (14 October 2026, from a second audit by another AI): after ending Office, the
+                // wait for the worker thread was not checked, so a worker still running could write after this file was
+                // rolled back, or into the next file's results. The only proof that a thread has stopped is that it has
+                // ended; if it has not, the run ends here, which ends the thread with it, and the log says why.
+                if (!thread.Join(30000)) {
+                    logger.error("The " + sProcessName + " worker was still running 30 seconds after Office was ended, so 2htm stops here: "
+                        + "nothing it might still write can then overwrite a file put back, or the next file's work.");
+                    try { logger.close(); } catch { }
+                    Environment.Exit(program.iExitFatal);
+                }
                 throw new TimeoutException((sProcessName == "WINWORD" ? "Word" : sProcessName == "EXCEL" ? "Excel" : sProcessName == "POWERPNT" ? "PowerPoint" : sProcessName)
                     + " was still working on this file after " + iOfficeMinutes + " minutes, so it was stopped. Office windows you had open were left alone.");
             }
