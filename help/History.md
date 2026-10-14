@@ -5,6 +5,10 @@ author: "Jamal Mazrui"
 
 # 2htm History
 
+## 14 October 2026 -- contents lists, and plainer guides
+
+- **Every help page has a contents list.** The build ran Pandoc without --toc, so a long guide had no list of its sections. Pages are now built with one, and a page that lacks one is built again once to gain it.
+
 ## 14 October 2026 -- the announcement in plainer words
 
 - **Announce.md now reads at grade 7.2, down from 13.1,** inside the ninth-grade target for documents shared publicly. Long sentences were split and dense phrases put plainly; every fact, key and link is kept, and first-person passages keep their author's own words. The section about the companion tools reads the same in each announcement that carries it, with the tools' hotkeys in alphabetical order.
