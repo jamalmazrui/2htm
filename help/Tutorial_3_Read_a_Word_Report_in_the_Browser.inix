@@ -87,7 +87,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Insert plus F6 lists every heading, the quickest way to jump to the section I want.
+Say=The reader's headings list, Insert plus F6 in some readers and part of the Insert plus F7 list in others, is the quickest way to jump to the section I want.
 Key=Insert+F6
 Hear=Headings list
 Note=Confirm the wording with a live run: buildTutorials -live.

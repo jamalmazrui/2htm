@@ -5,7 +5,7 @@
     <link>Tutorials.htm</link>
     <description></description>
     <language>en-us</language>
-    <lastBuildDate>Wed, 14 Oct 2026 16:29:41 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 15 Oct 2026 18:28:57 +0000</lastBuildDate>
     <itunes:author></itunes:author>
     <itunes:explicit>false</itunes:explicit>
     <itunes:category text="Technology"/>
@@ -14,8 +14,8 @@
       <description>Nothing to set up; this walk only listens. Full transcript: Tutorials.htm#0-0-overview</description>
       <link>Tutorials.htm#0-0-overview</link>
       <guid isPermaLink="false">homer-tutorial_0_overview</guid>
-      <enclosure url="tutorials/0_Overview.mp3" length="777371" type="audio/mpeg"/>
-      <itunes:duration>00:01:49</itunes:duration>
+      <enclosure url="tutorials/0_Overview.mp3" length="865078" type="audio/mpeg"/>
+      <itunes:duration>00:02:00</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
@@ -41,8 +41,8 @@
       <description>A long Word document of your own, and Microsoft Word installed. Full transcript: Tutorials.htm#0c-3-read-a-word-report-in-the-browser</description>
       <link>Tutorials.htm#0c-3-read-a-word-report-in-the-browser</link>
       <guid isPermaLink="false">homer-tutorial_3_read_a_word_report_in_the_browser</guid>
-      <enclosure url="tutorials/3_Read_a_Word_Report_in_the_Browser.mp3" length="1346742" type="audio/mpeg"/>
-      <itunes:duration>00:03:15</itunes:duration>
+      <enclosure url="tutorials/3_Read_a_Word_Report_in_the_Browser.mp3" length="1368475" type="audio/mpeg"/>
+      <itunes:duration>00:03:19</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
