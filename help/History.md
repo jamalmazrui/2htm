@@ -5,6 +5,12 @@ author: "Jamal Mazrui"
 
 # 2htm History
 
+## 20 October 2026 -- Converting through the Homer kit
+
+- **2htm converts through the Homer kit,** as every Homer app does, so a file becomes the same web page or text in 2htm as anywhere else. The page form every Homer app now uses came from 2htm: the stylesheet, one heading for the title, the page's parts marked for a screen reader, and pictures carried inside. Word, Excel and PowerPoint files still use Office when Pandoc is not installed.
+- **Markdig is no longer part of 2htm;** Markdown becomes a web page through the kit.
+- **The build needs HomerDev 1.87.4 or later.**
+
 ## 14 October 2026 -- it builds again
 
 - **The build failed on a name out of reach:** the guard against a stuck Office worker ended the run with iExitFatal, which belongs to the program class, not the one the guard is in. It now says program.iExitFatal (from an audit by another AI).

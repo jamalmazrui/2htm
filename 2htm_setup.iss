@@ -12,7 +12,7 @@
 ;   marker; the program starts after the Results box has been read.
 ;
 ; 2htm installs no components of its own: it drives the Microsoft Office
-; already on the machine, and everything else -- Markdig included -- is
+; already on the machine, and converts through the Homer kit's code, which is
 ; inside 2htm.exe. The
 ; finish page therefore offers only Launch (ticked) and Open the user guide
 ; (unticked), which is what the installer before the kit offered, with the
@@ -125,6 +125,8 @@ Name: "{app}\help"
 [Files]
 ; THE PROGRAM goes in exec. Everything 2htm needs is inside it.
 Source: "exec\{#AppExeName}"; DestDir: "{app}\exec"; Flags: ignoreversion
+; The Homer kit's conversion routes (20 October 2026): 2htm converts through the kit.
+Source: "exec\conversions.inix"; DestDir: "{app}\exec"; Flags: ignoreversion
 ; The command-line wrapper stays at the top, where typing 2htm in the
 ; program folder finds it; it runs exec\2htm.exe.
 Source: "{#AppName}.cmd"; DestDir: "{app}"; Flags: ignoreversion

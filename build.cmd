@@ -65,7 +65,7 @@ set "progFiles=%ProgramFiles%"
 
 rem ---- SETTINGS: the part an app edits -------------------------------
 rem The oldest kit with everything this build uses.
-set "kitNeeded=1.43.29"
+set "kitNeeded=1.87.4"
 rem The number to start from when version.txt is missing. A newer release
 rem tag, if the repository has one, wins. It is also a floor: a version.txt
 rem holding less is raised to it.
@@ -80,7 +80,8 @@ rem Help box offers the update), Log, Paths, Say and Util; Log needs Paths and
 rem Say; Mdi needs KeyMap. Each is compiled from C:\HomerDev\exec\CSharp.
 rem 2htm's dialog is built with Lbc (since 1.19.1), which needs Elevate,
 rem Inix, Log, Say and Util; Elevate needs Web, Log needs Paths and Say.
-set "homerModules=Elevate Inix Lbc Log Paths Say Util Web"
+rem The kit's one conversion technique (20 October 2026): Conversion, its page form and Table.
+set "homerModules=Conversion ConversionPage Elevate Inix Lbc Log Paths Say Table Util Web"
 rem The app's own sources beside 2htm.cs, if any, space separated.
 set "appSources="
 rem Files embedded in the program as resources, space separated: a sound, a
@@ -323,50 +324,18 @@ if defined nvdaClient (
   if /i "!nvdaClient!"=="exec" copy /y "work\nvda\nvdaControllerClient.dll" "exec\" >nul
 )
 
-rem ---- Markdig, fetched at a pinned version and embedded -----------------------
-rem 2htm renders Markdown with Markdig 0.18.3, which travels INSIDE 2htm.exe as
-rem a resource its AssemblyResolve handler loads, so the program stays a single
-rem file. The package is fetched once into work\nuget; lib\net40 is taken, else
-rem lib\net35. Markdig's types are declared in netstandard.dll, so the facade
-rem is referenced too -- without it csc reports CS0012 against the Markdig call
-rem sites, which looks like a fault in the source and is not.
-if not exist "work\nuget" mkdir "work\nuget"
-if exist "Markdig.dll" if not exist "work\nuget\Markdig.dll" (
-  move /y "Markdig.dll" "work\nuget\" >nul
-  >> "%log%" echo Moved the Markdig.dll fetched before the kit into work\nuget
-)
-if not exist "work\nuget\Markdig.dll" (
-  echo Fetching Markdig 0.18.3 from nuget.org
-  powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-    "$ErrorActionPreference = 'Stop';" ^
-    "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
-    "$sZip = Join-Path $env:TEMP ('2htm_markdig_' + [guid]::NewGuid().ToString('N') + '.zip');" ^
-    "$sDir = $sZip + '.d';" ^
-    "Invoke-WebRequest -Uri 'https://api.nuget.org/v3-flatcontainer/markdig/0.18.3/markdig.0.18.3.nupkg' -OutFile $sZip -UseBasicParsing;" ^
-    "Expand-Archive -LiteralPath $sZip -DestinationPath $sDir -Force;" ^
-    "$sDll = $null; foreach ($sTarget in @('net40', 'net35')) { $sTry = Join-Path $sDir ('lib\' + $sTarget + '\Markdig.dll'); if (-not $sDll -and (Test-Path $sTry)) { $sDll = $sTry } };" ^
-    "if (-not $sDll) { throw 'No net40 or net35 Markdig.dll in the package.' };" ^
-    "Copy-Item -LiteralPath $sDll -Destination '%CD%\work\nuget\Markdig.dll' -Force;" ^
-    "Remove-Item -LiteralPath $sZip, $sDir -Recurse -Force -ErrorAction SilentlyContinue;" ^
-    "'Markdig taken from ' + $sDll" >> "%log%" 2>&1
-  >> "%log%" echo Ran: fetch Markdig 0.18.3, exit code !errorlevel!
-)
-if not exist "work\nuget\Markdig.dll" (
-  echo Markdig could not be fetched. The log says why.
-  >> "%log%" echo ERROR: no work\nuget\Markdig.dll
+rem ---- the Homer kit's conversion (20 October 2026) ----------------------------
+rem 2htm converts through the kit's Conversion.convert; Markdig, which it fetched and
+rem embedded for Markdown, is no longer needed. The route table travels with the program.
+if not exist "exec" mkdir "exec"
+if not exist "!homerDev!\exec\conversions.inix" (
+  echo The kit has no exec\conversions.inix. Update HomerDev to !kitNeeded! or later.
+  >> "%log%" echo ERROR: NOT IN THE KIT: exec\conversions.inix
   goto :failed
 )
-set "netstd="
-for %%v in (v4.8.1 v4.8 v4.7.2) do if not defined netstd if exist "!progFiles86!\Reference Assemblies\Microsoft\Framework\.NETFramework\%%v\Facades\netstandard.dll" set "netstd=!progFiles86!\Reference Assemblies\Microsoft\Framework\.NETFramework\%%v\Facades\netstandard.dll"
-if not defined netstd if exist "%SystemRoot%\Microsoft.NET\assembly\GAC_MSIL\netstandard\v4.0_2.0.0.0__cc7b13ffcd2ddd51\netstandard.dll" set "netstd=%SystemRoot%\Microsoft.NET\assembly\GAC_MSIL\netstandard\v4.0_2.0.0.0__cc7b13ffcd2ddd51\netstandard.dll"
-if not defined netstd (
-  echo The netstandard facade was not found. Install the .NET Framework 4.8 targeting pack.
-  >> "%log%" echo ERROR: no netstandard.dll facade
-  goto :failed
-)
->> "%log%" echo netstandard facade: !netstd!
-set "extraRefs=!extraRefs! /reference:"!netstd!" /reference:"work\nuget\Markdig.dll" /reference:Microsoft.CSharp.dll"
-set "resourceArgs=!resourceArgs! /resource:work\nuget\Markdig.dll,Markdig.dll"
+copy /y "!homerDev!\exec\conversions.inix" "exec\conversions.inix" >nul
+>> "%log%" echo Copied conversions.inix from the kit into exec.
+set "extraRefs=!extraRefs! /reference:Microsoft.CSharp.dll"
 
 rem ---- a copy running from this project's exec cannot be replaced ------
 powershell -NoProfile -Command "$p = Get-Process -Name '%app%' -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path -like '%CD%\exec\*' }; if ($p) { exit 1 } else { exit 0 }"
