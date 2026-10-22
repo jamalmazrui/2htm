@@ -190,8 +190,7 @@ Both logs are UTF-8 with a byte-order mark, so Notepad opens them correctly.
 ## Notes
 
 - 2htm output preserves heading structure, lists, tables, and image alternative text. The output is a single self-contained `.htm` file with CSS embedded inline; it can be opened in any browser without external dependencies.
-- For `.docx`, `.xlsx`, and `.pptx` files, 2htm uses Microsoft Office's COM automation. Office must be installed and runnable; modern (64-bit) Office is the common case.
-- For `.md` files, 2htm uses the Markdig library (bundled inside the executable). No Office is needed.
+- 2htm converts through the Homer kit's conversion, the same in every Homer app, so a file becomes the same web page in 2htm as in FileDir or BatCon. Word documents use Pandoc when it is installed and Microsoft Office when it is not, and the older .doc, .xls and .ppt files always use Office. Excel and PowerPoint files, Markdown, text, CSV, JSON and web pages need neither: the kit reads them itself.
 - Plain text mode (`-p` or the dialog's Plain text checkbox) produces a `.txt` file instead. Image lines are stripped and the text is normalized for use as input to a synthesizer or for paste-into-email scenarios.
 
 ---
