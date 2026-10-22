@@ -326,43 +326,52 @@ namespace twoHtm
             var lsFileArgs = new List<string>();
             for (int i = 0; i < asArgs.Length; i++) {
                 string sArg = asArgs[i];
-                if (sArg == "-h" || sArg == "--help" || sArg == "/?" || sArg == "-?") {
+                // ONE SWITCH CONVENTION (20 October 2026, homer-code): /switch, -switch and --switch
+                // alike, in any case, through the kit's Util.switchName; the single letters still
+                // work. A known switch is always a switch: on Windows /help is also a path, the Help
+                // folder at the drive's root, and 2htm took it for a source where that folder exists.
+                // Only an unknown name that is an existing file or folder is a source.
+                string sSwitch = Homer.Util.switchName(sArg);
+                string[] aKnown = { "f", "force", "g", "gui", "gui-mode", "h", "help", "l", "log", "o", "output", "output-dir",
+                    "p", "plain-text", "s", "strip-images", "u", "use-configuration", "v", "version", "view", "view-output" };
+                if (sSwitch != "" && Array.IndexOf(aKnown, sSwitch) < 0 && (File.Exists(sArg) || Directory.Exists(sArg))) sSwitch = "";
+                if (sSwitch == "help" || sSwitch == "h" || sArg == "/?" || sArg == "-?") {
                     printUsage();
                     return iExitOk;
                 }
-                if (sArg == "-v" || sArg == "--version") {
+                if (sSwitch == "version" || sSwitch == "v") {
                     Console.WriteLine(program.sProgramName + " " + sProgramVersion);
                     return iExitOk;
                 }
-                if (sArg == "-s" || sArg == "--strip-images") {
+                if (sSwitch == "strip-images" || sSwitch == "s") {
                     bStripImages = true; bStripImagesFromCli = true;
                     continue;
                 }
-                if (sArg == "-p" || sArg == "--plain-text") {
+                if (sSwitch == "plain-text" || sSwitch == "p") {
                     bPlainText = true; bPlainTextFromCli = true;
                     continue;
                 }
-                if (sArg == "-f" || sArg == "--force") {
+                if (sSwitch == "force" || sSwitch == "f") {
                     bForce = true; bForceFromCli = true;
                     continue;
                 }
-                if (sArg == "-l" || sArg == "--log") {
+                if (sSwitch == "log" || sSwitch == "l") {
                     bLog = true; bLogFromCli = true;
                     continue;
                 }
-                if (sArg == "-g" || sArg == "--gui-mode") {
+                if (sSwitch == "gui-mode" || sSwitch == "gui" || sSwitch == "g") {
                     bGuiMode = true;
                     continue;
                 }
-                if (sArg == "--view-output") {
+                if (sSwitch == "view-output" || sSwitch == "view") {
                     bViewOutput = true; bViewOutputFromCli = true;
                     continue;
                 }
-                if (sArg == "-u" || sArg == "--use-configuration") {
+                if (sSwitch == "use-configuration" || sSwitch == "u") {
                     bUseConfig = true;
                     continue;
                 }
-                if (sArg == "-o" || sArg == "--output-dir") {
+                if (sSwitch == "output-dir" || sSwitch == "output" || sSwitch == "o") {
                     // Expects a following argument giving the
                     // directory. If missing or empty, treat as fatal
                     // so the user learns the correct usage.
@@ -370,16 +379,16 @@ namespace twoHtm
                         string.IsNullOrWhiteSpace(asArgs[i + 1])) {
                         Console.Error.WriteLine(sArg +
                             " requires a directory argument.");
-                        Console.Error.WriteLine("Run '2htm --help' for usage.");
+                        Console.Error.WriteLine("Run '2htm /help' for usage.");
                         return iExitFatal;
                     }
                     sOutputDir = asArgs[++i];
                     bOutputDirFromCli = true;
                     continue;
                 }
-                if (sArg.StartsWith("-") && !File.Exists(sArg) && !Directory.Exists(sArg)) {
-                    Console.Error.WriteLine("Unknown option: " + sArg);
-                    Console.Error.WriteLine("Run '2htm --help' for usage.");
+                if (sSwitch != "") {
+                    Console.Error.WriteLine("Unknown switch: " + sArg);
+                    Console.Error.WriteLine("Run '2htm /help' for usage.");
                     return iExitFatal;
                 }
                 lsFileArgs.Add(sArg);
@@ -867,24 +876,24 @@ namespace twoHtm
             Console.WriteLine("Examples:");
             Console.WriteLine("  2htm report.docx");
             Console.WriteLine("  2htm *.xlsx *.pptx");
-            Console.WriteLine("  2htm --plain-text C:\\docs\\*.pdf reports\\*.docx");
-            Console.WriteLine("  2htm --force --strip-images slides\\*.pptx");
+            Console.WriteLine("  2htm /plain-text C:\\docs\\*.pdf reports\\*.docx");
+            Console.WriteLine("  2htm /force /strip-images slides\\*.pptx");
             Console.WriteLine();
-            Console.WriteLine("Options:");
-            Console.WriteLine("  -h, --help, -?, /?   Show this help and exit.");
-            Console.WriteLine("  -v, --version        Show the version number and exit.");
-            Console.WriteLine("  -f, --force          Overwrite the target file if it already");
+            Console.WriteLine("Switches, written /switch, -switch or --switch, in any case:");
+            Console.WriteLine("  /help, /?            Show this help and exit.");
+            Console.WriteLine("  /version             Show the version number and exit.");
+            Console.WriteLine("  /force               Overwrite the target file if it already");
             Console.WriteLine("                       exists. Default is to skip.");
-            Console.WriteLine("  -s, --strip-images   Strip images from the output. No <img>");
+            Console.WriteLine("  /strip-images        Strip images from the output. No <img>");
             Console.WriteLine("                       tags, no broken references, no alt text.");
             Console.WriteLine("                       Use for large image-heavy documents.");
-            Console.WriteLine("  -p, --plain-text     Produce .txt instead of .htm. Output is");
+            Console.WriteLine("  /plain-text          Produce .txt instead of .htm. Output is");
             Console.WriteLine("                       readable plain text (no HTML markup).");
-            Console.WriteLine("  -o <dir>, --output-dir <dir>");
+            Console.WriteLine("  /output-dir          <dir>, /output <dir>");
             Console.WriteLine("                       Write output files to <dir> instead of");
             Console.WriteLine("                       the current directory. <dir> is created");
             Console.WriteLine("                       if it does not exist.");
-            Console.WriteLine("  -g, --gui-mode       Launch a dialog to enter parameters. Any");
+            Console.WriteLine("  /gui-mode            Launch a dialog to enter parameters. Any");
             Console.WriteLine("                       options given on the command line become");
             Console.WriteLine("                       the defaults. After conversion, a message");
             Console.WriteLine("                       box displays the per-file results. GUI mode");
@@ -893,13 +902,13 @@ namespace twoHtm
             Console.WriteLine("                       such as File Explorer (e.g., by double-");
             Console.WriteLine("                       clicking the executable or extracting it");
             Console.WriteLine("                       from a zip archive and running it).");
-            Console.WriteLine("  --view-output        After conversion, open the output");
+            Console.WriteLine("  /view-output         After conversion, open the output");
             Console.WriteLine("                       directory in the default file manager");
             Console.WriteLine("                       (typically File Explorer). Fires only if");
             Console.WriteLine("                       at least one file was actually converted;");
             Console.WriteLine("                       reuses an already-open window if one is");
             Console.WriteLine("                       already displaying that directory.");
-            Console.WriteLine("  -u, --use-configuration");
+            Console.WriteLine("  /use-configuration");
             Console.WriteLine("                       Read saved defaults from");
             Console.WriteLine("                       %LOCALAPPDATA%\\2htm\\configs\\2htm.inix. Any other");
             Console.WriteLine("                       options supplied on the command line take");
@@ -909,7 +918,7 @@ namespace twoHtm
             Console.WriteLine("                       are written back as next-run defaults.");
             Console.WriteLine("                       Without -u (and no checkbox), no");
             Console.WriteLine("                       settings are saved.");
-            Console.WriteLine("  -l, --log            Also write detailed diagnostics to 2htm.log");
+            Console.WriteLine("  /log                 Also write detailed diagnostics to 2htm.log");
             Console.WriteLine("                       (UTF-8 with BOM) in the output directory if");
             Console.WriteLine("                       one was specified, or the current working");
             Console.WriteLine("                       directory otherwise. Any prior 2htm.log in");
@@ -931,9 +940,9 @@ namespace twoHtm
             Console.WriteLine("  Text:       .txt   (native)");
             Console.WriteLine();
             Console.WriteLine("Output files are written to the current working directory by");
-            Console.WriteLine("default (.htm, or .txt when --plain-text is given), or to the");
-            Console.WriteLine("directory given by -o / --output-dir if one is specified. Existing");
-            Console.WriteLine("output files are skipped unless --force is given. The tool never");
+            Console.WriteLine("default (.htm, or .txt when /plain-text is given), or to the");
+            Console.WriteLine("directory given by -o / /output-dir if one is specified. Existing");
+            Console.WriteLine("output files are skipped unless /force is given. The tool never");
             Console.WriteLine("overwrites a source file with its own converted output.");
             Console.WriteLine();
             Console.WriteLine("Exit codes:");

@@ -463,29 +463,29 @@ GUI mode regardless.</p>
 <hr />
 <h2 id="command-line-options">Command-line options</h2>
 <ul>
-<li><code>-f</code>, <code>--force</code> — overwrite an existing
+<li><code>-f</code>, <code>/force</code> — overwrite an existing
 <code>&lt;basename&gt;.htm</code> instead of skipping the input.</li>
-<li><code>-g</code>, <code>--gui-mode</code> — show the parameter
+<li><code>-g</code>, <code>/gui-mode</code> — show the parameter
 dialog.</li>
-<li><code>-h</code>, <code>--help</code> — show usage and exit.</li>
-<li><code>-l</code>, <code>--log</code> — also write
+<li><code>-h</code>, <code>/help</code> — show usage and exit.</li>
+<li><code>-l</code>, <code>/log</code> — also write
 <code>2htm.log</code> (UTF-8 with BOM) in the output directory, replaced
 each session. A session log is always kept in
 <code>%LOCALAPPDATA%\2htm\logs</code>.</li>
 <li><code>-o &lt;folder&gt;</code>,
-<code>--output-dir &lt;folder&gt;</code> — write output to
+<code>/output-dir &lt;folder&gt;</code> — write output to
 <code>&lt;folder&gt;</code> (made if missing); the default is beside
 each source file, in its own folder.</li>
-<li><code>-p</code>, <code>--plain-text</code> — produce plain-text
+<li><code>-p</code>, <code>/plain-text</code> — produce plain-text
 <code>.txt</code> output instead of HTML.</li>
-<li><code>-s</code>, <code>--strip-images</code> — drop image references
+<li><code>-s</code>, <code>/strip-images</code> — drop image references
 from the output.</li>
-<li><code>-u</code>, <code>--use-configuration</code> — read saved
+<li><code>-u</code>, <code>/use-configuration</code> — read saved
 settings from <code>%LOCALAPPDATA%\2htm\configs\2htm.inix</code>.</li>
-<li><code>-v</code>, <code>--version</code> — show the version and
+<li><code>-v</code>, <code>/version</code> — show the version and
 exit.</li>
-<li><code>--view-output</code> — after the run, open the output
-directory in File Explorer.</li>
+<li><code>/view-output</code> — after the run, open the output directory
+in File Explorer.</li>
 </ul>
 <p>Every option in the GUI corresponds one-to-one with a command-line
 flag, so a workflow prototyped in the dialog can be translated to a

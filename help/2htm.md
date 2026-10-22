@@ -117,16 +117,16 @@ When invoked without arguments from a GUI shell (Explorer double-click, Start-me
 
 ## Command-line options
 
-- `-f`, `--force` — overwrite an existing `<basename>.htm` instead of skipping the input.
-- `-g`, `--gui-mode` — show the parameter dialog.
-- `-h`, `--help` — show usage and exit.
-- `-l`, `--log` — also write `2htm.log` (UTF-8 with BOM) in the output directory, replaced each session. A session log is always kept in `%LOCALAPPDATA%\2htm\logs`.
-- `-o <folder>`, `--output-dir <folder>` — write output to `<folder>` (made if missing); the default is beside each source file, in its own folder.
-- `-p`, `--plain-text` — produce plain-text `.txt` output instead of HTML.
-- `-s`, `--strip-images` — drop image references from the output.
-- `-u`, `--use-configuration` — read saved settings from `%LOCALAPPDATA%\2htm\configs\2htm.inix`.
-- `-v`, `--version` — show the version and exit.
-- `--view-output` — after the run, open the output directory in File Explorer.
+- `-f`, `/force` — overwrite an existing `<basename>.htm` instead of skipping the input.
+- `-g`, `/gui-mode` — show the parameter dialog.
+- `-h`, `/help` — show usage and exit.
+- `-l`, `/log` — also write `2htm.log` (UTF-8 with BOM) in the output directory, replaced each session. A session log is always kept in `%LOCALAPPDATA%\2htm\logs`.
+- `-o <folder>`, `/output-dir <folder>` — write output to `<folder>` (made if missing); the default is beside each source file, in its own folder.
+- `-p`, `/plain-text` — produce plain-text `.txt` output instead of HTML.
+- `-s`, `/strip-images` — drop image references from the output.
+- `-u`, `/use-configuration` — read saved settings from `%LOCALAPPDATA%\2htm\configs\2htm.inix`.
+- `-v`, `/version` — show the version and exit.
+- `/view-output` — after the run, open the output directory in File Explorer.
 
 Every option in the GUI corresponds one-to-one with a command-line flag, so a workflow prototyped in the dialog can be translated to a batch file without surprises.
 

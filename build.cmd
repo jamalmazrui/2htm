@@ -65,7 +65,7 @@ set "progFiles=%ProgramFiles%"
 
 rem ---- SETTINGS: the part an app edits -------------------------------
 rem The oldest kit with everything this build uses.
-set "kitNeeded=1.87.4"
+set "kitNeeded=1.87.5"
 rem The number to start from when version.txt is missing. A newer release
 rem tag, if the repository has one, wins. It is also a floor: a version.txt
 rem holding less is raised to it.
@@ -81,7 +81,7 @@ rem Say; Mdi needs KeyMap. Each is compiled from C:\HomerDev\exec\CSharp.
 rem 2htm's dialog is built with Lbc (since 1.19.1), which needs Elevate,
 rem Inix, Log, Say and Util; Elevate needs Web, Log needs Paths and Say.
 rem The kit's one conversion technique (20 October 2026): Conversion, its page form and Table.
-set "homerModules=Conversion ConversionPage Elevate Inix Lbc Log Paths Say Table Util Web"
+set "homerModules=Conversion ConversionMedia ConversionPage Elevate Inix Lbc Log Media Paths Say Table Util Voice Web"
 rem The app's own sources beside 2htm.cs, if any, space separated.
 set "appSources="
 rem Files embedded in the program as resources, space separated: a sound, a

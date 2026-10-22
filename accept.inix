@@ -3,6 +3,12 @@
 ; and Wants, when given, a string its output must contain.
 
 [check]
+Name   = switches are written /switch, in any case
+Run    = exec\2htm.exe /HELP
+Expect = 0
+Wants  = /output-dir
+
+[check]
 Name   = the help names the configuration file
 Run    = exec\2htm.exe --help
 Expect = 0

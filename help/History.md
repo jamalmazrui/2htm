@@ -7,6 +7,8 @@ author: "Jamal Mazrui"
 
 ## 20 October 2026 -- Converting through the Homer kit
 
+- **Switches follow the Homer convention:** /force, -force and --force alike, in any case, as every Homer app reads them; the single letters still work, and help shows the /switch form. /view and /output are short for /view-output and /output-dir, as in BatCon.
+- **Recordings and speech, as in every Homer app:** a recording converts to a transcript, and a document to spoken audio, through the Homer kit. The build needs HomerDev 1.87.5 or later.
 - **2htm converts through the Homer kit,** as every Homer app does, so a file becomes the same web page or text in 2htm as anywhere else. The page form every Homer app now uses came from 2htm: the stylesheet, one heading for the title, the page's parts marked for a screen reader, and pictures carried inside. Word, Excel and PowerPoint files still use Office when Pandoc is not installed.
 - **Markdig is no longer part of 2htm;** Markdown becomes a web page through the kit.
 - **The build needs HomerDev 1.87.4 or later.**
