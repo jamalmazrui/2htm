@@ -65,7 +65,7 @@ set "progFiles=%ProgramFiles%"
 
 rem ---- SETTINGS: the part an app edits -------------------------------
 rem The oldest kit with everything this build uses.
-set "kitNeeded=1.87.5"
+set "kitNeeded=1.88.2"
 rem The number to start from when version.txt is missing. A newer release
 rem tag, if the repository has one, wins. It is also a floor: a version.txt
 rem holding less is raised to it.
@@ -81,7 +81,7 @@ rem Say; Mdi needs KeyMap. Each is compiled from C:\HomerDev\exec\CSharp.
 rem 2htm's dialog is built with Lbc (since 1.19.1), which needs Elevate,
 rem Inix, Log, Say and Util; Elevate needs Web, Log needs Paths and Say.
 rem The kit's one conversion technique (20 October 2026): Conversion, its page form and Table.
-set "homerModules=Conversion ConversionMedia ConversionPage Elevate Inix Lbc Log Media Paths Say Table Util Voice Web"
+set "homerModules=Conversion ConversionMedia ConversionPage ConversionPdf Elevate Inix Lbc Log Media Paths PdfReader Say Table Util Voice Web"
 rem The app's own sources beside 2htm.cs, if any, space separated.
 set "appSources="
 rem Files embedded in the program as resources, space separated: a sound, a
@@ -100,7 +100,7 @@ set "nugetPackages="
 rem The kit tools this app uses, refreshed into scripts\ on every build.
 rem Name each; add one the day it is used (installCommon.cmd for install
 rem scripts written in cmd, buildTutorials and its fellows once a walk exists).
-set "kitTools=buildTutorials.cmd buildTutorials.ps1 check.cmd check.py checkTutorial.cmd checkTutorial.py fixEncoding.cmd fixEncoding.py kind.cmd kind.py makeTutorials.cmd makeTutorials.py push.cmd release.cmd release.ps1 tidy.cmd tidy.py unpushed.cmd unpushed.py"
+set "kitTools=buildTutorials.cmd buildTutorials.ps1 check.cmd check.py checkTutorial.cmd checkTutorial.py fixEncoding.cmd fixEncoding.py getPdfPig.cmd getPdfPig.ps1 kind.cmd kind.py makeTutorials.cmd makeTutorials.py push.cmd release.cmd release.ps1 tidy.cmd tidy.py unpushed.cmd unpushed.py"
 set "useDocs=1"
 set "useInstaller=1"
 set "useVersionSteps=1"
@@ -307,6 +307,44 @@ for %%P in (!nugetPackages!) do (
     set "extraRefs=!extraRefs! /reference:"exec\%%b""
   )
 )
+
+rem ---- PdfPig, for the kit's own PdfReader (kit 1.88.0) -------------------
+rem Every converting Homer app reads a PDF with the kit's PdfReader, the one technique;
+rem PdfPig (Apache 2.0) is what it reads with. The kit's getPdfPig fetches it, pinned, with
+rem every assembly it needs, into exec, and writes the program's .exe.config with the binding
+rem redirects they need -- HomerScribe's proven way. nuget.exe is used when present, and
+rem nuget.org directly when not.
+where nuget >nul 2>&1
+if not errorlevel 1 (
+  >> "%log%" echo Asking nuget for PdfPig and its dependencies
+  nuget install PdfPig -Version 0.1.16 -OutputDirectory work\packages -ExcludeVersion -NonInteractive -DependencyVersion Highest >> "%log%" 2>&1
+)
+rem The kit's own copy is run, not the one refreshed into scripts: some builds refresh their
+rem kit scripts after compiling, when this step has already run (2htm, FileDir, 22 October 2026).
+if not exist "!homerDev!\scripts\getPdfPig.ps1" (
+  echo The kit has no scripts\getPdfPig.ps1. Update HomerDev to !kitNeeded! or later.
+  >> "%log%" echo ERROR: !homerDev!\scripts\getPdfPig.ps1 missing
+  goto :failed
+)
+powershell -NoProfile -ExecutionPolicy Bypass -File "!homerDev!\scripts\getPdfPig.ps1" -App "%app%" >> "%log%" 2>&1
+>> "%log%" echo Ran: getPdfPig, exit code !errorlevel!
+set "pdfDll="
+if exist "exec\pdfpig.name" set /p pdfDll=<exec\pdfpig.name
+if not defined pdfDll (
+  echo PdfPig could not be found or fetched, so PDFs could not be read. The log says what was tried.
+  >> "%log%" echo ERROR: PdfPig could not be found or fetched
+  goto :failed
+)
+if not exist "exec\%app%.exe.config" (
+  echo %app%.exe.config was not written, so PDFs would fail at run time. The log says why.
+  >> "%log%" echo ERROR: exec\%app%.exe.config missing
+  goto :failed
+)
+for %%F in (exec\*PdfPig*.dll) do set "extraRefs=!extraRefs! /reference:"%%~fF""
+rem The companions are named bare, so each is found in exec by its full path there; %%~fF
+rem would resolve a bare name against the project folder (BatCon's first build, 22 October 2026).
+for %%F in (Microsoft.Bcl.HashCode.dll System.Buffers.dll System.Memory.dll System.Numerics.Vectors.dll System.Runtime.CompilerServices.Unsafe.dll System.ValueTuple.dll) do if exist "exec\%%F" set "extraRefs=!extraRefs! /reference:"%CD%\exec\%%F""
+>> "%log%" echo PdfPig: !pdfDll! and its companions referenced from exec
 set "resourceArgs="
 for %%R in (!csResources!) do (
   if exist "%%R" (

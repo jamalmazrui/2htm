@@ -125,6 +125,9 @@ Name: "{app}\help"
 [Files]
 ; THE PROGRAM goes in exec. Everything 2htm needs is inside it.
 Source: "exec\{#AppExeName}"; DestDir: "{app}\exec"; Flags: ignoreversion
+; PdfPig and its companions, for the kit's PdfReader, with the redirects they need (1.88.0).
+Source: "exec\*.dll"; DestDir: "{app}\exec"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "exec\{#AppExeName}.config"; DestDir: "{app}\exec"; Flags: ignoreversion
 ; The Homer kit's conversion routes (20 October 2026): 2htm converts through the kit.
 Source: "exec\conversions.inix"; DestDir: "{app}\exec"; Flags: ignoreversion
 ; The command-line wrapper stays at the top, where typing 2htm in the

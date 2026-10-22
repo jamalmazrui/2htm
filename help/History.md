@@ -7,6 +7,7 @@ author: "Jamal Mazrui"
 
 ## 20 October 2026 -- Converting through the Homer kit
 
+- **PDFs are read with the Homer kit's own PDF reader,** as in BatCon and bookFido, keeping a tagged PDF's structure and reading an untagged one by its layout. The build fetches PdfPig by itself. It needs HomerDev 1.88.0 or later.
 - **The guide describes conversion as it is now:** through the Homer kit, with Office needed only for Word documents without Pandoc and for the older Office formats; Markdig is no longer mentioned.
 - **Switches follow the Homer convention:** /force, -force and --force alike, in any case, as every Homer app reads them; the single letters still work, and help shows the /switch form. /view and /output are short for /view-output and /output-dir, as in BatCon.
 - **Recordings and speech, as in every Homer app:** a recording converts to a transcript, and a document to spoken audio, through the Homer kit. The build needs HomerDev 1.87.5 or later.
