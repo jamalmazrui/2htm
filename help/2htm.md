@@ -69,7 +69,7 @@ The dialog is the one every Homer launch app shows, in rows called bands that re
 - **Strip images** [I] — drop image references from the output
 - **Output directory** [O] — where the output is written. Blank means beside each source file, in its own folder.
 - **Choose output directory** [C] — pick the output directory from a folder picker
-- **Force replacements** [F] — overwrite an existing `<basename>.htm` instead of skipping the input. Without this, 2htm skips an input whose .htm already exists in the output directory.
+- **Force replacements** [F] — do the work again for a source whose result is already there, replacing the old result once the new one is complete. Unchecked, that source is skipped, its result kept, and the Results box says how many.
 - **Use configuration** [U] — load these field values from the saved configuration at startup, and save them back when you press OK
 - **View output directory** [V] — open the output directory in File Explorer when the run is done, after you close the Results box
 - **Default settings** [D] — clear all fields, uncheck all boxes, and delete the saved configuration if any
@@ -116,7 +116,7 @@ When invoked without arguments from a GUI shell (Explorer double-click, Start-me
 ## Command-line options
 
 - `-d`, `/default-settings` — forget the saved settings and exit.
-- `-f`, `/force-replacements` — overwrite an existing `<basename>.htm` instead of skipping the input.
+- `-f`, `/force-replacements` — do the work again for a source whose result is already there, replacing it; without it, that source is skipped and its result kept.
 - `-g`, `/gui-mode` — show the parameter dialog.
 - `-h`, `/help` — show usage and exit.
 - `-i`, `/strip-images` — drop image references from the output. (`-s` also works)

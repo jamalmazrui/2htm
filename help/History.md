@@ -13,7 +13,8 @@ author: "Jamal Mazrui"
 - **Logging is automatic.** The Log session checkbox and /log are gone; every run writes %LOCALAPPDATA%\2htm\logs\2htm-yyyyMMdd-HHmmss.log. The Guide button is gone too.
 - **Every run ends with the Results box,** whose one OK button has the focus, so Enter, Space or Escape closes it; the output directory then opens if View output directory is checked, and 2htm closes.
 - **Switches match the dialog:** a long switch is a control's label and a short one its Alt letter, written with /, - or --, in any case. New: -d, --default-settings; -i for Strip images (-s still works); -v is now View output directory, so the version is /version alone. The older names still work.
-- **The progress window is the kit's,** LaunchProgress: "2htm, <status>" in its title, a Status box with the focus, Cancel (Escape) to stop after the current file, and speech only while 2htm is the window in front. Its own window's status label was not reliably spoken, and it had no way out.
+- **The progress window is the kit's,** LaunchProgress: "2htm, <status>" in its title, a Status box with the focus, the percentage done and time left ("2 of 5 done, 40%, about 3 min left"), Cancel (Escape) to stop after the current file, and speech only while 2htm is the window in front. Its own window's status label was not reliably spoken, and it had no way out.
+- **Force replacements works as in every launch app:** unchecked, a source whose result is already there is skipped and kept, and the Results box says how many and how to replace them; checked, the work is done again and the old result kept until the new one is complete. Its tip is now the kit's standard one.
 - **The build needs HomerDev 1.89.0 or later.**
 
 ## 20 October 2026 -- Converting through the Homer kit

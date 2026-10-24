@@ -635,9 +635,7 @@ namespace twoHtm
                     }
                     if (iSkippedExisting > 0) {
                         if (iConverted > 0 || iFailed > 0) Console.WriteLine();
-                        Console.WriteLine("Skipped " + iSkippedExisting + " " +
-                            (iSkippedExisting == 1 ? "file" : "files") +
-                            ". Check \"Force replacements\" to overwrite.");
+                        Console.WriteLine(LaunchDialog.keptLine(iSkippedExisting, "file"));
                     }
                     if (iConverted == 0 && iFailed == 0 && iSkippedExisting == 0) {
                         Console.WriteLine("No supported files to convert.");
@@ -1338,7 +1336,7 @@ namespace twoHtm
                         if (bOutputMirrorsSource) tbOut.Text = sMirror;
                     };
 
-                    oLaunch.addOperationBands(bForce, "Overwrite an existing output file instead of skipping the input.",
+                    oLaunch.addOperationBands(bForce, "",
                         bUseCfg, "Load these settings next time, and save them when you press OK, in configs\\" + program.sConfigFileName + ".",
                         bView, "Open the output directory in File Explorer when the run is done.");
 
