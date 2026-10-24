@@ -5,6 +5,17 @@ author: "Jamal Mazrui"
 
 # 2htm History
 
+## 23 October 2026 -- the Homer launch dialog
+
+- **The dialog is the one every Homer launch app shows,** built by the Homer kit's LaunchDialog (kit 1.89.0). It is in rows called bands, read left to right: Source paths and Browse local source; Plain text and Strip images; Output directory and Choose output directory; Force replacements, Use configuration and View output directory; Default settings and Help; then OK and Cancel alone at the bottom right, as Microsoft's dialog guidance places them.
+- **Insert+Tab names the Source paths box again, and the Output directory box is found again.** The kit put a band's label after the band, so the box had no name and Browse seemed to come first.
+- **Control+Enter is OK and Escape is Cancel from any control, and F11 checks for a newer version from anywhere.** Help says so, and says where the logs are kept.
+- **Logging is automatic.** The Log session checkbox and /log are gone; every run writes %LOCALAPPDATA%\2htm\logs\2htm-yyyyMMdd-HHmmss.log. The Guide button is gone too.
+- **Every run ends with the Results box,** whose one OK button has the focus, so Enter, Space or Escape closes it; the output directory then opens if View output directory is checked, and 2htm closes.
+- **Switches match the dialog:** a long switch is a control's label and a short one its Alt letter, written with /, - or --, in any case. New: -d, --default-settings; -i for Strip images (-s still works); -v is now View output directory, so the version is /version alone. The older names still work.
+- **The progress window is the kit's,** LaunchProgress: "2htm, <status>" in its title, a Status box with the focus, Cancel (Escape) to stop after the current file, and speech only while 2htm is the window in front. Its own window's status label was not reliably spoken, and it had no way out.
+- **The build needs HomerDev 1.89.0 or later.**
+
 ## 20 October 2026 -- Converting through the Homer kit
 
 - **PDFs are read with the Homer kit's own PDF reader,** as in BatCon and bookFido, keeping a tagged PDF's structure and reading an untagged one by its layout. The build fetches PdfPig by itself. It needs HomerDev 1.88.0 or later.

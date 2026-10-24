@@ -13,10 +13,10 @@ Key=
 
 [step]
 
-Say=I open the dialog. Source files can hold several files at once, separated by spaces.
+Say=I open the dialog. Source paths can hold several files at once, separated by spaces.
 Key=Alt+Control+2
 Hear=2htm dialog
-Hear=Source files edit
+Hear=Source paths edit
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

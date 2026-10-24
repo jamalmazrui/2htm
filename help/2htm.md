@@ -61,28 +61,26 @@ Launch `2htm` from any of these:
 - The Start-menu shortcut
 - Double-clicking `2htm.exe` in the `exec` folder in File Explorer
 
-The parameter dialog has these controls. Each label has an underlined letter that you can press with **Alt** to jump straight to that control:
+The dialog is the one every Homer launch app shows, in rows called bands that read left to right. Tab moves through its controls in this order. Each label has an underlined letter that you can press with **Alt** to jump straight to that control:
 
-- **Source files** [S] — a single file path, a wildcard pattern (e.g., `*.docx`), or several of either separated by spaces. A single path containing spaces does not need quotes — 2htm recognizes the entire trimmed field as one path when it points to an existing file or directory. Quotes are only needed when supplying multiple specs and at least one contains a space.
-- **Browse source...** [B] — pick a single source from a file picker
-- **Output directory** [O] — where the output is written. Blank means beside each source file, in its own folder.
-- **Choose output...** [C] — pick the output directory from a folder picker
-- **Strip images** [I] — drop image references from the output
+- **Source paths** [S] — a single file path, a wildcard pattern (e.g., `*.docx`), or several of either separated by spaces. A single path containing spaces does not need quotes — 2htm recognizes the entire trimmed field as one path when it points to an existing file or directory. Quotes are only needed when supplying multiple specs and at least one contains a space.
+- **Browse local source** [B] — pick a single source from a file picker
 - **Plain text** [P] — produce plain-text `.txt` output instead of HTML
+- **Strip images** [I] — drop image references from the output
+- **Output directory** [O] — where the output is written. Blank means beside each source file, in its own folder.
+- **Choose output directory** [C] — pick the output directory from a folder picker
 - **Force replacements** [F] — overwrite an existing `<basename>.htm` instead of skipping the input. Without this, 2htm skips an input whose .htm already exists in the output directory.
-- **View output** [V] — open the output directory in File Explorer when the run is done
-- **Log session** [L] — also write a fresh `2htm.log` in the output directory (or current directory if no output directory is set). A session log is always kept in `%LOCALAPPDATA%\2htm\logs`.
 - **Use configuration** [U] — load these field values from the saved configuration at startup, and save them back when you press OK
-- **Guide** [G] — open this guide in your browser, then return to the dialog with everything as it was.
-- **Help** [H] — list every field with its tip, the dialog's keys, and the version check. F1 also shows Help.
+- **View output directory** [V] — open the output directory in File Explorer when the run is done, after you close the Results box
 - **Default settings** [D] — clear all fields, uncheck all boxes, and delete the saved configuration if any
-- **OK** / **Cancel** — start the run, or cancel without running. Enter is OK; Escape is Cancel.
+- **Help** [H] — list every field with its tip, the dialog's keys, where the logs are kept, and the version check. F1 also shows Help.
+- **OK** / **Cancel** — alone at the bottom right: start the run, or close without running. Control+Enter is OK and Escape is Cancel, from any control.
 
-More keys work anywhere in the dialog: **F1** shows Help, **F11** checks the web for a newer version of 2htm (see Updating), **Control+Enter** is OK from any control, **Shift+F1** says the tip for the field you are on, and **F7** lists the dialog's controls so you can move to one. The dialog is built with the Homer Lbc classes, so its text fields also have the Lbc editing keys, which Help lists.
+More keys work anywhere in the dialog: **F1** shows Help, **F11** checks the web, from any control, for a newer version of 2htm (see Updating), **Control+Enter** is OK from any control, **Shift+F1** says the tip for the field you are on, and **F7** lists the dialog's controls so you can move to one. The dialog is built with the Homer Lbc classes, so its text fields also have the Lbc editing keys, which Help lists.
 
-**Default settings** and **Guide** return you to the dialog; Default settings first clears the fields and deletes any saved configuration.
+**Default settings** returns you to the dialog with the fields cleared and any saved configuration deleted. Every run ends with the 2htm Results box. Its only button is OK, so Enter, Space or Escape closes it; then the output directory opens if View output directory is checked, and 2htm closes. A long report shows its first 15 lines and names a file with the rest.
 
-The Browse source and Choose output pickers open at the directory derived from the corresponding text field's current value when that value points to an existing path; otherwise they open at your Documents folder. With **Use configuration** checked, those text fields are pre-populated from your last session, so the pickers naturally pick up where you left off.
+The Browse local source and Choose output directory pickers open at the directory derived from the corresponding text field's current value when that value points to an existing path; otherwise they open at your Documents folder. With **Use configuration** checked, those text fields are pre-populated from your last session, so the pickers naturally pick up where you left off.
 
 If you press OK with an output directory that does not yet exist, 2htm prompts to create it (default Yes). Choosing No keeps the dialog open with focus on the output field so you can correct it.
 
@@ -117,18 +115,18 @@ When invoked without arguments from a GUI shell (Explorer double-click, Start-me
 
 ## Command-line options
 
-- `-f`, `/force` — overwrite an existing `<basename>.htm` instead of skipping the input.
+- `-d`, `/default-settings` — forget the saved settings and exit.
+- `-f`, `/force-replacements` — overwrite an existing `<basename>.htm` instead of skipping the input.
 - `-g`, `/gui-mode` — show the parameter dialog.
 - `-h`, `/help` — show usage and exit.
-- `-l`, `/log` — also write `2htm.log` (UTF-8 with BOM) in the output directory, replaced each session. A session log is always kept in `%LOCALAPPDATA%\2htm\logs`.
-- `-o <folder>`, `/output-dir <folder>` — write output to `<folder>` (made if missing); the default is beside each source file, in its own folder.
+- `-i`, `/strip-images` — drop image references from the output. (`-s` also works)
+- `-o <folder>`, `/output-directory <folder>` — write output to `<folder>` (made if missing); the default is beside each source file, in its own folder.
 - `-p`, `/plain-text` — produce plain-text `.txt` output instead of HTML.
-- `-s`, `/strip-images` — drop image references from the output.
 - `-u`, `/use-configuration` — read saved settings from `%LOCALAPPDATA%\2htm\configs\2htm.inix`.
-- `-v`, `/version` — show the version and exit.
-- `/view-output` — after the run, open the output directory in File Explorer.
+- `/version` — show the version and exit.
+- `-v`, `/view-output-directory` — after the run, open the output directory in File Explorer.
 
-Every option in the GUI corresponds one-to-one with a command-line flag, so a workflow prototyped in the dialog can be translated to a batch file without surprises.
+Every option in the dialog has a command-line switch named after its label, whose letter is the control's Alt letter, and switches may be written with /, - or --, in any case, so a workflow prototyped in the dialog can be translated to a batch file without surprises.
 
 ---
 
@@ -181,9 +179,7 @@ Settings saved by versions before 1.19, in `%LOCALAPPDATA%\2htm\2htm.ini`, are r
 
 Each run gets its own file, named for the moment it started, so sorting the folder by name also sorts it by time. The 30 newest are kept. The log starts with the version, where the program ran from, the Windows version, the working folder, the command line and every setting, then records each file converted and any error with its full details. If something goes wrong, zip the `logs` folder and send it.
 
-**Log session** (or `-l`) additionally writes a fresh `2htm.log` in the output directory (or the current directory if none is set), so a log can travel with the output. Any prior `2htm.log` there is replaced.
-
-Both logs are UTF-8 with a byte-order mark, so Notepad opens them correctly.
+Logging is automatic: there is no checkbox or switch for it, and Help names the folder. The log is UTF-8 with a byte-order mark, so Notepad opens it correctly.
 
 ---
 

@@ -19,7 +19,7 @@ You need Windows 10 or 11, 64-bit, and the Office program for each kind of Offic
 
 ## Convert a file
 
-1. Press **Alt+Control+2** from anywhere in Windows (except inside Word, which keeps that key for Heading 2). The 2htm dialog opens with focus in **Source files**.
+1. Press **Alt+Control+2** from anywhere in Windows (except inside Word, which keeps that key for Heading 2). The 2htm dialog opens with focus in **Source paths**.
 2. Type a file name, a folder, or a pattern such as `*.docx`.
 3. Press Enter.
 

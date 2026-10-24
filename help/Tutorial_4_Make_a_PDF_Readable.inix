@@ -13,10 +13,10 @@ Key=
 
 [step]
 
-Say=I open the dialog and type the PDF's path in Source files. Typing works as well as browsing.
+Say=I open the dialog and type the PDF's path in Source paths. Typing works as well as browsing.
 Key=Alt+Control+2
 Hear=2htm dialog
-Hear=Source files edit
+Hear=Source paths edit
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

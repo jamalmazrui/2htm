@@ -13,10 +13,10 @@ Key=
 
 [step]
 
-Say=I open the dialog. In Source files, a folder's path is enough: 2htm converts every document in it that it knows how to read.
+Say=I open the dialog. In Source paths, a folder's path is enough: 2htm converts every document in it that it knows how to read.
 Key=Alt+Control+2
 Hear=2htm dialog
-Hear=Source files edit
+Hear=Source paths edit
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
@@ -47,16 +47,15 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Log session, L, keeps a log of the whole run beside the pages.
-Key=Alt+L
-Hear=Log session check box, checked
+Say=Logging is automatic, so there is no box to tick for it. Every run's log is kept in the program's logs folder, under your local application data, and Help names that folder.
+Key=
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=View output, V, opens the Pages folder at the end.
+Say=View output directory, V, opens the Pages folder at the end.
 Key=Alt+V
-Hear=View output check box, checked
+Hear=View output directory check box, checked
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

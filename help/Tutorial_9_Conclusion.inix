@@ -65,9 +65,9 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=F7 lists the dialog's controls. Guide, Alt plus G, opens the full guide and returns to the dialog as you left it.
-Key=Alt+G
-Hear=Guide button
+Say=F7 lists the dialog's controls. Help, Alt plus H, does what F1 does, and also says where the automatic logs are kept.
+Key=Alt+H
+Hear=Help button
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

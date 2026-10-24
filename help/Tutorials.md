@@ -32,7 +32,7 @@ You know your screen reader's own keys already, and three of them are worth reme
 
 Screen reader:
 
-- Source files edit
+- Source paths edit
 
 ### Step 3: Insert+Tab
 
@@ -40,7 +40,7 @@ Insert plus Tab says what has the focus: its name, its role, and its value or st
 
 Screen reader:
 
-- Source files edit, blank
+- Source paths edit, blank
 
 ### Step 4: Insert+T
 
@@ -101,13 +101,13 @@ I press the desktop key for 2htm. The dialog opens on its first field.
 Screen reader:
 
 - 2htm dialog
-- Source files edit
+- Source paths edit
 
 Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 3
 
-Source files names what to convert: one file, a folder, a pattern such as star dot docx, or several with spaces between. Its letter is S.
+Source paths names what to convert: one file, a folder, a pattern such as star dot docx, or several with spaces between. Its letter is S.
 
 ### Step 4: Tab
 
@@ -115,7 +115,7 @@ Tab moves to the next control, a button that opens a file picker.
 
 Screen reader:
 
-- Browse source button
+- Browse local source button
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -131,7 +131,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 6
 
-Left blank, each web page is written beside its document. Choose output, C, picks a folder instead of typing one.
+Left blank, each web page is written beside its document. Choose output directory, C, picks a folder instead of typing one.
 
 ### Step 7: Alt+F
 
@@ -165,7 +165,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 10
 
-View output, V, opens the folder when the run is done; Log session, L, writes a log beside the output; Use configuration, U, remembers these choices for next time.
+View output directory, V, opens the folder when the run is done; Use configuration, U, remembers these choices for next time.
 
 ### Step 11: Space
 
@@ -229,37 +229,37 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 17: Enter
 
-I choose Source files.
+I choose Source paths.
 
 Screen reader:
 
-- Source files edit
+- Source paths edit
 
 Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 18: Tab
 
-Enter starts converting from any field, and Control plus Enter does the same from any control. Escape closes the dialog without converting.
+Control plus Enter starts converting from any control. Escape presses Cancel from any control, closing the dialog without converting.
 
 Screen reader:
 
-- Browse source button
+- Browse local source button
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 19: Alt+G
+### Step 19: Alt+H
 
-Two more buttons sit at the end. Guide, G, opens the full guide in the browser and returns here; Default settings, D, clears every field and box.
+Two buttons sit in their own band, above OK and Cancel. Default settings, D, clears every field and box; Help, H, lists every field, says where the logs are kept, and checks for a newer version.
 
 Screen reader:
 
-- Guide button
+- Help button
 
 Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 20: Up Arrow
 
-The text fields remember your answers. In Source files, Up Arrow brings back what you typed last time, and earlier answers above it.
+The text fields remember your answers. In Source paths, Up Arrow brings back what you typed last time, and earlier answers above it.
 
 Screen reader:
 
@@ -273,7 +273,7 @@ Down Arrow returns toward an empty field, so a fresh entry is a key or two away.
 
 Screen reader:
 
-- Source files edit, blank
+- Source paths edit, blank
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -360,12 +360,12 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 8: Enter
 
-When I close that box, 2htm starts, ready on Source files.
+When I close that box, 2htm starts, ready on Source paths.
 
 Screen reader:
 
 - 2htm dialog
-- Source files edit
+- Source paths edit
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -479,18 +479,18 @@ One want: a forty-page Word report that I can skim by heading, the way I skim a 
 
 ### Step 2: Alt+Control+2
 
-I open the dialog. The focus is on Source files.
+I open the dialog. The focus is on Source paths.
 
 Screen reader:
 
 - 2htm dialog
-- Source files edit
+- Source paths edit
 
 Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 3: Alt+B
 
-Browse source opens a file picker, rather than typing the path.
+Browse local source opens a file picker, rather than typing the path.
 
 Screen reader:
 
@@ -501,22 +501,22 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 4: Enter
 
-I type the start of the report's name and press Enter. Its full path is now in Source files.
+I type the start of the report's name and press Enter. Its full path is now in Source paths.
 
 Screen reader:
 
-- Source files edit
+- Source paths edit
 - C colon backslash Documents backslash Annual Report dot docx
 
 Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 5: Alt+V
 
-I tick View output, so the folder opens when the page is ready.
+I tick View output directory, so the folder opens when the page is ready.
 
 Screen reader:
 
-- View output check box, checked
+- View output directory check box, checked
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -695,12 +695,12 @@ One want: a PDF manual whose text I can read line by line and search, instead of
 
 ### Step 2: Alt+Control+2
 
-I open the dialog and type the PDF's path in Source files. Typing works as well as browsing.
+I open the dialog and type the PDF's path in Source paths. Typing works as well as browsing.
 
 Screen reader:
 
 - 2htm dialog
-- Source files edit
+- Source paths edit
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -855,12 +855,12 @@ One want: a document as clean text, to listen to in a synthesizer program on a w
 
 ### Step 2: Alt+Control+2
 
-I open the dialog and put the document's path in Source files.
+I open the dialog and put the document's path in Source paths.
 
 Screen reader:
 
 - 2htm dialog
-- Source files edit
+- Source paths edit
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1013,12 +1013,12 @@ One want: the slides from a talk I missed, and the budget workbook shared with i
 
 ### Step 2: Alt+Control+2
 
-I open the dialog. Source files can hold several files at once, separated by spaces.
+I open the dialog. Source paths can hold several files at once, separated by spaces.
 
 Screen reader:
 
 - 2htm dialog
-- Source files edit
+- Source paths edit
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1176,12 +1176,12 @@ One want: every document from a week of meetings, converted in one run, the page
 
 ### Step 2: Alt+Control+2
 
-I open the dialog. In Source files, a folder's path is enough: 2htm converts every document in it that it knows how to read.
+I open the dialog. In Source paths, a folder's path is enough: 2htm converts every document in it that it knows how to read.
 
 Screen reader:
 
 - 2htm dialog
-- Source files edit
+- Source paths edit
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1219,23 +1219,19 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 7: Alt+L
+### Step 7
 
-Log session, L, keeps a log of the whole run beside the pages.
-
-Screen reader:
-
-- Log session check box, checked
+Logging is automatic, so there is no box to tick for it. Every run's log is kept in the program's logs folder, under your local application data, and Help names that folder.
 
 Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 8: Alt+V
 
-View output, V, opens the Pages folder at the end.
+View output directory, V, opens the Pages folder at the end.
 
 Screen reader:
 
-- View output check box, checked
+- View output directory check box, checked
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1458,7 +1454,7 @@ A Task Scheduler entry that runs the batch file each Monday morning keeps a fold
 
 ### Step 18
 
-Dash dash view output opens the output folder at the end, as the dialog's box does.
+Dash dash view output directory opens the output folder at the end, as the dialog's box does.
 
 ### Step 19
 
@@ -1546,13 +1542,13 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 11: Alt+G
+### Step 11: Alt+H
 
-F7 lists the dialog's controls. Guide, Alt plus G, opens the full guide and returns to the dialog as you left it.
+F7 lists the dialog's controls. Help, Alt plus H, does what F1 does, and also says where the automatic logs are kept.
 
 Screen reader:
 
-- Guide button
+- Help button
 
 Confirm the wording with a live run: buildTutorials -live.
 

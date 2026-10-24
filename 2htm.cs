@@ -79,19 +79,13 @@ namespace twoHtm
         // file instead of skipping it. Without this flag, a file is
         // only converted when its target does not yet exist.
         //
-        // bLog: set by --log / -l, or by the GUI Log session
-        // checkbox. Creates 2htm.log in the output directory if one
-        // was specified (-o or the GUI Output field), or in the
-        // current directory otherwise. Streams detailed diagnostic
-        // information to it (in addition to the normal console
-        // output). Each session starts with a fresh file -- any
-        // prior log is overwritten. Intended to help debug
-        // conversion failures; upload the log file when reporting
-        // an issue.
+        // LOGGING IS AUTOMATIC (23 October 2026): there is no Log session
+        // checkbox and no /log switch. Every run writes
+        // %LOCALAPPDATA%\2htm\logs\2htm-yyyyMMdd-HHmmss.log, and the Help
+        // box and /help say so.
         public static bool bStripImages = false;
         public static bool bPlainText = false;
         public static bool bForce = false;
-        public static bool bLog = false;
         public static bool bGuiMode = false;
 
         // When true, the program was launched from File Explorer
@@ -126,7 +120,6 @@ namespace twoHtm
         public static bool bStripImagesFromCli = false;
         public static bool bPlainTextFromCli = false;
         public static bool bForceFromCli = false;
-        public static bool bLogFromCli = false;
         public static bool bViewOutputFromCli = false;
         public static bool bOutputDirFromCli = false;
         public static bool bSourceFromCli = false;
@@ -161,8 +154,8 @@ namespace twoHtm
             AppDomain.CurrentDomain.AssemblyResolve += resolveEmbeddedAssembly;
             // ONE SESSION LOG, ALWAYS: %LOCALAPPDATA%\2htm\logs\
             // 2htm-yyyyMMdd-HHmmss.log, from Homer's Log, with the
-            // environment already in its header. -l still writes 2htm.log
-            // beside the output as well. Neither Log nor Elevate touches
+            // environment already in its header. Logging is automatic, with
+            // no switch (23 October 2026). Neither Log nor Elevate touches
             // Markdig, so Main still references no embedded assembly.
             Log.start(sProgramName);
             Elevate.configure(sGitHubOwner, sProgramName, sProgramVersion);
@@ -332,18 +325,28 @@ namespace twoHtm
                 // folder at the drive's root, and 2htm took it for a source where that folder exists.
                 // Only an unknown name that is an existing file or folder is a source.
                 string sSwitch = Homer.Util.switchName(sArg);
-                string[] aKnown = { "f", "force", "g", "gui", "gui-mode", "h", "help", "l", "log", "o", "output", "output-dir",
-                    "p", "plain-text", "s", "strip-images", "u", "use-configuration", "v", "version", "view", "view-output" };
+                // THE LAUNCH SWITCHES (23 October 2026, help\LaunchDialog.md in the kit): a long
+                // switch is the dialog's label and a short one its Alt letter; the older names
+                // still work. /log went with the Log session checkbox, since logging is automatic,
+                // and -v is View output directory, so the version is /version alone.
+                string[] aKnown = { "d", "default-settings", "defaults", "f", "force", "force-replacements", "g", "gui", "gui-mode", "h", "help",
+                    "i", "o", "output", "output-dir", "output-directory", "p", "plain-text", "s", "strip-images", "u", "use-configuration",
+                    "v", "version", "view", "view-output", "view-output-directory" };
                 if (sSwitch != "" && Array.IndexOf(aKnown, sSwitch) < 0 && (File.Exists(sArg) || Directory.Exists(sArg))) sSwitch = "";
                 if (sSwitch == "help" || sSwitch == "h" || sArg == "/?" || sArg == "-?") {
                     printUsage();
                     return iExitOk;
                 }
-                if (sSwitch == "version" || sSwitch == "v") {
+                if (sSwitch == "default-settings" || sSwitch == "defaults" || sSwitch == "d") {
+                    configManager.eraseAll();
+                    Console.WriteLine("Default settings restored.");
+                    return iExitOk;
+                }
+                if (sSwitch == "version") {
                     Console.WriteLine(program.sProgramName + " " + sProgramVersion);
                     return iExitOk;
                 }
-                if (sSwitch == "strip-images" || sSwitch == "s") {
+                if (sSwitch == "strip-images" || sSwitch == "i" || sSwitch == "s") {
                     bStripImages = true; bStripImagesFromCli = true;
                     continue;
                 }
@@ -351,19 +354,15 @@ namespace twoHtm
                     bPlainText = true; bPlainTextFromCli = true;
                     continue;
                 }
-                if (sSwitch == "force" || sSwitch == "f") {
+                if (sSwitch == "force-replacements" || sSwitch == "force" || sSwitch == "f") {
                     bForce = true; bForceFromCli = true;
-                    continue;
-                }
-                if (sSwitch == "log" || sSwitch == "l") {
-                    bLog = true; bLogFromCli = true;
                     continue;
                 }
                 if (sSwitch == "gui-mode" || sSwitch == "gui" || sSwitch == "g") {
                     bGuiMode = true;
                     continue;
                 }
-                if (sSwitch == "view-output" || sSwitch == "view") {
+                if (sSwitch == "view-output-directory" || sSwitch == "view-output" || sSwitch == "view" || sSwitch == "v") {
                     bViewOutput = true; bViewOutputFromCli = true;
                     continue;
                 }
@@ -371,7 +370,7 @@ namespace twoHtm
                     bUseConfig = true;
                     continue;
                 }
-                if (sSwitch == "output-dir" || sSwitch == "output" || sSwitch == "o") {
+                if (sSwitch == "output-directory" || sSwitch == "output-dir" || sSwitch == "output" || sSwitch == "o") {
                     // Expects a following argument giving the
                     // directory. If missing or empty, treat as fatal
                     // so the user learns the correct usage.
@@ -438,17 +437,15 @@ namespace twoHtm
                 bool bPlain = bPlainText;
                 bool bForceLocal = bForce;
                 bool bView = bViewOutput;
-                bool bLogLocal = bLog;
                 bool bUseCfg = bUseConfig;
                 if (!guiDialog.show(ref sSource, ref sOut, ref bStrip,
-                    ref bPlain, ref bForceLocal, ref bView, ref bLogLocal, ref bUseCfg)) {
+                    ref bPlain, ref bForceLocal, ref bView, ref bUseCfg)) {
                     return iExitOk;
                 }
                 bStripImages = bStrip;
                 bPlainText = bPlain;
                 bForce = bForceLocal;
                 bViewOutput = bView;
-                bLog = bLogLocal;
                 bUseConfig = bUseCfg;
                 sOutputDir = sOut;
                 // Re-parse the source field. It may contain multiple
@@ -463,7 +460,7 @@ namespace twoHtm
                 // call).
                 if (bUseConfig) {
                     configManager.save(sSource, sOutputDir, bStripImages,
-                        bPlainText, bForce, bViewOutput, bLog);
+                        bPlainText, bForce, bViewOutput);
                 }
             } else if (lsFileArgs.Count == 0) {
                 printUsage();
@@ -485,7 +482,6 @@ namespace twoHtm
                 }
             }
 
-            if (bLog) logger.open(sOutputDir);
 
             // In GUI mode, capture all console output so we can
             // show it to the user at the end via MessageBox. In
@@ -495,6 +491,7 @@ namespace twoHtm
             // interrupting the user with on a successful run, but
             // errors must still be surfaced somehow since the user
             // has no visible console to read them from.
+            string sViewAfterResults = "";
             TextWriter writerOriginalOut = Console.Out;
             TextWriter writerOriginalErr = Console.Error;
             StringWriter stringWriterOut = null;
@@ -530,7 +527,6 @@ namespace twoHtm
                 lsParams.Add(new KeyValuePair<string, string>("Strip images",       bStripImages.ToString().ToLowerInvariant()));
                 lsParams.Add(new KeyValuePair<string, string>("View output",        bViewOutput.ToString().ToLowerInvariant()));
                 lsParams.Add(new KeyValuePair<string, string>("Use configuration",  bUseConfig.ToString().ToLowerInvariant()));
-                lsParams.Add(new KeyValuePair<string, string>("Log session",        bLog.ToString().ToLowerInvariant()));
                 lsParams.Add(new KeyValuePair<string, string>("GUI mode",           bGuiMode.ToString().ToLowerInvariant()));
                 lsParams.Add(new KeyValuePair<string, string>("Working directory",  Directory.GetCurrentDirectory()));
                 lsParams.Add(new KeyValuePair<string, string>("Command line",       string.Join(" ", asArgs)));
@@ -655,11 +651,16 @@ namespace twoHtm
                     // the shell, but only if at least one file was
                     // actually converted. Skipped-only runs should
                     // not pop an Explorer window.
+                    //
+                    // In the dialog's run the folder opens only after the Results
+                    // box is closed, so File Explorer does not take the focus
+                    // from the results (23 October 2026).
                     if (bViewOutput && iConverted > 0) {
                         string sDirToOpen = string.IsNullOrEmpty(sOutputDir)
                             ? Directory.GetCurrentDirectory()
                             : sOutputDir;
-                        shellHelper.openFolderSmart(sDirToOpen);
+                        if (bGuiMode) sViewAfterResults = sDirToOpen;
+                        else shellHelper.openFolderSmart(sDirToOpen);
                     }
                 }
             } finally {
@@ -668,9 +669,12 @@ namespace twoHtm
                     Console.SetOut(writerOriginalOut);
                     Console.SetError(writerOriginalErr);
                     string sCaptured = stringWriterOut != null ? stringWriterOut.ToString() : "";
-                    showFinalMessage(string.IsNullOrWhiteSpace(sCaptured)
+                    // THE RESULTS BOX ENDS THE RUN, then the output directory
+                    // opens if asked, and 2htm closes.
+                    LaunchDialog.showResults(program.sProgramName, string.IsNullOrWhiteSpace(sCaptured)
                         ? "Done. No output."
-                        : sCaptured);
+                        : sCaptured, iExitCode != iExitOk);
+                    if (sViewAfterResults != "") shellHelper.openFolderSmart(sViewAfterResults);
                 } else if (bHideConsoleMode) {
                     Console.SetError(writerOriginalErr);
                     string sErrText = stringWriterErr != null ? stringWriterErr.ToString() : "";
@@ -772,64 +776,11 @@ namespace twoHtm
             return false;
         }
 
-        // Displays a modal MessageBox with the captured console
-        // output. Large output is scrollable via a multi-line
-        // TextBox inside a small Form; small output uses the
-        // native MessageBox.
+        // showFinalMessage: an early error, as the Results box every
+        // Homer launch ends with (the kit's LaunchDialog.showResults).
         private static void showFinalMessage(string sText)
         {
-            // MessageBox handles ~1000 chars gracefully; longer than
-            // that and it truncates. Switch to a custom scrollable
-            // form for anything bigger than 800 chars or more than
-            // 15 lines.
-            bool bLong = sText.Length > 800 ||
-                sText.Split('\n').Length > 15;
-            if (!bLong) {
-                System.Windows.Forms.MessageBox.Show(sText,
-                    "2htm — Results",
-                    System.Windows.Forms.MessageBoxButtons.OK,
-                    System.Windows.Forms.MessageBoxIcon.Information);
-                return;
-            }
-
-            var frm = new System.Windows.Forms.Form();
-            frm.Text = "2htm — Results";
-            frm.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            frm.ClientSize = new System.Drawing.Size(600, 400);
-            frm.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
-            frm.MinimizeBox = false;
-            frm.MaximizeBox = true;
-            frm.ShowInTaskbar = false;
-            frm.Font = System.Drawing.SystemFonts.MessageBoxFont;
-
-            var txt = new System.Windows.Forms.TextBox();
-            txt.Multiline = true;
-            txt.ReadOnly = true;
-            txt.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            txt.Text = sText;
-            txt.Dock = System.Windows.Forms.DockStyle.Fill;
-            txt.Font = new System.Drawing.Font(System.Drawing.FontFamily.GenericMonospace,
-                9.0f);
-            frm.Controls.Add(txt);
-
-            var pnl = new System.Windows.Forms.Panel();
-            pnl.Height = 40;
-            pnl.Dock = System.Windows.Forms.DockStyle.Bottom;
-            frm.Controls.Add(pnl);
-
-            var btn = new System.Windows.Forms.Button();
-            btn.Text = "OK";
-            btn.DialogResult = System.Windows.Forms.DialogResult.OK;
-            btn.Size = new System.Drawing.Size(100, 26);
-            btn.Anchor = System.Windows.Forms.AnchorStyles.Top |
-                System.Windows.Forms.AnchorStyles.Right;
-            btn.Location = new System.Drawing.Point(
-                pnl.ClientSize.Width - btn.Width - 12, 7);
-            pnl.Controls.Add(btn);
-            frm.AcceptButton = btn;
-            frm.CancelButton = btn;
-
-            frm.ShowDialog();
+            LaunchDialog.showResults(program.sProgramName, sText, true);
         }
 
         // Loads assemblies that have been embedded as manifest
@@ -879,54 +830,31 @@ namespace twoHtm
             Console.WriteLine("  2htm /plain-text C:\\docs\\*.pdf reports\\*.docx");
             Console.WriteLine("  2htm /force /strip-images slides\\*.pptx");
             Console.WriteLine();
-            Console.WriteLine("Switches, written /switch, -switch or --switch, in any case:");
-            Console.WriteLine("  /help, /?            Show this help and exit.");
-            Console.WriteLine("  /version             Show the version number and exit.");
-            Console.WriteLine("  /force               Overwrite the target file if it already");
-            Console.WriteLine("                       exists. Default is to skip.");
-            Console.WriteLine("  /strip-images        Strip images from the output. No <img>");
-            Console.WriteLine("                       tags, no broken references, no alt text.");
-            Console.WriteLine("                       Use for large image-heavy documents.");
-            Console.WriteLine("  /plain-text          Produce .txt instead of .htm. Output is");
-            Console.WriteLine("                       readable plain text (no HTML markup).");
-            Console.WriteLine("  /output-dir          <dir>, /output <dir>");
-            Console.WriteLine("                       Write output files to <dir> instead of");
-            Console.WriteLine("                       the current directory. <dir> is created");
-            Console.WriteLine("                       if it does not exist.");
-            Console.WriteLine("  /gui-mode            Launch a dialog to enter parameters. Any");
-            Console.WriteLine("                       options given on the command line become");
-            Console.WriteLine("                       the defaults. After conversion, a message");
-            Console.WriteLine("                       box displays the per-file results. GUI mode");
-            Console.WriteLine("                       is also entered automatically when 2htm is");
-            Console.WriteLine("                       launched with no arguments from a GUI shell");
-            Console.WriteLine("                       such as File Explorer (e.g., by double-");
-            Console.WriteLine("                       clicking the executable or extracting it");
-            Console.WriteLine("                       from a zip archive and running it).");
-            Console.WriteLine("  /view-output         After conversion, open the output");
-            Console.WriteLine("                       directory in the default file manager");
-            Console.WriteLine("                       (typically File Explorer). Fires only if");
-            Console.WriteLine("                       at least one file was actually converted;");
-            Console.WriteLine("                       reuses an already-open window if one is");
-            Console.WriteLine("                       already displaying that directory.");
-            Console.WriteLine("  /use-configuration");
-            Console.WriteLine("                       Read saved defaults from");
-            Console.WriteLine("                       %LOCALAPPDATA%\\2htm\\configs\\2htm.inix. Any other");
-            Console.WriteLine("                       options supplied on the command line take");
-            Console.WriteLine("                       precedence over saved values. In GUI mode,");
-            Console.WriteLine("                       the Use configuration checkbox also");
-            Console.WriteLine("                       controls whether the current dialog values");
-            Console.WriteLine("                       are written back as next-run defaults.");
-            Console.WriteLine("                       Without -u (and no checkbox), no");
-            Console.WriteLine("                       settings are saved.");
-            Console.WriteLine("  /log                 Also write detailed diagnostics to 2htm.log");
-            Console.WriteLine("                       (UTF-8 with BOM) in the output directory if");
-            Console.WriteLine("                       one was specified, or the current working");
-            Console.WriteLine("                       directory otherwise. Any prior 2htm.log in");
-            Console.WriteLine("                       that location is overwritten so the file");
-            Console.WriteLine("                       always reflects only the current session.");
-            Console.WriteLine("                       Useful for reporting conversion problems.");
-            Console.WriteLine("                       A session log is always kept in");
-            Console.WriteLine("                       %LOCALAPPDATA%\\2htm\\logs.");
+            Console.WriteLine("Switches, written /switch, -switch or --switch, in any case. Each long");
+            Console.WriteLine("switch is a label in the dialog, and each letter is that control's Alt letter:");
+            Console.WriteLine("  -h, /help, /?                 Show this help and exit.");
+            Console.WriteLine("  /version                      Show the version number and exit.");
+            Console.WriteLine("  -p, /plain-text               Produce .txt instead of .htm: readable");
+            Console.WriteLine("                                plain text, no HTML markup.");
+            Console.WriteLine("  -i, /strip-images             Leave images out of the output: no <img>");
+            Console.WriteLine("                                tags, no broken references. Use for large");
+            Console.WriteLine("                                image-heavy documents. -s also works.");
+            Console.WriteLine("  -o, /output-directory <dir>   Write the results to <dir>, made if it does");
+            Console.WriteLine("                                not exist. Without it, the current folder.");
+            Console.WriteLine("  -f, /force-replacements       Overwrite a result that already exists.");
+            Console.WriteLine("                                Without it, that source is skipped.");
+            Console.WriteLine("  -u, /use-configuration        Start from the settings the dialog saved in");
+            Console.WriteLine("                                %LOCALAPPDATA%\\2htm\\configs\\2htm.inix; any");
+            Console.WriteLine("                                other switch given wins over a saved value.");
+            Console.WriteLine("  -v, /view-output-directory    Open the output directory when done, if at");
+            Console.WriteLine("                                least one file was converted.");
+            Console.WriteLine("  -d, /default-settings         Forget the saved settings and exit.");
+            Console.WriteLine("  -g, /gui-mode                 Show the dialog, starting from the other");
+            Console.WriteLine("                                switches given. Starting 2htm with nothing");
+            Console.WriteLine("                                from File Explorer shows it too.");
+            Console.WriteLine();
+            Console.WriteLine("Logging is automatic: every run writes");
+            Console.WriteLine("%LOCALAPPDATA%\\2htm\\logs\\2htm-yyyyMMdd-HHmmss.log.");
             Console.WriteLine();
             Console.WriteLine("Supported input formats:");
             Console.WriteLine("  Word:       .docx .doc .rtf .odt");
@@ -1295,6 +1223,8 @@ namespace twoHtm
             lsFailed = new List<failure>();
             int iIndex = 0;
             foreach (var sFile in lsToConvert) {
+                // Cancel in the progress window stops before the next file.
+                if (guiProgress.cancelled) { Console.WriteLine("Cancelled: " + (lsToConvert.Count - iIndex) + " not converted."); break; }
                 iIndex++;
                 string sBase = Path.GetFileName(sFile);
                 if (onStarting != null) {
@@ -1364,86 +1294,55 @@ namespace twoHtm
     // -----------------------------------------------------------------
     public static class guiDialog
     {
-        // THE DIALOG IS BUILT FROM Homer's Lbc (since 1.19.1), like every
-        // Homer dialog: one control per row in tab order, each field's label
-        // just before it so the label names it, a band where a field and the
-        // button that fills it share a row. Lbc supplies, with no code here,
-        // Control+Enter for OK from any control, Shift+F1 for a field's tip,
-        // F7 for a list of the dialog's controls, the editing keys of every
-        // text field, and the Help button (F1), which lists each field with
-        // its tip and ends with the version check. F11 is claimed below. The
-        // Guide button opens the full guide and returns to the dialog with
-        // everything as it was, as Default settings does.
+        // THE DIALOG IS THE KIT'S LAUNCH DIALOG (23 October 2026, help\LaunchDialog.md in
+        // HomerDev), the one every Homer launch app shows: Source paths and Browse local
+        // source; 2htm's own Plain text and Strip images; Output directory and Choose output
+        // directory; Force replacements, Use configuration and View output directory; Default
+        // settings and Help; then OK and Cancel alone. Control+Enter is OK and Escape is Cancel
+        // from any control, F1 is Help and F11 checks the web for a newer 2htm. There is no
+        // Guide button and no Log session checkbox: Help says where the automatic logs are.
         public static bool show(ref string sSource, ref string sOutputDir,
             ref bool bStrip, ref bool bPlain, ref bool bForce, ref bool bView,
-            ref bool bLog, ref bool bUseCfg)
+            ref bool bUseCfg)
         {
             while (true) {
                 string sButton;
-                using (var dlg = new LbcDialog(program.sProgramName, null)) {
+                using (var oLaunch = new LaunchDialog(program.sProgramName)) {
                     string sStartSource = string.IsNullOrWhiteSpace(sSource) ? defaultSourceForGui() : sSource;
-                    dlg.addBand();
-                    System.Windows.Forms.TextBox tbSource = dlg.addInputBox("&Source files:", sStartSource,
+                    oLaunch.sourcePick = "folder";
+                    System.Windows.Forms.TextBox tbSource = oLaunch.addSourceBand(sStartSource,
                         "One or more files, folders or wildcard patterns such as *.docx, " +
-                        "separated by spaces. A folder means every supported file in it.");
-                    System.Windows.Forms.Button btnBrowse = dlg.addButton("&Browse source...",
-                        "Choose a folder of files to convert.");
-                    dlg.addBand();
-                    System.Windows.Forms.TextBox tbOut = dlg.addInputBox("&Output directory:",
-                        !string.IsNullOrWhiteSpace(sOutputDir) ? sOutputDir : deriveOutputDirFromSource(sStartSource),
-                        "Where each converted file is written. Blank means beside the source.");
-                    System.Windows.Forms.Button btnChoose = dlg.addButton("&Choose output...",
-                        "Choose the folder the converted files go to.");
-                    dlg.endBand();
+                        "separated by spaces. A folder means every supported file in it.",
+                        "Choose a folder of files to convert. It opens where Source paths points, else in Documents.");
 
-                    btnBrowse.Click += (o, e) => {
-                        string sPicked = pickFolder("Choose a folder of files to convert", tbSource.Text);
-                        if (sPicked == null) return;
-                        // The output follows the source only while it still
-                        // mirrors it; a folder the user chose stays.
-                        string sOldDerived = deriveOutputDirFromSource(tbSource.Text);
-                        bool bOutputMirrorsSource = string.IsNullOrWhiteSpace(tbOut.Text) ||
-                            string.Equals(tbOut.Text.Trim(), sOldDerived, StringComparison.OrdinalIgnoreCase);
-                        tbSource.Text = sPicked;
-                        if (bOutputMirrorsSource) tbOut.Text = deriveOutputDirFromSource(sPicked);
-                        tbSource.Focus();
-                    };
-                    btnChoose.Click += (o, e) => {
-                        string sPicked = pickFolder("Choose the output directory", tbOut.Text);
-                        if (sPicked == null) return;
-                        tbOut.Text = sPicked;
-                        tbOut.Focus();
-                    };
-
-                    dlg.addSeparator();
-                    System.Windows.Forms.CheckBox cbStrip = dlg.addCheckBox("Strip &images", bStrip,
-                        "Leave images out of the output.");
-                    System.Windows.Forms.CheckBox cbPlain = dlg.addCheckBox("&Plain text", bPlain,
+                    // 2htm's own choices: what the conversion makes.
+                    oLaunch.dialog.addBand();
+                    System.Windows.Forms.CheckBox cbPlain = oLaunch.dialog.addCheckBox("&Plain text", bPlain,
                         "Write plain text, .txt, instead of HTML.");
-                    System.Windows.Forms.CheckBox cbForce = dlg.addCheckBox("&Force replacements", bForce,
-                        "Overwrite an existing output file instead of skipping the input.");
-                    System.Windows.Forms.CheckBox cbView = dlg.addCheckBox("&View output", bView,
-                        "Open the output folder in File Explorer when the run is done.");
-                    System.Windows.Forms.CheckBox cbLog = dlg.addCheckBox("&Log session", bLog,
-                        "Also write " + program.sLogFileName + " in the output folder. A session log is always kept in %LOCALAPPDATA%\\2htm\\logs.");
-                    System.Windows.Forms.CheckBox cbUseCfg = dlg.addCheckBox("&Use configuration", bUseCfg,
-                        "Load these settings next time, and save them when you press OK, in configs\\" + program.sConfigFileName + ".");
+                    System.Windows.Forms.CheckBox cbStrip = oLaunch.dialog.addCheckBox("Strip &images", bStrip,
+                        "Leave images out of the output.");
+                    oLaunch.dialog.endBand();
 
-                    // F11: is there a newer 2htm on the web? (Elevate sounds
-                    // like eleven.) Claimed before any control sees the key.
-                    dlg.commandKey = k => {
-                        if (k != System.Windows.Forms.Keys.F11) return false;
-                        logger.info("F11: checking the web for a newer version");
-                        if (Elevate.offer(dlg.form)) {
-                            logger.info("F11: the setup program was started; closing the dialog");
-                            dlg.form.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-                            dlg.form.Close();
-                        }
-                        return true;
+                    System.Windows.Forms.TextBox tbOut = oLaunch.addOutputBand(
+                        !string.IsNullOrWhiteSpace(sOutputDir) ? sOutputDir : deriveOutputDirFromSource(sStartSource),
+                        "Where each converted file is written. Blank means beside the source.",
+                        "Choose the folder the converted files go to.");
+
+                    // The output follows the source only while it still mirrors it; a
+                    // folder the user chose stays.
+                    string sMirror = deriveOutputDirFromSource(tbSource.Text);
+                    oLaunch.sourceChosen = delegate() {
+                        bool bOutputMirrorsSource = string.IsNullOrWhiteSpace(tbOut.Text) ||
+                            string.Equals(tbOut.Text.Trim(), sMirror, StringComparison.OrdinalIgnoreCase);
+                        sMirror = deriveOutputDirFromSource(tbSource.Text);
+                        if (bOutputMirrorsSource) tbOut.Text = sMirror;
                     };
 
-                    sButton = dlg.runWithButtons(new string[] {
-                        "OK", "Guide", "Default settings", "Cancel" });
+                    oLaunch.addOperationBands(bForce, "Overwrite an existing output file instead of skipping the input.",
+                        bUseCfg, "Load these settings next time, and save them when you press OK, in configs\\" + program.sConfigFileName + ".",
+                        bView, "Open the output directory in File Explorer when the run is done.");
+
+                    sButton = oLaunch.run();
 
                     // Harvest every field before the dialog is disposed, so a
                     // return to the dialog keeps whatever else was typed.
@@ -1451,24 +1350,17 @@ namespace twoHtm
                     sOutputDir = (tbOut.Text ?? "").Trim();
                     bStrip = cbStrip.Checked;
                     bPlain = cbPlain.Checked;
-                    bForce = cbForce.Checked;
-                    bView = cbView.Checked;
-                    bLog = cbLog.Checked;
-                    bUseCfg = cbUseCfg.Checked;
+                    bForce = oLaunch.forceBox.Checked;
+                    bView = oLaunch.viewOutputBox.Checked;
+                    bUseCfg = oLaunch.useConfigBox.Checked;
                 }
 
-                if (string.IsNullOrEmpty(sButton) ||
-                        string.Equals(sButton, "Cancel", StringComparison.OrdinalIgnoreCase))
-                    return false;
-                if (string.Equals(sButton, "Guide", StringComparison.OrdinalIgnoreCase)) {
-                    launchReadMe();
-                    continue;
-                }
-                if (string.Equals(sButton, "Default settings", StringComparison.OrdinalIgnoreCase)) {
+                if (sButton == "Cancel") return false;
+                if (sButton == "Default settings") {
                     sSource = defaultSourceForGui();
                     sOutputDir = deriveOutputDirFromSource(sSource);
                     bStrip = false; bPlain = false; bForce = false;
-                    bView = false; bLog = false; bUseCfg = false;
+                    bView = false; bUseCfg = false;
                     configManager.eraseAll();
                     logger.info("Default settings restored");
                     continue;
@@ -1553,111 +1445,6 @@ namespace twoHtm
             } catch { }
             return "";
         }
-
-        // Opens a FolderBrowserDialog initialized at the given path
-        // (or a reasonable default if it is empty or invalid).
-        // Returns null if the user cancels.
-        private static string pickFolder(string sDesc, string sSeed)
-        {
-            // Pick a sensible initial folder. The strategy follows
-            // Microsoft's guidance: start at the user's most recent
-            // intent (the seed -- typically the current text in the
-            // Source files or Output directory field) when one is
-            // usable, otherwise fall back to the user's Documents
-            // folder.
-            //
-            // The seed may be:
-            //   - empty
-            //   - a folder path
-            //   - a wildcard pattern (e.g. C:\docs\*.xlsx)
-            //   - a single file path
-            //   - a space-separated list of any of the above
-            //   - a quoted path containing spaces
-            //   - a non-existent path the user typed manually
-            string sInitial = "";
-            try {
-                string sCandidate = (sSeed ?? "").Trim();
-                if (!string.IsNullOrEmpty(sCandidate)) {
-                    // Inspect the first space-separated token only.
-                    int iSpace = sCandidate.IndexOf(' ');
-                    if (iSpace >= 0) sCandidate = sCandidate.Substring(0, iSpace);
-                    sCandidate = sCandidate.Trim('"');
-                    // Wildcards: strip the basename and inspect the parent.
-                    if (sCandidate.IndexOfAny(new[] { '*', '?' }) >= 0)
-                        sCandidate = System.IO.Path.GetDirectoryName(sCandidate) ?? "";
-                    if (!string.IsNullOrEmpty(sCandidate)) {
-                        if (System.IO.Directory.Exists(sCandidate)) {
-                            sInitial = System.IO.Path.GetFullPath(sCandidate);
-                        } else if (System.IO.File.Exists(sCandidate)) {
-                            sInitial = System.IO.Path.GetDirectoryName(
-                                System.IO.Path.GetFullPath(sCandidate));
-                        } else {
-                            string sParent = System.IO.Path.GetDirectoryName(sCandidate);
-                            if (!string.IsNullOrEmpty(sParent) &&
-                                System.IO.Directory.Exists(sParent))
-                                sInitial = System.IO.Path.GetFullPath(sParent);
-                        }
-                    }
-                }
-            } catch { sInitial = ""; }
-
-            // Documents fallback when no usable seed.
-            if (string.IsNullOrEmpty(sInitial)) {
-                try {
-                    sInitial = Environment.GetFolderPath(
-                        Environment.SpecialFolder.MyDocuments);
-                } catch { sInitial = ""; }
-            }
-
-            using (var dlg = new System.Windows.Forms.FolderBrowserDialog()) {
-                dlg.Description = sDesc;
-                dlg.ShowNewFolderButton = true;
-                if (!string.IsNullOrEmpty(sInitial)) dlg.SelectedPath = sInitial;
-                if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                    return dlg.SelectedPath;
-            }
-            return null;
-        }
-
-        // Opens the full guide. The Homer layout puts it in
-        // help\2htm.htm, beside exec\ where the program runs, in the
-        // installed tree and in the project alike; Paths.installedFolder
-        // finds that folder. ReadMe.htm at the top is the fallback, then
-        // the Markdown forms.
-        private static void launchReadMe()
-        {
-            string sFolder = Paths.installedFolder;
-            string[] aCandidates = {
-                Path.Combine(Path.Combine(sFolder, "help"), "2htm.htm"),
-                Path.Combine(sFolder, "ReadMe.htm"),
-                Path.Combine(Path.Combine(sFolder, "help"), "2htm.md"),
-                Path.Combine(sFolder, "ReadMe.md") };
-            string sTarget = null;
-            foreach (string sCandidate in aCandidates)
-                if (sTarget == null && File.Exists(sCandidate)) sTarget = sCandidate;
-            if (sTarget == null) {
-                logger.warn("No guide found under " + sFolder);
-                System.Windows.Forms.MessageBox.Show(
-                    "The guide was not found in the 2htm folder:\r\n\r\n" +
-                    sFolder + "\r\n\r\nReinstalling 2htm puts it back.",
-                    "2htm — Guide not found",
-                    System.Windows.Forms.MessageBoxButtons.OK,
-                    System.Windows.Forms.MessageBoxIcon.Warning);
-                return;
-            }
-            try {
-                var processStartInfo = new System.Diagnostics.ProcessStartInfo(sTarget) {
-                    UseShellExecute = true
-                };
-                System.Diagnostics.Process.Start(processStartInfo);
-            } catch (Exception ex) {
-                System.Windows.Forms.MessageBox.Show(
-                    "Could not open the guide:\r\n\r\n" + ex.Message,
-                    "2htm — Error",
-                    System.Windows.Forms.MessageBoxButtons.OK,
-                    System.Windows.Forms.MessageBoxIcon.Warning);
-            }
-        }
     }
 
     // -----------------------------------------------------------------
@@ -1700,67 +1487,30 @@ namespace twoHtm
     // The form has no buttons, so DoEvents pumping is safe (no stray
     // click can re-enter the conversion code).
     // -----------------------------------------------------------------
+    // guiProgress: the kit's LaunchProgress (23 October 2026, help\LaunchDialog.md in
+    // HomerDev), the one progress window of every Homer launch app: "2htm, <status>" in
+    // its title, a status box that holds the focus, Cancel (Escape), speech only while
+    // 2htm is the window in front, and the message pump. It replaced 2htm's own form,
+    // whose StatusBar-role label was not reliably spoken and which offered no way out.
     public static class guiProgress
     {
-        private static System.Windows.Forms.Form frm;
-        private static System.Windows.Forms.Label lblStatus;
-
+        private static LaunchProgress oProgress;
+        public static bool cancelled { get { return oProgress != null && oProgress.cancelled; } }
         public static void open(int iTotal)
         {
-            frm = new System.Windows.Forms.Form();
-            frm.Text = "2htm \u2014 Converting";
-            frm.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            frm.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            frm.MaximizeBox = false;
-            frm.MinimizeBox = false;
-            frm.ControlBox = false;
-            frm.ShowInTaskbar = true;
-            frm.ClientSize = new System.Drawing.Size(480, 92);
-            frm.Font = System.Drawing.SystemFonts.MessageBoxFont;
-
-            var lblIntro = new System.Windows.Forms.Label();
-            lblIntro.Text = "Converting files. Please wait...";
-            lblIntro.AutoSize = false;
-            lblIntro.Location = new System.Drawing.Point(14, 14);
-            lblIntro.Size = new System.Drawing.Size(452, 22);
-            lblIntro.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            frm.Controls.Add(lblIntro);
-
-            lblStatus = new System.Windows.Forms.Label();
-            lblStatus.Text = "Starting...";
-            lblStatus.AutoSize = false;
-            lblStatus.Location = new System.Drawing.Point(14, 42);
-            lblStatus.Size = new System.Drawing.Size(452, 22);
-            lblStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            lblStatus.AccessibleName = "Conversion status";
-            lblStatus.AccessibleRole = System.Windows.Forms.AccessibleRole.StatusBar;
-            frm.Controls.Add(lblStatus);
-
-            frm.Show();
-            System.Windows.Forms.Application.DoEvents();
+            oProgress = new LaunchProgress(program.sProgramName,
+                "Converting " + iTotal + (iTotal == 1 ? " file" : " files"), delegate(string sLine) { logger.info(sLine); });
         }
-
         public static void update(string sBase, int iIndex, int iTotal)
         {
-            if (frm == null || lblStatus == null) return;
-            // iIndex is 1-based; we display "iIndex - 1" as the
-            // completed count, so the percentage and count reflect
-            // work DONE, not work in progress.
-            int iCompleted = iIndex - 1;
-            int iPercent = iTotal > 0 ? (iCompleted * 100 / iTotal) : 0;
-            lblStatus.Text = sBase + " \u2014 " + iCompleted + " of " + iTotal +
-                ", " + iPercent + "%";
-            System.Windows.Forms.Application.DoEvents();
+            if (oProgress != null) oProgress.step(sBase, iIndex - 1, iTotal);
         }
-
         public static void close()
         {
-            if (frm == null) return;
-            try { frm.Close(); frm.Dispose(); } catch { }
-            frm = null;
-            lblStatus = null;
+            if (oProgress == null) return;
+            oProgress.Dispose();
+            oProgress = null;
         }
-
         // Wrapper that opens the progress form, runs the conversion
         // loop with the update callback, and closes the form. The
         // call site in run() uses this; passes a pre-pruned list
@@ -1854,8 +1604,8 @@ namespace twoHtm
 
         // EVERY LINE ALSO GOES TO THE SESSION LOG that Homer's Log keeps
         // in %LOCALAPPDATA%\2htm\logs, whatever the options, so a
-        // failure always leaves a record. 2htm.log (-l) stays what it
-        // was: an extra copy beside the output.
+        // failure always leaves a record. The extra 2htm.log beside the
+        // output went with -l on 23 October 2026, so open() is no longer called.
         public static void info(string sMsg)  { Log.info(sMsg); write("INFO", sMsg); }
         public static void warn(string sMsg)  { Log.warn(sMsg); write("WARN", sMsg); }
         public static void error(string sMsg) { Log.error(sMsg); write("ERROR", sMsg); }
@@ -2337,12 +2087,10 @@ namespace twoHtm
                 program.bForce = getBool(dVals, "ForceReplacements");
             if (!program.bViewOutputFromCli)
                 program.bViewOutput = getBool(dVals, "ViewOutput");
-            if (!program.bLogFromCli)
-                program.bLog = getBool(dVals, "LogSession");
         }
 
         public static void save(string sSource, string sOutputDir,
-            bool bStrip, bool bPlain, bool bForce, bool bView, bool bLog)
+            bool bStrip, bool bPlain, bool bForce, bool bView)
         {
             string sDir = getConfigDir();
             string sPath = getConfigPath();
@@ -2363,7 +2111,6 @@ namespace twoHtm
                 InixCodec.writeValue(sPath, sSettingsSection, "PlainText", bPlain ? "yes" : "no");
                 InixCodec.writeValue(sPath, sSettingsSection, "ForceReplacements", bForce ? "yes" : "no");
                 InixCodec.writeValue(sPath, sSettingsSection, "ViewOutput", bView ? "yes" : "no");
-                InixCodec.writeValue(sPath, sSettingsSection, "LogSession", bLog ? "yes" : "no");
                 logger.info("Saved configuration to " + sPath);
                 if (File.Exists(getLegacyPath())) {
                     File.Delete(getLegacyPath());

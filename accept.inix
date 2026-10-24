@@ -6,7 +6,7 @@
 Name   = switches are written /switch, in any case
 Run    = exec\2htm.exe /HELP
 Expect = 0
-Wants  = /output-dir
+Wants  = /output-directory
 
 [check]
 Name   = the help names the configuration file

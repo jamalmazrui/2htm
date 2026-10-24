@@ -16,19 +16,19 @@ Key=
 Say=I press the desktop key for 2htm. The dialog opens on its first field.
 Key=Alt+Control+2
 Hear=2htm dialog
-Hear=Source files edit
+Hear=Source paths edit
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Source files names what to convert: one file, a folder, a pattern such as star dot docx, or several with spaces between. Its letter is S.
+Say=Source paths names what to convert: one file, a folder, a pattern such as star dot docx, or several with spaces between. Its letter is S.
 Key=
 
 [step]
 
 Say=Tab moves to the next control, a button that opens a file picker.
 Key=Tab
-Hear=Browse source button
+Hear=Browse local source button
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
@@ -40,7 +40,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Left blank, each web page is written beside its document. Choose output, C, picks a folder instead of typing one.
+Say=Left blank, each web page is written beside its document. Choose output directory, C, picks a folder instead of typing one.
 Key=
 
 [step]
@@ -66,7 +66,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=View output, V, opens the folder when the run is done; Log session, L, writes a log beside the output; Use configuration, U, remembers these choices for next time.
+Say=View output directory, V, opens the folder when the run is done; Use configuration, U, remembers these choices for next time.
 Key=
 
 [step]
@@ -113,28 +113,28 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=I choose Source files.
+Say=I choose Source paths.
 Key=Enter
-Hear=Source files edit
+Hear=Source paths edit
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Enter starts converting from any field, and Control plus Enter does the same from any control. Escape closes the dialog without converting.
+Say=Control plus Enter starts converting from any control. Escape presses Cancel from any control, closing the dialog without converting.
 Key=Tab
-Hear=Browse source button
+Hear=Browse local source button
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Two more buttons sit at the end. Guide, G, opens the full guide in the browser and returns here; Default settings, D, clears every field and box.
-Key=Alt+G
-Hear=Guide button
+Say=Two buttons sit in their own band, above OK and Cancel. Default settings, D, clears every field and box; Help, H, lists every field, says where the logs are kept, and checks for a newer version.
+Key=Alt+H
+Hear=Help button
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=The text fields remember your answers. In Source files, Up Arrow brings back what you typed last time, and earlier answers above it.
+Say=The text fields remember your answers. In Source paths, Up Arrow brings back what you typed last time, and earlier answers above it.
 Key=Up Arrow
 Hear=C colon backslash Documents backslash Annual Report dot docx
 Note=Confirm the wording with a live run: buildTutorials -live.
@@ -143,7 +143,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=Down Arrow returns toward an empty field, so a fresh entry is a key or two away.
 Key=Down Arrow
-Hear=Source files edit, blank
+Hear=Source paths edit, blank
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

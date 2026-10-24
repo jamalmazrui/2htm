@@ -13,10 +13,10 @@ Key=
 
 [step]
 
-Say=I open the dialog and put the document's path in Source files.
+Say=I open the dialog and put the document's path in Source paths.
 Key=Alt+Control+2
 Hear=2htm dialog
-Hear=Source files edit
+Hear=Source paths edit
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

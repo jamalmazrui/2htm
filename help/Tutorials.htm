@@ -219,14 +219,14 @@ worth remembering whenever you feel lost or unsure. Insert plus Up Arrow
 says the line you are on again.</p>
 <p>Screen reader:</p>
 <ul>
-<li>Source files edit</li>
+<li>Source paths edit</li>
 </ul>
 <h3 id="step-3-inserttab">Step 3: Insert+Tab</h3>
 <p>Insert plus Tab says what has the focus: its name, its role, and its
 value or state.</p>
 <p>Screen reader:</p>
 <ul>
-<li>Source files edit, blank</li>
+<li>Source paths edit, blank</li>
 </ul>
 <h3 id="step-4-insertt">Step 4: Insert+T</h3>
 <p>Insert plus T says the title of the window.</p>
@@ -282,18 +282,18 @@ field.</p>
 <p>Screen reader:</p>
 <ul>
 <li>2htm dialog</li>
-<li>Source files edit</li>
+<li>Source paths edit</li>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
 <h3 id="step-3">Step 3</h3>
-<p>Source files names what to convert: one file, a folder, a pattern
+<p>Source paths names what to convert: one file, a folder, a pattern
 such as star dot docx, or several with spaces between. Its letter is
 S.</p>
 <h3 id="step-4-tab">Step 4: Tab</h3>
 <p>Tab moves to the next control, a button that opens a file picker.</p>
 <p>Screen reader:</p>
 <ul>
-<li>Browse source button</li>
+<li>Browse local source button</li>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
 <h3 id="step-5-alto">Step 5: Alt+O</h3>
@@ -306,7 +306,7 @@ straight to it. Output directory is O.</p>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
 <h3 id="step-6-1">Step 6</h3>
 <p>Left blank, each web page is written beside its document. Choose
-output, C, picks a folder instead of typing one.</p>
+output directory, C, picks a folder instead of typing one.</p>
 <h3 id="step-7-altf">Step 7: Alt+F</h3>
 <p>Then the check boxes. Force replacements, F, replaces a web page
 already made; without it, a document whose page exists is skipped.</p>
@@ -330,9 +330,8 @@ already made; without it, a document whose page exists is skipped.</p>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
 <h3 id="step-10-1">Step 10</h3>
-<p>View output, V, opens the folder when the run is done; Log session,
-L, writes a log beside the output; Use configuration, U, remembers these
-choices for next time.</p>
+<p>View output directory, V, opens the folder when the run is done; Use
+configuration, U, remembers these choices for next time.</p>
 <h3 id="step-11-space">Step 11: Space</h3>
 <p>Space checks a box and Space again clears it.</p>
 <p>Screen reader:</p>
@@ -378,32 +377,31 @@ move there.</p>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
 <h3 id="step-17-enter">Step 17: Enter</h3>
-<p>I choose Source files.</p>
+<p>I choose Source paths.</p>
 <p>Screen reader:</p>
 <ul>
-<li>Source files edit</li>
+<li>Source paths edit</li>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
 <h3 id="step-18-tab">Step 18: Tab</h3>
-<p>Enter starts converting from any field, and Control plus Enter does
-the same from any control. Escape closes the dialog without
-converting.</p>
+<p>Control plus Enter starts converting from any control. Escape presses
+Cancel from any control, closing the dialog without converting.</p>
 <p>Screen reader:</p>
 <ul>
-<li>Browse source button</li>
+<li>Browse local source button</li>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
-<h3 id="step-19-altg">Step 19: Alt+G</h3>
-<p>Two more buttons sit at the end. Guide, G, opens the full guide in
-the browser and returns here; Default settings, D, clears every field
-and box.</p>
+<h3 id="step-19-alth">Step 19: Alt+H</h3>
+<p>Two buttons sit in their own band, above OK and Cancel. Default
+settings, D, clears every field and box; Help, H, lists every field,
+says where the logs are kept, and checks for a newer version.</p>
 <p>Screen reader:</p>
 <ul>
-<li>Guide button</li>
+<li>Help button</li>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
 <h3 id="step-20-up-arrow">Step 20: Up Arrow</h3>
-<p>The text fields remember your answers. In Source files, Up Arrow
+<p>The text fields remember your answers. In Source paths, Up Arrow
 brings back what you typed last time, and earlier answers above it.</p>
 <p>Screen reader:</p>
 <ul>
@@ -415,7 +413,7 @@ brings back what you typed last time, and earlier answers above it.</p>
 or two away.</p>
 <p>Screen reader:</p>
 <ul>
-<li>Source files edit, blank</li>
+<li>Source paths edit, blank</li>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
 <h3 id="step-22">Step 22</h3>
@@ -484,11 +482,11 @@ logs are.</p>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
 <h3 id="step-8-enter">Step 8: Enter</h3>
-<p>When I close that box, 2htm starts, ready on Source files.</p>
+<p>When I close that box, 2htm starts, ready on Source paths.</p>
 <p>Screen reader:</p>
 <ul>
 <li>2htm dialog</li>
-<li>Source files edit</li>
+<li>Source paths edit</li>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
 <h3 id="step-9-1">Step 9</h3>
@@ -582,15 +580,16 @@ and Microsoft Word installed.</p>
 <p>One want: a forty-page Word report that I can skim by heading, the
 way I skim a web page, without Word’s own interface in the way.</p>
 <h3 id="step-2-altcontrol2-1">Step 2: Alt+Control+2</h3>
-<p>I open the dialog. The focus is on Source files.</p>
+<p>I open the dialog. The focus is on Source paths.</p>
 <p>Screen reader:</p>
 <ul>
 <li>2htm dialog</li>
-<li>Source files edit</li>
+<li>Source paths edit</li>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
 <h3 id="step-3-altb">Step 3: Alt+B</h3>
-<p>Browse source opens a file picker, rather than typing the path.</p>
+<p>Browse local source opens a file picker, rather than typing the
+path.</p>
 <p>Screen reader:</p>
 <ul>
 <li>Open dialog</li>
@@ -599,18 +598,19 @@ way I skim a web page, without Word’s own interface in the way.</p>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
 <h3 id="step-4-enter-1">Step 4: Enter</h3>
 <p>I type the start of the report’s name and press Enter. Its full path
-is now in Source files.</p>
+is now in Source paths.</p>
 <p>Screen reader:</p>
 <ul>
-<li>Source files edit</li>
+<li>Source paths edit</li>
 <li>C colon backslash Documents backslash Annual Report dot docx</li>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
 <h3 id="step-5-altv">Step 5: Alt+V</h3>
-<p>I tick View output, so the folder opens when the page is ready.</p>
+<p>I tick View output directory, so the folder opens when the page is
+ready.</p>
 <p>Screen reader:</p>
 <ul>
-<li>View output check box, checked</li>
+<li>View output directory check box, checked</li>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
 <h3 id="step-6-enter">Step 6: Enter</h3>
@@ -751,12 +751,12 @@ statement or a manual.</p>
 <p>One want: a PDF manual whose text I can read line by line and search,
 instead of a viewer that reads it in pieces.</p>
 <h3 id="step-2-altcontrol2-2">Step 2: Alt+Control+2</h3>
-<p>I open the dialog and type the PDF’s path in Source files. Typing
+<p>I open the dialog and type the PDF’s path in Source paths. Typing
 works as well as browsing.</p>
 <p>Screen reader:</p>
 <ul>
 <li>2htm dialog</li>
-<li>Source files edit</li>
+<li>Source paths edit</li>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
 <h3 id="step-3-enter-1">Step 3: Enter</h3>
@@ -880,11 +880,11 @@ supported kinds.</p>
 <p>One want: a document as clean text, to listen to in a synthesizer
 program on a walk, or to paste into an email without formatting.</p>
 <h3 id="step-2-altcontrol2-3">Step 2: Alt+Control+2</h3>
-<p>I open the dialog and put the document’s path in Source files.</p>
+<p>I open the dialog and put the document’s path in Source paths.</p>
 <p>Screen reader:</p>
 <ul>
 <li>2htm dialog</li>
-<li>Source files edit</li>
+<li>Source paths edit</li>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
 <h3 id="step-3-altp">Step 3: Alt+P</h3>
@@ -1001,12 +1001,12 @@ your own, and Microsoft Office installed.</p>
 <p>One want: the slides from a talk I missed, and the budget workbook
 shared with it, both readable without opening PowerPoint or Excel.</p>
 <h3 id="step-2-altcontrol2-4">Step 2: Alt+Control+2</h3>
-<p>I open the dialog. Source files can hold several files at once,
+<p>I open the dialog. Source paths can hold several files at once,
 separated by spaces.</p>
 <p>Screen reader:</p>
 <ul>
 <li>2htm dialog</li>
-<li>Source files edit</li>
+<li>Source paths edit</li>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
 <h3 id="step-3-1">Step 3</h3>
@@ -1131,12 +1131,12 @@ documents, such as meeting papers.</p>
 <p>One want: every document from a week of meetings, converted in one
 run, the pages kept together in their own folder.</p>
 <h3 id="step-2-altcontrol2-5">Step 2: Alt+Control+2</h3>
-<p>I open the dialog. In Source files, a folder’s path is enough: 2htm
+<p>I open the dialog. In Source paths, a folder’s path is enough: 2htm
 converts every document in it that it knows how to read.</p>
 <p>Screen reader:</p>
 <ul>
 <li>2htm dialog</li>
-<li>Source files edit</li>
+<li>Source paths edit</li>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
 <h3 id="step-3-2">Step 3</h3>
@@ -1164,18 +1164,16 @@ directory.</p>
 <li>C colon backslash Meetings backslash Pages</li>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
-<h3 id="step-7-altl">Step 7: Alt+L</h3>
-<p>Log session, L, keeps a log of the whole run beside the pages.</p>
-<p>Screen reader:</p>
-<ul>
-<li>Log session check box, checked</li>
-</ul>
+<h3 id="step-7-2">Step 7</h3>
+<p>Logging is automatic, so there is no box to tick for it. Every run’s
+log is kept in the program’s logs folder, under your local application
+data, and Help names that folder.</p>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
 <h3 id="step-8-altv">Step 8: Alt+V</h3>
-<p>View output, V, opens the Pages folder at the end.</p>
+<p>View output directory, V, opens the Pages folder at the end.</p>
 <p>Screen reader:</p>
 <ul>
-<li>View output check box, checked</li>
+<li>View output directory check box, checked</li>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
 <h3 id="step-9-enter-1">Step 9: Enter</h3>
@@ -1297,7 +1295,7 @@ a folder every week without opening anything.</p>
 <p>Every box in the dialog has an option. Dash p makes plain text; dash
 s strips images; dash f replaces existing pages; dash o sends output to
 a folder.</p>
-<h3 id="step-7-2">Step 7</h3>
+<h3 id="step-7-3">Step 7</h3>
 <p>So one line converts a whole folder into a Pages folder, replacing
 last week’s pages.</p>
 <p>Screen reader:</p>
@@ -1352,8 +1350,8 @@ convert two kinds of file in one run.</p>
 <p>A Task Scheduler entry that runs the batch file each Monday morning
 keeps a folder of pages current with no effort.</p>
 <h3 id="step-18-5">Step 18</h3>
-<p>Dash dash view output opens the output folder at the end, as the
-dialog’s box does.</p>
+<p>Dash dash view output directory opens the output folder at the end,
+as the dialog’s box does.</p>
 <h3 id="step-19-5">Step 19</h3>
 <p>Running 2htm with no arguments at all opens the dialog, so a shortcut
 to the program works without options.</p>
@@ -1396,7 +1394,7 @@ reader can move through by key.</li>
 <li>Words alone, with no formatting, for listening, braille or pasting
 into an email.</li>
 </ul>
-<h3 id="step-7-3">Step 7</h3>
+<h3 id="step-7-4">Step 7</h3>
 <p>Heading.</p>
 <p>Screen reader:</p>
 <ul>
@@ -1425,12 +1423,12 @@ Shift plus F1 says the tip for the control you are on.</p>
 <li>2htm Help dialog</li>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
-<h3 id="step-11-altg">Step 11: Alt+G</h3>
-<p>F7 lists the dialog’s controls. Guide, Alt plus G, opens the full
-guide and returns to the dialog as you left it.</p>
+<h3 id="step-11-alth">Step 11: Alt+H</h3>
+<p>F7 lists the dialog’s controls. Help, Alt plus H, does what F1 does,
+and also says where the automatic logs are kept.</p>
 <p>Screen reader:</p>
 <ul>
-<li>Guide button</li>
+<li>Help button</li>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
 <h3 id="step-12-6">Step 12</h3>

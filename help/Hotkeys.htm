@@ -2,20 +2,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc 3.12.1" />
+  <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <meta name="author" content="Jamal Mazrui" />
   <title>Hotkeys</title>
   <style>
-    /* Default styles provided by pandoc.
-    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-    */
     html {
       color: #1a1a1a;
-      color: light-dark(#1a1a1a, #fdfdfd);
       background-color: #fdfdfd;
-      background-color: light-dark(#fdfdfd, #1a1a1a);
-      color-scheme: light dark;
     }
     body {
       margin: 0 auto;
@@ -40,16 +34,12 @@
     }
     @media print {
       html {
-        color-scheme: light only;
+        background-color: white;
       }
-      html, body, pre, code {
+      body {
         background-color: transparent;
-      }
-      body, a, a:visited, blockquote {
         color: black;
-      }
-      pre, code {
-        padding: 0;
+        font-size: 12pt;
       }
       p, h2, h3 {
         orphans: 3;
@@ -62,14 +52,13 @@
     p {
       margin: 1em 0;
     }
-    a, a:visited {
-      color: inherit;
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
     }
     img {
-      max-width: 100%;
-    }
-    svg {
-      height: auto;
       max-width: 100%;
     }
     h1, h2, h3, h4, h5, h6 {
@@ -92,14 +81,10 @@
     blockquote {
       margin: 1em 0 1em 1.7em;
       padding-left: 1em;
-      border-left: 2px solid;
-      border-color: #e6e6e6;
-      border-color: light-dark(#e6e6e6, #4c4c4c);
+      border-left: 2px solid #e6e6e6;
       color: #606060;
-      color: light-dark(#606060, #b6b6b6);
     }
     code {
-      white-space: pre-wrap;
       font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
       font-size: 85%;
       margin: 0;
@@ -119,8 +104,8 @@
      overflow: visible;
     }
     hr {
+      background-color: #1a1a1a;
       border: none;
-      border-top: 1px solid currentColor;
       height: 1px;
       margin: 1em 0;
     }
@@ -137,11 +122,11 @@
     }
     tbody {
       margin-top: 0.5em;
-      border-top: 1px solid currentColor;
-      border-bottom: 1px solid currentColor;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
     }
     th {
-      border-top: 1px solid currentColor;
+      border-top: 1px solid #1a1a1a;
       padding: 0.25em 0.5em 0.25em 0.5em;
     }
     td {
@@ -163,13 +148,10 @@
     #TOC a:not(:hover) {
       text-decoration: none;
     }
+    code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: 1.5em;}
-    div.column{flex: auto;}
-    @media screen {
-    div.columns{gap: min(4vw, 1.5em);}
-    div.column{overflow-x: auto;}
-    }
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
     /* The extra [class] is a hack that increases specificity enough to
        override a similar rule in reveal.js */
@@ -180,54 +162,38 @@
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
   </style>
 </head>
 <body>
-<header id="title-block-header">
-<p class="author">Jamal Mazrui</p>
-</header>
-<nav id="TOC" role="doc-toc" aria-label="Contents">
-<ul>
-<li><a href="#htm-hotkeys" id="toc-htm-hotkeys">2htm Hotkeys</a>
-<ul>
-<li><a href="#by-key" id="toc-by-key">By key</a></li>
-<li><a href="#by-command" id="toc-by-command">By command</a></li>
-<li><a href="#in-tab-order" id="toc-in-tab-order">In tab order</a></li>
-<li><a href="#why-these-keys" id="toc-why-these-keys">Why these
-keys</a></li>
-</ul></li>
-</ul>
-</nav>
 <main>
 <h1 id="htm-hotkeys">2htm Hotkeys</h1>
 <p>The keys of the 2htm dialog, listed three ways. Each Alt key is the
 letter underlined in its control’s label, so a screen reader reads it
-with the control. OK and Cancel have no letter: Enter is OK,
-Control+Enter is OK from any control, and Escape is Cancel. The dialog
-is built with the Homer Lbc classes, so every text field also has the
-Lbc editing keys; Help (F1) lists them.</p>
+with the control. OK and Cancel have no letter: Control+Enter is OK and
+Escape is Cancel, from any control, and Enter is OK except on a button.
+The dialog is built with the Homer Lbc classes, so every text field also
+has the Lbc editing keys; Help (F1) lists them.</p>
 <h2 id="by-key">By key</h2>
 <ul>
-<li>Alt+B — Browse source</li>
-<li>Alt+C — Choose output</li>
+<li>Alt+B — Browse local source</li>
+<li>Alt+C — Choose output directory</li>
 <li>Alt+Control+2 — open the 2htm dialog from anywhere (the desktop
 shortcut)</li>
 <li>Alt+D — Default settings</li>
 <li>Alt+F — Force replacements</li>
-<li>Alt+G — Guide: open the full guide, then return to the dialog</li>
 <li>Alt+H — Help</li>
 <li>Alt+I — Strip images</li>
-<li>Alt+L — Log session</li>
 <li>Alt+O — Output directory</li>
 <li>Alt+P — Plain text</li>
-<li>Alt+S — Source files</li>
+<li>Alt+S — Source paths</li>
 <li>Alt+U — Use configuration</li>
-<li>Alt+V — View output</li>
+<li>Alt+V — View output directory</li>
 <li>Control+Enter — OK, from any control</li>
 <li>Enter — OK: start converting</li>
-<li>Escape — Cancel: close without converting</li>
+<li>Escape — Cancel, from any control: close without converting</li>
 <li>F1 — Help</li>
-<li>F11 — check for a newer version</li>
+<li>F11 — check for a newer version, from any control</li>
 <li>F7 — list the dialog’s controls, and move to the one chosen</li>
 <li>Shift+F1 — say the focus tip for the current field</li>
 <li>Shift+F10, then 2 — Convert via 2htm, on a file in File
@@ -235,41 +201,41 @@ Explorer</li>
 </ul>
 <h2 id="by-command">By command</h2>
 <ul>
-<li>Browse source — Alt+B</li>
+<li>Browse local source — Alt+B</li>
 <li>Cancel — Escape</li>
 <li>Check for a newer version — F11</li>
-<li>Choose output — Alt+C</li>
+<li>Choose output directory — Alt+C</li>
 <li>Convert via 2htm, in File Explorer — Shift+F10, then 2</li>
 <li>Default settings — Alt+D</li>
 <li>Force replacements — Alt+F</li>
-<li>Guide — Alt+G</li>
 <li>List the controls — F7</li>
 <li>Help — Alt+H or F1</li>
-<li>Log session — Alt+L</li>
 <li>OK — Enter, or Control+Enter from any control</li>
 <li>Open the dialog from anywhere — Alt+Control+2</li>
 <li>Output directory — Alt+O</li>
 <li>Plain text — Alt+P</li>
 <li>Say the focus tip — Shift+F1</li>
-<li>Source files — Alt+S</li>
+<li>Source paths — Alt+S</li>
 <li>Strip images — Alt+I</li>
 <li>Use configuration — Alt+U</li>
-<li>View output — Alt+V</li>
+<li>View output directory — Alt+V</li>
 </ul>
 <h2 id="in-tab-order">In tab order</h2>
+<p>The dialog is in bands, rows read left to right, in this order:</p>
 <ol type="1">
-<li>Source files — Alt+S</li>
-<li>Browse source — Alt+B</li>
-<li>Output directory — Alt+O</li>
-<li>Choose output — Alt+C</li>
-<li>Strip images — Alt+I</li>
+<li>Source paths — Alt+S</li>
+<li>Browse local source — Alt+B</li>
 <li>Plain text — Alt+P</li>
+<li>Strip images — Alt+I</li>
+<li>Output directory — Alt+O</li>
+<li>Choose output directory — Alt+C</li>
 <li>Force replacements — Alt+F</li>
-<li>View output — Alt+V</li>
-<li>Log session — Alt+L</li>
 <li>Use configuration — Alt+U</li>
-<li>The buttons: OK (Enter), Guide (Alt+G), Default settings (Alt+D),
-Cancel (Escape) and Help (Alt+H)</li>
+<li>View output directory — Alt+V</li>
+<li>Default settings — Alt+D</li>
+<li>Help — Alt+H or F1</li>
+<li>OK and Cancel, alone at the bottom right: Control+Enter is OK and
+Escape is Cancel, from any control</li>
 </ol>
 <h2 id="why-these-keys">Why these keys</h2>
 <p>F1 is help in every Windows program. F11 is the Homer key for
@@ -278,7 +244,7 @@ updating a program to its newest release, because “elevate” sounds like
 keys are for desktop shortcuts, and 2 is the first character of 2htm.
 The same 2 is the access key of Convert via <strong>2</strong>htm in
 File Explorer. Strip images takes I, from images, because S already
-belongs to Source files. Word keeps Alt+Control+2 for its Heading 2
+belongs to Source paths. Word keeps Alt+Control+2 for its Heading 2
 style while it has focus.</p>
 </main>
 </body>

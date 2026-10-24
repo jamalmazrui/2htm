@@ -13,15 +13,15 @@ Key=
 
 [step]
 
-Say=I open the dialog. The focus is on Source files.
+Say=I open the dialog. The focus is on Source paths.
 Key=Alt+Control+2
 Hear=2htm dialog
-Hear=Source files edit
+Hear=Source paths edit
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Browse source opens a file picker, rather than typing the path.
+Say=Browse local source opens a file picker, rather than typing the path.
 Key=Alt+B
 Hear=Open dialog
 Hear=File name edit
@@ -29,17 +29,17 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=I type the start of the report's name and press Enter. Its full path is now in Source files.
+Say=I type the start of the report's name and press Enter. Its full path is now in Source paths.
 Key=Enter
-Hear=Source files edit
+Hear=Source paths edit
 Hear=C colon backslash Documents backslash Annual Report dot docx
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=I tick View output, so the folder opens when the page is ready.
+Say=I tick View output directory, so the folder opens when the page is ready.
 Key=Alt+V
-Hear=View output check box, checked
+Hear=View output directory check box, checked
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

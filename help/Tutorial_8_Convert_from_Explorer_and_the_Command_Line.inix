@@ -109,7 +109,7 @@ Key=
 
 [step]
 
-Say=Dash dash view output opens the output folder at the end, as the dialog's box does.
+Say=Dash dash view output directory opens the output folder at the end, as the dialog's box does.
 Key=
 
 [step]
